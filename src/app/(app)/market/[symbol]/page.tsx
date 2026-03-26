@@ -1,6 +1,6 @@
 "use client";
 
-import { use } from "react";
+import { use, useState } from "react";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
@@ -8,6 +8,7 @@ import { api } from "../../../../../convex/_generated/api";
 import { Badge } from "@/components/ui/badge";
 import { PriceChart } from "@/components/market/price-chart";
 import { SECTORS } from "@/lib/constants/sectors";
+import { TradeModal } from "@/components/trade/trade-modal";
 
 type PageProps = {
   params: Promise<{ symbol: string }>;
@@ -30,6 +31,9 @@ function formatCents(cents: number): string {
 export default function TickerDetailPage({ params }: PageProps) {
   const { symbol } = use(params);
   const { user, isLoaded } = useUser();
+
+  const [tradeModalOpen, setTradeModalOpen] = useState(false);
+  const [tradeModalType, setTradeModalType] = useState<"buy" | "sell">("buy");
 
   const stock = useQuery(api.market.getStock, { symbol: symbol.toUpperCase() });
 
@@ -241,15 +245,21 @@ export default function TickerDetailPage({ params }: PageProps) {
         {/* BUY / SELL buttons — desktop inline */}
         <div className="hidden lg:flex gap-4">
           <button
-            disabled
-            className="flex-1 border-2 border-[#ffffff] bg-[#22c55e]/20 text-[#22c55e] font-mono font-bold text-sm py-3 uppercase tracking-widest opacity-50 cursor-not-allowed"
+            onClick={() => {
+              setTradeModalType("buy");
+              setTradeModalOpen(true);
+            }}
+            className="flex-1 border-2 border-[#ffffff] bg-[#22c55e]/20 text-[#22c55e] font-mono font-bold text-sm py-3 uppercase tracking-widest hover:bg-[#22c55e]/30 transition-colors"
             style={{ boxShadow: "4px 4px 0px 0px #ffffff" }}
           >
             Buy {stock.symbol}
           </button>
           <button
-            disabled
-            className="flex-1 border-2 border-[#ffffff] bg-[#ef4444]/20 text-[#ef4444] font-mono font-bold text-sm py-3 uppercase tracking-widest opacity-50 cursor-not-allowed"
+            onClick={() => {
+              setTradeModalType("sell");
+              setTradeModalOpen(true);
+            }}
+            className="flex-1 border-2 border-[#ffffff] bg-[#ef4444]/20 text-[#ef4444] font-mono font-bold text-sm py-3 uppercase tracking-widest hover:bg-[#ef4444]/30 transition-colors"
             style={{ boxShadow: "4px 4px 0px 0px #ffffff" }}
           >
             Sell {stock.symbol}
@@ -262,18 +272,42 @@ export default function TickerDetailPage({ params }: PageProps) {
         className="lg:hidden fixed bottom-16 left-0 right-0 z-30 flex gap-0 border-t-2 border-[#ffffff] bg-[#0e0e0e]"
       >
         <button
-          disabled
-          className="flex-1 bg-[#22c55e]/20 text-[#22c55e] font-mono font-bold text-sm py-4 uppercase tracking-widest opacity-50 cursor-not-allowed border-r-2 border-[#ffffff]"
+          onClick={() => {
+            setTradeModalType("buy");
+            setTradeModalOpen(true);
+          }}
+          className="flex-1 bg-[#22c55e]/20 text-[#22c55e] font-mono font-bold text-sm py-4 uppercase tracking-widest border-r-2 border-[#ffffff] hover:bg-[#22c55e]/30 transition-colors"
         >
           Buy
         </button>
         <button
-          disabled
-          className="flex-1 bg-[#ef4444]/20 text-[#ef4444] font-mono font-bold text-sm py-4 uppercase tracking-widest opacity-50 cursor-not-allowed"
+          onClick={() => {
+            setTradeModalType("sell");
+            setTradeModalOpen(true);
+          }}
+          className="flex-1 bg-[#ef4444]/20 text-[#ef4444] font-mono font-bold text-sm py-4 uppercase tracking-widest hover:bg-[#ef4444]/30 transition-colors"
         >
           Sell
         </button>
       </div>
+
+      {/* Trade modal */}
+      {player && (
+        <TradeModal
+          stock={{
+            _id: stock._id,
+            symbol: stock.symbol,
+            name: stock.name,
+            priceInCents: stock.priceInCents,
+          }}
+          playerId={player._id}
+          playerCash={player.cashInCents}
+          currentHoldingShares={holdingShares}
+          isOpen={tradeModalOpen}
+          onClose={() => setTradeModalOpen(false)}
+          initialType={tradeModalType}
+        />
+      )}
     </div>
   );
 }
