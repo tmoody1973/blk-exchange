@@ -3,6 +3,8 @@
 import { useState } from "react";
 import type { ConceptTier } from "@/lib/constants/concepts";
 
+type ShareState = "idle" | "copied" | "shared";
+
 interface ConceptCardProps {
   conceptId: string;
   conceptName: string;
@@ -44,6 +46,17 @@ function formatDate(ts: number): string {
   });
 }
 
+function buildShareText(
+  conceptName: string,
+  portfolioValueAtUnlock: number,
+  definition: string
+): string {
+  // Extract a one-liner: first sentence of the definition
+  const oneLiner = definition.split(".")[0].trim() + ".";
+  const portfolioFormatted = formatCents(portfolioValueAtUnlock);
+  return `I just learned about ${conceptName} on BLK Exchange! My portfolio was at ${portfolioFormatted} when I unlocked it. ${oneLiner} 🎓📈 #BLKExchange #FinancialLiteracy`;
+}
+
 export function ConceptCard({
   conceptName,
   tier,
@@ -55,6 +68,7 @@ export function ConceptCard({
   unlockedAt,
 }: ConceptCardProps) {
   const [expanded, setExpanded] = useState(false);
+  const [shareState, setShareState] = useState<ShareState>("idle");
   const accentColor = TIER_COLORS[tier];
   const tierLabel = TIER_LABELS[tier];
 
@@ -66,6 +80,31 @@ export function ConceptCard({
       : triggerType === "behavior"
       ? "Your trading behavior"
       : "A market event";
+
+  async function handleShare(e: React.MouseEvent) {
+    e.stopPropagation();
+    const shareText = buildShareText(conceptName, portfolioValueAtUnlock, definition);
+
+    let didAct = false;
+
+    if (typeof navigator !== "undefined" && navigator.share) {
+      try {
+        await navigator.share({ text: shareText });
+        setShareState("shared");
+        didAct = true;
+      } catch {
+        // User cancelled — do nothing
+      }
+    } else if (typeof navigator !== "undefined" && navigator.clipboard) {
+      await navigator.clipboard.writeText(shareText);
+      setShareState("copied");
+      didAct = true;
+    }
+
+    if (didAct) {
+      setTimeout(() => setShareState("idle"), 2000);
+    }
+  }
 
   return (
     <div
@@ -167,16 +206,22 @@ export function ConceptCard({
             </div>
           </div>
 
-          {/* Share button — placeholder */}
+          {/* Share button */}
           <button
-            className="w-full border-2 border-[#ffffff30] py-2 font-mono text-xs font-bold uppercase tracking-widest transition-colors hover:border-[#FDE047] hover:text-[#FDE047]"
-            style={{ color: "#ffffff40", backgroundColor: "transparent" }}
-            onClick={(e) => {
-              e.stopPropagation();
-              // Placeholder — share functionality TBD
+            className="w-full border-2 py-2 font-mono text-xs font-bold uppercase tracking-widest transition-all"
+            style={{
+              borderColor: shareState !== "idle" ? "#FDE047" : "#ffffff30",
+              color: shareState !== "idle" ? "#0e0e0e" : "#ffffff80",
+              backgroundColor: shareState !== "idle" ? "#FDE047" : "transparent",
+              boxShadow: shareState !== "idle" ? "3px 3px 0px 0px #000000" : "none",
             }}
+            onClick={handleShare}
           >
-            Share Knowledge
+            {shareState === "copied"
+              ? "Copied!"
+              : shareState === "shared"
+              ? "Shared!"
+              : "Share Knowledge"}
           </button>
         </div>
       )}
