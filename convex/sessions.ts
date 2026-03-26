@@ -1,4 +1,5 @@
 import { query, mutation } from "./_generated/server";
+import { internal } from "./_generated/api";
 import { v } from "convex/values";
 
 export const startSession = mutation({
@@ -65,13 +66,27 @@ export const endSession = mutation({
       if (s) value += Math.round(h.shares * s.priceInCents);
     }
 
-    await ctx.db.patch(session._id, {
+    const sessionId = session._id;
+
+    await ctx.db.patch(sessionId, {
       active: false,
       endedAt: Date.now(),
       portfolioEndValueInCents: value,
     });
 
-    return session._id;
+    // Kick off Claude debrief generation asynchronously
+    await ctx.scheduler.runAfter(0, internal.claude.generateDebrief.generateDebrief, {
+      sessionId,
+    });
+
+    return sessionId;
+  },
+});
+
+export const getSessionById = query({
+  args: { sessionId: v.id("sessions") },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.sessionId);
   },
 });
 
