@@ -106,6 +106,17 @@
   }
 }
 
+/* Marquee scrolling animations */
+@keyframes marquee {
+  0% { transform: translateX(0%); }
+  100% { transform: translateX(-100%); }
+}
+
+@keyframes marquee2 {
+  0% { transform: translateX(100%); }
+  100% { transform: translateX(0%); }
+}
+
 /* Interactive hover: translate + reduced shadow */
 @layer utilities {
   .blk-interactive {
@@ -127,5 +138,13 @@
     background-color: var(--card);
     border: 1px solid var(--border);
     box-shadow: var(--blk-shadow);
+  }
+
+  .animate-marquee {
+    animation: marquee 30s linear infinite;
+  }
+
+  .animate-marquee2 {
+    animation: marquee2 30s linear infinite;
   }
 }
