@@ -1,4 +1,4 @@
-import { query, mutation } from "./_generated/server";
+import { query, mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 
 // ─── Period helpers ────────────────────────────────────────────────────────────
@@ -75,7 +75,7 @@ export const getPlayerRank = query({
 
 // ─── updateScore (upsert) ─────────────────────────────────────────────────────
 
-export const updateScore = mutation({
+export const updateScore = internalMutation({
   args: {
     playerId: v.id("players"),
     playerName: v.string(),

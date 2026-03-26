@@ -119,40 +119,9 @@ export const applyEvent = internalMutation({
       fired: false,
     });
 
-    // 2. Apply price changes to all affected stocks immediately
-    for (const affected of args.affectedStocks) {
-      const stock = await ctx.db
-        .query("stocks")
-        .withIndex("by_symbol", (q) => q.eq("symbol", affected.symbol))
-        .first();
-
-      if (!stock) continue;
-
-      const changeFraction = affected.changePercent / 100;
-      const changeInCents = Math.round(stock.priceInCents * changeFraction);
-      const newPriceInCents = Math.max(1, stock.priceInCents + changeInCents);
-
-      const newDailyChangeInCents =
-        stock.dailyChangeInCents + changeInCents;
-      const newDailyChangePercent =
-        Math.round(
-          ((newPriceInCents - stock.previousCloseInCents) /
-            stock.previousCloseInCents) *
-            10000
-        ) / 100;
-
-      const newPriceHistory = [
-        ...stock.priceHistory,
-        { timestamp: now, priceInCents: newPriceInCents },
-      ];
-
-      await ctx.db.patch(stock._id, {
-        priceInCents: newPriceInCents,
-        dailyChangeInCents: newDailyChangeInCents,
-        dailyChangePercent: newDailyChangePercent,
-        priceHistory: newPriceHistory,
-      });
-    }
+    // 2. Price changes are NOT applied here — they are applied when the
+    // event fires via eventScheduler.fireNextEvent. This ensures prices
+    // move at the moment the Market Alert appears to players.
 
     // 3. Update company state for the primary symbol
     const companyState = await ctx.db

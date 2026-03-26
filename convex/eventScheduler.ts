@@ -48,7 +48,41 @@ export const fireNextEvent = internalMutation({
       firedAt: now,
     });
 
-    // 5. Schedule market commentary for this event
+    // 5. Apply price changes NOW — prices move at the moment the alert shows
+    for (const affected of nextEvent.affectedStocks) {
+      const stock = await ctx.db
+        .query("stocks")
+        .withIndex("by_symbol", (q) => q.eq("symbol", affected.symbol))
+        .first();
+
+      if (!stock) continue;
+
+      const changeFraction = affected.changePercent / 100;
+      const changeInCents = Math.round(stock.priceInCents * changeFraction);
+      const newPriceInCents = Math.max(1, stock.priceInCents + changeInCents);
+
+      const newDailyChangeInCents = stock.dailyChangeInCents + changeInCents;
+      const newDailyChangePercent =
+        Math.round(
+          ((newPriceInCents - stock.previousCloseInCents) /
+            stock.previousCloseInCents) *
+            10000
+        ) / 100;
+
+      const newPriceHistory = [
+        ...stock.priceHistory.slice(-199), // cap at 200 entries
+        { timestamp: now, priceInCents: newPriceInCents },
+      ];
+
+      await ctx.db.patch(stock._id, {
+        priceInCents: newPriceInCents,
+        dailyChangeInCents: newDailyChangeInCents,
+        dailyChangePercent: newDailyChangePercent,
+        priceHistory: newPriceHistory,
+      });
+    }
+
+    // 6. Schedule market commentary for this event
     await ctx.scheduler.runAfter(
       0,
       internal.groq.marketCommentary.generate,

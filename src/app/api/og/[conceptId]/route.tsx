@@ -100,9 +100,10 @@ const CONCEPT_MAP: Record<string, { name: string; oneLiner: string }> = {
 
 export async function GET(
   _request: Request,
-  { params }: { params: { conceptId: string } }
+  props: { params: Promise<{ conceptId: string }> }
 ) {
-  const concept = CONCEPT_MAP[params.conceptId];
+  const { conceptId } = await props.params;
+  const concept = CONCEPT_MAP[conceptId];
 
   const name = concept?.name ?? "Financial Concept";
   const oneLiner = concept?.oneLiner ?? "Learn to build wealth on BLK Exchange.";

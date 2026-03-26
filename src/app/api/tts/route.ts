@@ -1,9 +1,16 @@
 import { ElevenLabsClient } from "elevenlabs";
+import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 
 const CHARLIE_VOICE_ID = "IKne3meq5aSn9XLyUdCD";
 
 export async function POST(request: NextRequest) {
+  // Auth check: only authenticated users can use TTS
+  const { userId } = await auth();
+  if (!userId) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   const apiKey = process.env.ELEVENLABS_API_KEY;
   if (!apiKey) {
     return NextResponse.json(

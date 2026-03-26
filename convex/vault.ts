@@ -155,11 +155,11 @@ export const checkBehaviorTriggers = mutation({
       }
     }
 
-    // portfolio-rebalancing: sold a position that was >25% of portfolio value
+    // portfolio-rebalancing: sold a position that was >30% of portfolio value
     if (!unlockedIds.has("portfolio-rebalancing")) {
       const recentSells = trades.filter((t) => t.type === "sell").slice(-5);
       for (const sell of recentSells) {
-        if (sell.amountInCents > portfolioValue * 0.25) {
+        if (sell.amountInCents > portfolioValue * 0.30) {
           newUnlocks.push("portfolio-rebalancing");
           break;
         }
