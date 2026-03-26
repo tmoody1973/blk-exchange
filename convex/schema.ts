@@ -95,8 +95,7 @@ export default defineSchema({
     classifiedConcept: v.optional(v.string()),
     sourceLayer: v.union(
       v.literal("firecrawl"),
-      v.literal("exa"),
-      v.literal("tavily")
+      v.literal("perplexity")
     ),
     createdAt: v.number(),
     processedAsEvent: v.boolean(),

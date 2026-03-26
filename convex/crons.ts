@@ -10,21 +10,21 @@ crons.interval(
   internal.eventScheduler.fireNextEvent
 );
 
-// Firecrawl every 15 minutes — scrape known Black publications
+// Firecrawl every 15 minutes — scrape 12 Black publications
 crons.interval(
   "scrape publications",
   { minutes: 15 },
   internal.news.firecrawl.scrape
 );
 
-// Exa every 30 minutes — semantic discovery
+// Perplexity every 30 minutes — AI-powered news discovery
 crons.interval(
-  "exa discovery",
+  "perplexity discovery",
   { minutes: 30 },
-  internal.news.exa.discover
+  internal.news.perplexity.discover
 );
 
-// Full pipeline every 30 minutes — includes Tavily fallback when needed
+// Full pipeline every 30 minutes — Firecrawl + Perplexity
 crons.interval(
   "news pipeline",
   { minutes: 30 },

@@ -1,23 +1,20 @@
 import { internalAction } from "../_generated/server";
 import { internal } from "../_generated/api";
 
+/**
+ * 2-layer news pipeline orchestrator:
+ * Layer 1: Firecrawl — scrapes 12 specific Black publications
+ * Layer 2: Perplexity Sonar — AI-powered news discovery across the web
+ *
+ * Perplexity replaces both Exa (semantic search) and Tavily (fallback).
+ * It searches + synthesizes in one call, returning sourced summaries.
+ */
 export const runPipeline = internalAction({
   handler: async (ctx) => {
-    // Layer 1: Firecrawl — scrape known Black publications
+    // Layer 1: Firecrawl — targeted scraping of known publications
     await ctx.runAction(internal.news.firecrawl.scrape);
 
-    // Layer 2: Exa — semantic discovery of recent relevant articles
-    await ctx.runAction(internal.news.exa.discover);
-
-    // Check how many articles have come in over the last 30 minutes
-    const thirtyMinAgo = Date.now() - 30 * 60 * 1000;
-    const recentCount = await ctx.runQuery(internal.articles.countRecentArticles, {
-      sinceTimestamp: thirtyMinAgo,
-    });
-
-    // Layer 3: Tavily fallback — only if pipeline yielded fewer than 3 articles
-    if (recentCount < 3) {
-      await ctx.runAction(internal.news.tavily.search);
-    }
+    // Layer 2: Perplexity Sonar — broad AI-powered news discovery
+    await ctx.runAction(internal.news.perplexity.discover);
   },
 });

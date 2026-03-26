@@ -1,0 +1,137 @@
+import { internalAction } from "../_generated/server";
+import { internal } from "../_generated/api";
+import OpenAI from "openai";
+
+/**
+ * Layer 2: Perplexity Sonar — AI-powered news discovery.
+ * Replaces both Exa (semantic search) and Tavily (fallback search).
+ * Uses OpenAI-compatible API with model "sonar".
+ *
+ * Perplexity searches the web, synthesizes results with citations,
+ * and returns sourced summaries in a single API call.
+ */
+export const discover = internalAction({
+  handler: async (ctx) => {
+    const apiKey = process.env.PERPLEXITY_API_KEY;
+    if (!apiKey) return { discovered: 0 };
+
+    const client = new OpenAI({
+      baseURL: "https://api.perplexity.ai",
+      apiKey,
+    });
+
+    const queries = [
+      "Latest Black-owned business news and funding announcements from the past 24 hours",
+      "Recent HBCU investments, endowments, and Black education finance news",
+      "Black entertainment, music, and media industry deals and launches this week",
+      "African American tech startups, fintech, and venture capital news today",
+      "Black real estate, community banking, and wealth building news this week",
+      "Black fashion, beauty, and consumer brand launches and partnerships recently",
+    ];
+
+    let totalDiscovered = 0;
+
+    for (const query of queries) {
+      try {
+        const response = await client.chat.completions.create({
+          model: "sonar",
+          messages: [
+            {
+              role: "system",
+              content:
+                "You are a news aggregator focused on Black business, culture, and economic news. Return exactly 3-5 recent news items as a JSON array. Each item must have: title (string), url (string), summary (1-2 sentence string), source (publication name string). Only include real, verifiable news from the past 7 days. Return ONLY the JSON array, no other text.",
+            },
+            {
+              role: "user",
+              content: query,
+            },
+          ],
+        });
+
+        const content = response.choices[0]?.message?.content;
+        if (!content) continue;
+
+        // Parse the JSON array from the response
+        let articles: Array<{
+          title: string;
+          url: string;
+          summary: string;
+          source: string;
+        }>;
+
+        try {
+          // Try to extract JSON from the response (may be wrapped in markdown code blocks)
+          const jsonMatch = content.match(/\[[\s\S]*\]/);
+          if (!jsonMatch) continue;
+          articles = JSON.parse(jsonMatch[0]);
+        } catch {
+          continue;
+        }
+
+        if (!Array.isArray(articles)) continue;
+
+        for (const article of articles.slice(0, 5)) {
+          if (!article.title || !article.url) continue;
+
+          const urlHash = simpleHash(article.url);
+          const existing = await ctx.runQuery(
+            internal.articles.getByUrlHash,
+            { urlHash }
+          );
+          if (existing) continue;
+
+          let hostname: string;
+          try {
+            hostname = new URL(article.url).hostname;
+          } catch {
+            hostname = article.source || "unknown";
+          }
+
+          const articleId = await ctx.runMutation(
+            internal.articles.insertArticle,
+            {
+              urlHash,
+              url: article.url,
+              title: article.title,
+              publication: article.source || hostname,
+              summary: article.summary?.slice(0, 500),
+              significance: 0,
+              classifiedTickers: [],
+              sourceLayer: "perplexity",
+              processedAsEvent: false,
+            }
+          );
+
+          // Schedule Groq classification
+          await ctx.scheduler.runAfter(
+            0,
+            internal.groq.classifyArticle.classify,
+            {
+              articleId,
+              title: article.title,
+              summary: article.summary?.slice(0, 500),
+              publication: article.source || hostname,
+              url: article.url,
+            }
+          );
+
+          totalDiscovered++;
+        }
+      } catch (error) {
+        console.error(`Perplexity query failed: ${query}`, error);
+      }
+    }
+
+    return { discovered: totalDiscovered };
+  },
+});
+
+function simpleHash(str: string): string {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = (hash << 5) - hash + char;
+    hash = hash & hash;
+  }
+  return Math.abs(hash).toString(36);
+}
