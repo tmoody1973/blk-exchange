@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { PriceChart } from "@/components/market/price-chart";
 import { SECTORS } from "@/lib/constants/sectors";
 import { TradeModal } from "@/components/trade/trade-modal";
+import { ProfessorMode } from "@/components/education/professor-mode";
 
 type PageProps = {
   params: Promise<{ symbol: string }>;
@@ -241,6 +242,17 @@ export default function TickerDetailPage({ params }: PageProps) {
             <p className="font-mono text-white/40 text-sm">No position</p>
           )}
         </div>
+
+        {/* Professor Mode — Ask about this stock */}
+        {player && (
+          <div className="mb-8">
+            <ProfessorMode
+              playerId={player._id}
+              stockSymbol={symbol.toUpperCase()}
+              placeholder={`Ask about ${symbol.toUpperCase()}… (e.g. "What sector risk does this have?")`}
+            />
+          </div>
+        )}
 
         {/* BUY / SELL buttons — desktop inline */}
         <div className="hidden lg:flex gap-4">

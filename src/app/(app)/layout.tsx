@@ -9,6 +9,7 @@ import { AppSidebar } from "@/components/layout/app-sidebar";
 import { BottomTabs } from "@/components/layout/bottom-tabs";
 import { SectorMarquee } from "@/components/market/sector-marquee";
 import { BLKIndex } from "@/components/market/blk-index";
+import { MarketAlert } from "@/components/market/market-alert";
 
 function AppLayoutInner({ children }: { children: React.ReactNode }) {
   const { user, isLoaded, isSignedIn } = useUser();
@@ -61,6 +62,9 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
         {/* Mobile bottom tabs — hidden at lg+ */}
         <BottomTabs />
       </div>
+
+      {/* Market alert overlay — renders on all pages */}
+      <MarketAlert />
     </SidebarProvider>
   );
 }

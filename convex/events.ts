@@ -43,3 +43,16 @@ export const getEventsBySymbol = query({
       .take(10);
   },
 });
+
+// Get the most recently fired event (for market alert polling)
+export const getLatestFiredEvent = query({
+  handler: async (ctx) => {
+    const event = await ctx.db
+      .query("events")
+      .withIndex("by_timestamp")
+      .order("desc")
+      .filter((q) => q.eq(q.field("fired"), true))
+      .first();
+    return event ?? null;
+  },
+});
