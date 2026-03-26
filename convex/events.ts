@@ -1,4 +1,4 @@
-import { query } from "./_generated/server";
+import { query, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
 
 // Get recent events (last 20, sorted by timestamp desc)
@@ -21,6 +21,14 @@ export const getFiredEvents = query({
       .order("desc")
       .take(20);
     return events.filter((e) => e.fired);
+  },
+});
+
+// Get a single event by ID (internal — used by market commentary action)
+export const getEventById = internalQuery({
+  args: { eventId: v.id("events") },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.eventId);
   },
 });
 
