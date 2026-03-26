@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import type { Id } from "../../../convex/_generated/dataModel";
+import { CONCEPTS } from "@/lib/constants/concepts";
+import { CONCEPT_CONTENT } from "@/data/concepts";
 import {
   Sheet,
   SheetContent,
@@ -73,6 +75,9 @@ export function TradeModal({
   const isMobile = useIsMobile();
 
   const executeTrade = useMutation(api.trades.executeTrade);
+  const checkBehaviorTriggers = useMutation(api.vault.checkBehaviorTriggers);
+  const unlockConcept = useMutation(api.vault.unlockConcept);
+  const updateDebt = useMutation(api.curriculumDebt.updateDebt);
 
   // Fetch total portfolio value for the 25% limit calculation
   const portfolioValue = useQuery(api.players.getPortfolioValue, { playerId });
@@ -131,6 +136,35 @@ export function TradeModal({
         `${tradeType === "buy" ? "Bought" : "Sold"} ${sharesStr} ${result.symbol} for ${dollarStr}`
       );
       setAmountInput("");
+
+      // Check behavior triggers and unlock concepts asynchronously
+      void (async () => {
+        try {
+          const newUnlockIds = await checkBehaviorTriggers({ playerId });
+          for (const conceptId of newUnlockIds) {
+            const concept = CONCEPTS.find((c) => c.id === conceptId);
+            const content = CONCEPT_CONTENT[conceptId];
+            if (concept && content) {
+              await unlockConcept({
+                playerId,
+                conceptId: concept.id,
+                conceptName: concept.name,
+                tier: concept.tier,
+                triggerType: "behavior",
+                definition: content.definition,
+                realWorldExample: content.realWorldExample,
+              });
+            }
+          }
+          // Update curriculum debt after unlocking
+          if (newUnlockIds.length > 0) {
+            await updateDebt({ playerId });
+          }
+        } catch (err) {
+          // Non-critical — log and continue
+          console.error("[TradeModal] Behavior trigger check failed:", err);
+        }
+      })();
 
       // Auto-close after brief success display
       setTimeout(() => {

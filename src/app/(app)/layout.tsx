@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { useUser } from "@clerk/nextjs";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/layout/app-sidebar";
@@ -10,6 +10,7 @@ import { BottomTabs } from "@/components/layout/bottom-tabs";
 import { SectorMarquee } from "@/components/market/sector-marquee";
 import { BLKIndex } from "@/components/market/blk-index";
 import { MarketAlert } from "@/components/market/market-alert";
+import { useSession } from "@/lib/hooks/use-session";
 
 function AppLayoutInner({ children }: { children: React.ReactNode }) {
   const { user, isLoaded, isSignedIn } = useUser();
@@ -23,6 +24,15 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
       }).catch(console.error);
     }
   }, [isLoaded, isSignedIn, user, getOrCreate]);
+
+  // Resolve playerId for session management
+  const player = useQuery(
+    api.players.getPlayer,
+    isLoaded && isSignedIn && user ? { clerkId: user.id } : "skip"
+  );
+
+  // Auto-start session when player is available
+  useSession({ playerId: player?._id ?? null });
 
   return (
     <SidebarProvider defaultOpen={true}>
