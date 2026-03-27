@@ -9,14 +9,14 @@ export const generateDebrief = internalAction({
   args: {
     sessionId: v.id("sessions"),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<{ debriefText: string }> => {
     const apiKey = process.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
       throw new Error("ANTHROPIC_API_KEY environment variable is not set");
     }
 
     // Fetch session data
-    const session = await ctx.runQuery(internal.claude.generateDebrief.getSessionForDebrief, {
+    const session: any = await ctx.runQuery(internal.claude.generateDebrief.getSessionForDebrief, {
       sessionId: args.sessionId,
     });
 
@@ -25,7 +25,7 @@ export const generateDebrief = internalAction({
     }
 
     // Fetch player
-    const player = await ctx.runQuery(internal.claude.generateDebrief.getPlayerForDebrief, {
+    const player: any = await ctx.runQuery(internal.claude.generateDebrief.getPlayerForDebrief, {
       playerId: session.playerId,
     });
 
@@ -34,13 +34,13 @@ export const generateDebrief = internalAction({
     }
 
     // Fetch current holdings
-    const holdings = await ctx.runQuery(
+    const holdings: any[] = await ctx.runQuery(
       internal.claude.generateDebrief.getHoldingsForDebrief,
       { playerId: session.playerId }
     );
 
     // Fetch trades during session window
-    const trades = await ctx.runQuery(
+    const trades: any[] = await ctx.runQuery(
       internal.claude.generateDebrief.getTradesForDebrief,
       {
         playerId: session.playerId,
@@ -50,7 +50,7 @@ export const generateDebrief = internalAction({
     );
 
     // Fetch vault concepts
-    const vault = await ctx.runQuery(
+    const vault: any[] = await ctx.runQuery(
       internal.claude.generateDebrief.getVaultForDebrief,
       { playerId: session.playerId }
     );
@@ -68,7 +68,7 @@ export const generateDebrief = internalAction({
 
     const holdingsSummary = holdings.length > 0
       ? holdings
-          .map((h) => {
+          .map((h: any) => {
             const pnlSign2 = h.pnlInCents >= 0 ? "+" : "-";
             return `  - ${h.symbol} | ${h.shares.toFixed(4)} shares | Value: $${(h.currentValueInCents / 100).toFixed(2)} | P&L: ${pnlSign2}$${(Math.abs(h.pnlInCents) / 100).toFixed(2)} (${pnlSign2}${Math.abs(h.pnlPercent).toFixed(2)}%) | Sector: ${h.sector}`;
           })
@@ -77,7 +77,7 @@ export const generateDebrief = internalAction({
 
     const tradesSummary = trades.length > 0
       ? trades
-          .map((t) => {
+          .map((t: any) => {
             const ts = new Date(t.timestamp).toLocaleTimeString();
             return `  - [${ts}] ${t.type.toUpperCase()} ${t.shares.toFixed(4)} shares of ${t.symbol} @ $${(t.priceInCents / 100).toFixed(2)} | Total: $${(t.amountInCents / 100).toFixed(2)}`;
           })
@@ -85,14 +85,14 @@ export const generateDebrief = internalAction({
       : "  No trades this session.";
 
     const sessionConcepts = session.conceptsUnlocked;
-    const vaultConcepts = vault.filter((v) => sessionConcepts.includes(v.conceptId));
+    const vaultConcepts = vault.filter((v: any) => sessionConcepts.includes(v.conceptId));
     const conceptsSummary = vaultConcepts.length > 0
-      ? vaultConcepts.map((c) => `  - ${c.conceptName} (${c.tier}): ${c.definition}`).join("\n")
+      ? vaultConcepts.map((c: any) => `  - ${c.conceptName} (${c.tier}): ${c.definition}`).join("\n")
       : "  No new concepts unlocked this session.";
 
-    const totalVaultConcepts = vault.length;
+    const totalVaultConcepts: number = vault.length;
 
-    const userMessage = `
+    const userMessage: string = `
 Session Data for Debrief:
 
 Player: ${player.name}
@@ -139,7 +139,7 @@ FOCUS FOR NEXT SESSION:
 
     const client = new Anthropic({ apiKey });
 
-    const response = await client.messages.create({
+    const response: Awaited<ReturnType<typeof client.messages.create>> = await client.messages.create({
       model: "claude-sonnet-4-6-20250514",
       max_tokens: 1200,
       system:
@@ -147,7 +147,7 @@ FOCUS FOR NEXT SESSION:
       messages: [{ role: "user", content: userMessage }],
     });
 
-    const debriefText =
+    const debriefText: string =
       response.content[0]?.type === "text"
         ? response.content[0].text
         : "Session complete. Keep building your portfolio and unlocking concepts.";

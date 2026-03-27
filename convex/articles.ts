@@ -23,7 +23,7 @@ export const insertArticle = internalMutation({
     significance: v.number(),
     classifiedTickers: v.array(v.string()),
     classifiedConcept: v.optional(v.string()),
-    sourceLayer: v.union(v.literal("firecrawl"), v.literal("exa"), v.literal("tavily")),
+    sourceLayer: v.union(v.literal("firecrawl"), v.literal("perplexity")),
     processedAsEvent: v.boolean(),
   },
   handler: async (ctx, args) => {

@@ -110,7 +110,7 @@ export const gradePortfolioPublic = action({
   args: {
     playerId: v.id("players"),
   },
-  handler: async (ctx, args) => {
+  handler: async (ctx, args): Promise<unknown> => {
     return await ctx.runAction(internal.claude.gradePortfolio.gradePortfolio, {
       playerId: args.playerId,
     });

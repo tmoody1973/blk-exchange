@@ -19,7 +19,7 @@ export const seedDatabase = mutation({
         dailyChangeInCents: stock.dailyChangeInCents,
         dailyChangePercent: stock.dailyChangePercent,
         marketCapInCents: stock.marketCapInCents,
-        priceHistory: stock.priceHistory as Array<{ timestamp: number; priceInCents: number }>,
+        priceHistory: stock.priceHistory as unknown as Array<{ timestamp: number; priceInCents: number }>,
       });
     }
 

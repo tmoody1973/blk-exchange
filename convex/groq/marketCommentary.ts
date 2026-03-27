@@ -43,7 +43,7 @@ export const generate = internalAction({
 
     const affectedSummary = event.affectedStocks
       .map(
-        (s) =>
+        (s: { symbol: string; changePercent: number }) =>
           `${s.symbol} ${s.changePercent >= 0 ? "+" : ""}${s.changePercent}%`
       )
       .join(", ");
