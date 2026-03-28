@@ -1,5 +1,14 @@
-import { internalMutation } from "./_generated/server";
+import { internalMutation, mutation } from "./_generated/server";
 import { internal } from "./_generated/api";
+
+// Public wrapper for testing — call via `npx convex run eventScheduler:triggerFire`
+export const triggerFire = mutation({
+  args: {},
+  handler: async (ctx) => {
+    await ctx.scheduler.runAfter(0, internal.eventScheduler.fireNextEvent, {});
+    return { scheduled: true };
+  },
+});
 
 const TEN_MINUTES_MS = 10 * 60 * 1000;
 const MAX_EVENTS_PER_WINDOW = 2;
@@ -20,8 +29,10 @@ export const fireNextEvent = internalMutation({
       (e) => e.firedAt !== undefined && e.firedAt >= windowStart
     ).length;
 
+    console.log(`[fireNextEvent] recentFired: ${recentFired.length}, recentInWindow: ${recentCount}`);
+
     if (recentCount >= MAX_EVENTS_PER_WINDOW) {
-      // Rate limit: too many events in the window, skip this tick
+      console.log("[fireNextEvent] Rate limited, skipping");
       return;
     }
 
@@ -31,6 +42,8 @@ export const fireNextEvent = internalMutation({
       .withIndex("by_fired", (q) => q.eq("fired", false))
       .order("asc")
       .first();
+
+    console.log(`[fireNextEvent] Next event in queue: ${nextEvent ? nextEvent.headline.slice(0, 50) : "NONE"}`);
 
     if (!nextEvent) {
       // 3. Queue is empty — ask Groq to generate a new event

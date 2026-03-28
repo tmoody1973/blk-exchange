@@ -1,26 +1,27 @@
 import { query, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
 
-// Get recent events (last 20, sorted by timestamp desc)
+// Get recent FIRED events (last 20, sorted by firedAt desc) — what players see in news feed
 export const getRecentEvents = query({
   handler: async (ctx) => {
     return await ctx.db
       .query("events")
       .withIndex("by_timestamp")
       .order("desc")
+      .filter((q) => q.eq(q.field("fired"), true))
       .take(20);
   },
 });
 
-// Get fired events only
+// Get fired events only (alias)
 export const getFiredEvents = query({
   handler: async (ctx) => {
-    const events = await ctx.db
+    return await ctx.db
       .query("events")
       .withIndex("by_timestamp")
       .order("desc")
+      .filter((q) => q.eq(q.field("fired"), true))
       .take(20);
-    return events.filter((e) => e.fired);
   },
 });
 
