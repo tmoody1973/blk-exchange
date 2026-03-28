@@ -8,6 +8,7 @@ import { api } from "../../../../../convex/_generated/api";
 import { Badge } from "@/components/ui/badge";
 import { PriceChart } from "@/components/market/price-chart";
 import { SECTORS } from "@/lib/constants/sectors";
+import { COMPANY_BACKSTORIES } from "@/data/company-backstories";
 import { TradeModal } from "@/components/trade/trade-modal";
 import { ProfessorMode } from "@/components/education/professor-mode";
 
@@ -167,6 +168,12 @@ export default function TickerDetailPage({ params }: PageProps) {
           <p className="font-mono text-white/70 text-sm leading-relaxed">
             {stock.description}
           </p>
+          <div className="mt-4">
+            <h3 className="font-mono text-xs uppercase tracking-wider text-white/50 mb-2">About</h3>
+            <p className="font-mono text-sm text-white/80 leading-relaxed">
+              {COMPANY_BACKSTORIES[symbol.toUpperCase()] ?? "Company profile coming soon."}
+            </p>
+          </div>
           <div className="mt-4 grid grid-cols-2 gap-4">
             <div>
               <p className="font-mono text-xs text-white/40 uppercase tracking-wider">

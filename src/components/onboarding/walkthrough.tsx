@@ -4,8 +4,11 @@ import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import type { CallBackProps, Step } from "react-joyride";
 
-// Dynamic import to avoid SSR issues with react-joyride
-const Joyride = dynamic(() => import("react-joyride"), { ssr: false });
+// Dynamic import — must extract .default for ESM compatibility
+const Joyride = dynamic(
+  () => import("react-joyride").then((mod) => mod.default ?? mod),
+  { ssr: false }
+);
 
 const WALKTHROUGH_KEY = "blk-exchange-walkthrough-completed";
 
