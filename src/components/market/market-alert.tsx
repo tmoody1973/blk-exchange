@@ -69,7 +69,7 @@ function AlertInner({ alert, onDismiss }: AlertInnerProps) {
           <span className="font-mono text-xs font-bold uppercase tracking-widest text-[#FDE047]">
             Market Alert
           </span>
-          <SourceBadge sourceType={alert.sourceType} source={alert.source} />
+          <SourceBadge sourceType={alert.sourceType} source={alert.source} sourceUrl={alert.sourceUrl} />
         </div>
         <button
           onClick={onDismiss}
@@ -136,22 +136,41 @@ function AlertInner({ alert, onDismiss }: AlertInnerProps) {
 function SourceBadge({
   sourceType,
   source,
+  sourceUrl,
 }: {
   sourceType: "fictional" | "real";
   source: string;
+  sourceUrl?: string;
 }) {
   const isReal = sourceType === "real";
+  const badgeStyle = {
+    borderColor: isReal ? "#FDE047" : "#7F77DD",
+    color: isReal ? "#FDE047" : "#7F77DD",
+    backgroundColor: isReal ? "#FDE04715" : "#7F77DD15",
+  };
+
+  if (isReal && sourceUrl) {
+    return (
+      <a
+        href={sourceUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="font-mono text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 border hover:underline"
+        style={badgeStyle}
+        title={`Source: ${source}`}
+      >
+        {source} ↗
+      </a>
+    );
+  }
+
   return (
     <span
       className="font-mono text-[10px] font-bold uppercase tracking-wider px-1.5 py-0.5 border"
-      style={{
-        borderColor: isReal ? "#FDE047" : "#7F77DD",
-        color: isReal ? "#FDE047" : "#7F77DD",
-        backgroundColor: isReal ? "#FDE04715" : "#7F77DD15",
-      }}
+      style={badgeStyle}
       title={source}
     >
-      {isReal ? "Real" : "Sim"}
+      {isReal ? source : "Sim"}
     </span>
   );
 }

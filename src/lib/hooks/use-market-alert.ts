@@ -9,6 +9,7 @@ export type MarketAlertEvent = {
   headline: string;
   source: string;
   sourceType: "fictional" | "real";
+  sourceUrl?: string;
   affectedStocks: { symbol: string; changePercent: number }[];
   conceptTaught?: string;
   commentary?: string;
@@ -45,6 +46,7 @@ export function useMarketAlert(): UseMarketAlertReturn {
         headline: latestEvent.headline,
         source: latestEvent.source,
         sourceType: latestEvent.sourceType,
+        sourceUrl: latestEvent.sourceUrl,
         affectedStocks: latestEvent.affectedStocks,
         conceptTaught: latestEvent.conceptTaught,
         commentary: latestEvent.commentary,
