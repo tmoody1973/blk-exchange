@@ -91,7 +91,8 @@
   /* Hard corners everywhere */
   * {
     border-radius: 0 !important;
-    @apply border-border outline-ring/50;
+    border-color: var(--border);
+    outline-color: var(--ring);
   }
 
   body {
