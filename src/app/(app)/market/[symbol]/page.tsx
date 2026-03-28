@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
@@ -12,7 +12,7 @@ import { TradeModal } from "@/components/trade/trade-modal";
 import { ProfessorMode } from "@/components/education/professor-mode";
 
 type PageProps = {
-  params: Promise<{ symbol: string }>;
+  params: { symbol: string };
 };
 
 function getSectorColor(sectorId: string): string {
@@ -30,7 +30,7 @@ function formatCents(cents: number): string {
 }
 
 export default function TickerDetailPage({ params }: PageProps) {
-  const { symbol } = use(params);
+  const { symbol } = params;
   const { user, isLoaded } = useUser();
 
   const [tradeModalOpen, setTradeModalOpen] = useState(false);
