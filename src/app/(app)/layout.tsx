@@ -35,7 +35,7 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
   useSession({ playerId: player?._id ?? null });
 
   return (
-    <SidebarProvider defaultOpen={true}>
+    <SidebarProvider defaultOpen={false}>
       <div className="flex min-h-screen w-full flex-col bg-[#0e0e0e]">
         {/* Sector marquee — always visible at the very top */}
         <div className="sticky top-0 z-40">
