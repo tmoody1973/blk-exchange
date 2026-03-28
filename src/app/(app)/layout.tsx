@@ -26,13 +26,11 @@ function DesktopNav() {
 
   return (
     <nav className="hidden lg:flex items-center gap-1 border-b-2 border-white bg-[#0e0e0e] px-4 py-2">
-      {/* Logo */}
       <Link href="/market" className="mr-6 flex items-center gap-1">
         <span className="text-lg font-bold" style={{ color: "#7F77DD" }}>BLK</span>
         <span className="text-lg font-bold text-white">EXCHANGE</span>
       </Link>
 
-      {/* Nav links */}
       {NAV_ITEMS.map(({ href, label, icon: Icon }) => {
         const isActive = pathname.startsWith(href);
         return (
@@ -51,7 +49,6 @@ function DesktopNav() {
         );
       })}
 
-      {/* BLK Index on the right */}
       <div className="ml-auto">
         <BLKIndex />
       </div>
@@ -81,32 +78,23 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-[#0e0e0e]">
-      {/* Sector marquee — always visible at the very top */}
       <div className="sticky top-0 z-40">
         <SectorMarquee />
       </div>
 
-      {/* Desktop top nav */}
       <DesktopNav />
 
-      {/* Mobile top bar with BLK Index */}
       <div className="flex items-center gap-4 border-b-2 border-white bg-[#0e0e0e] px-4 py-2 lg:hidden">
         <span className="text-sm font-bold" style={{ color: "#7F77DD" }}>BLK</span>
         <BLKIndex />
       </div>
 
-      {/* Page content — bottom padding on mobile for tab bar */}
       <main className="flex-1 overflow-auto pb-16 lg:pb-0">
         {children}
       </main>
 
-      {/* Mobile bottom tabs */}
       <BottomTabs />
-
-      {/* Market alert overlay */}
       <MarketAlert />
-
-      {/* Onboarding walkthrough — shows once for new users */}
       <Walkthrough />
     </div>
   );

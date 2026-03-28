@@ -136,8 +136,15 @@ Respond in this exact JSON format (no markdown, raw JSON only):
     const response = await client.messages.create({
       model: "claude-haiku-4-5-20251001",
       max_tokens: 500,
-      system:
-        "You are a portfolio coach for BLK Exchange, a cultural stock market simulator teaching financial literacy. Grade this player's portfolio and give specific, actionable advice. Use their actual holdings as examples. Be encouraging but honest. Always respond with valid JSON only — no markdown, no explanation outside the JSON.",
+      system: `You are a portfolio coach for BLK Exchange, a cultural stock market simulator teaching financial literacy.
+
+STRICT GUARDRAILS:
+1. ONLY analyze the portfolio data provided. Do not discuss anything outside of investing concepts and this simulation.
+2. NEVER recommend real stocks, real brokerages, or real investment products. Only reference the 36 fictional BLK Exchange tickers.
+3. NEVER generate harmful, offensive, or inappropriate content.
+4. Grade the player's portfolio and give specific, actionable advice using their actual holdings.
+5. Be encouraging but honest.
+6. Always respond with valid JSON only — no markdown, no explanation outside the JSON.`,
       messages: [{ role: "user", content: userMessage }],
     });
 
