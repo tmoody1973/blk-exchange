@@ -1,14 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import dynamic from "next/dynamic";
 import type { CallBackProps, Step } from "react-joyride";
-
-// Dynamic import — must extract .default for ESM compatibility
-const Joyride = dynamic(
-  () => import("react-joyride").then((mod) => mod.default ?? mod),
-  { ssr: false }
-);
 
 const WALKTHROUGH_KEY = "blk-exchange-walkthrough-completed";
 
@@ -113,16 +106,23 @@ const joyrideStyles = {
 
 export function Walkthrough() {
   const [run, setRun] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [JoyrideComponent, setJoyrideComponent] = useState<any>(null);
 
   useEffect(() => {
-    // Only show walkthrough once per user
+    // Check if walkthrough already completed
     const completed = localStorage.getItem(WALKTHROUGH_KEY);
-    if (!completed) {
-      // Delay slightly so the page renders first
-      const timer = setTimeout(() => setRun(true), 1500);
-      return () => clearTimeout(timer);
-    }
+    if (completed) return;
+
+    // Dynamically import react-joyride on client only
+    import("react-joyride").then((mod) => {
+      setJoyrideComponent(() => mod.default);
+      // Delay to let the page render first
+      setTimeout(() => setRun(true), 1500);
+    });
   }, []);
+
+  if (!JoyrideComponent) return null;
 
   const handleCallback = (data: CallBackProps) => {
     const { status } = data;
@@ -133,7 +133,7 @@ export function Walkthrough() {
   };
 
   return (
-    <Joyride
+    <JoyrideComponent
       steps={STEPS}
       run={run}
       continuous
