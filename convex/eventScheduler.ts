@@ -10,6 +10,15 @@ export const triggerFire = mutation({
   },
 });
 
+// Force generate a fictional event — call via `npx convex run eventScheduler:triggerFictional`
+export const triggerFictional = mutation({
+  args: {},
+  handler: async (ctx) => {
+    await ctx.scheduler.runAfter(0, internal.groq.generateFictionalEvent.generate, {});
+    return { scheduled: true };
+  },
+});
+
 const TEN_MINUTES_MS = 10 * 60 * 1000;
 const MAX_EVENTS_PER_WINDOW = 2;
 

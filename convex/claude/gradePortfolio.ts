@@ -134,7 +134,7 @@ Respond in this exact JSON format (no markdown, raw JSON only):
     const client = new Anthropic({ apiKey });
 
     const response = await client.messages.create({
-      model: "claude-sonnet-4-6-20250514",
+      model: "claude-haiku-4-5-20251001",
       max_tokens: 500,
       system:
         "You are a portfolio coach for BLK Exchange, a cultural stock market simulator teaching financial literacy. Grade this player's portfolio and give specific, actionable advice. Use their actual holdings as examples. Be encouraging but honest. Always respond with valid JSON only — no markdown, no explanation outside the JSON.",

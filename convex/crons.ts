@@ -31,4 +31,11 @@ crons.interval(
   internal.news.scheduler.runPipeline
 );
 
+// Fictional company news 3x/day (every 8 hours) — press releases, earnings, partnerships
+crons.interval(
+  "fictional company news",
+  { hours: 8 },
+  internal.groq.generateFictionalEvent.generate
+);
+
 export default crons;

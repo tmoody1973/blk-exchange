@@ -82,7 +82,7 @@ Cash available: $${((player?.cashInCents ?? 0) / 100).toFixed(2)}.
     const client = new Anthropic({ apiKey });
 
     const response = await client.messages.create({
-      model: "claude-sonnet-4-6-20250514",
+      model: "claude-haiku-4-5-20251001",
       max_tokens: 400,
       system: `You are Professor BLK, a financial literacy professor inside BLK Exchange — a cultural stock market simulator. You teach investing concepts using culturally relevant examples from music, fashion, sports, entertainment, and Black culture.
 

@@ -121,6 +121,17 @@ export default function ProfilePage() {
           </p>
         </div>
 
+        {/* Take Tour button */}
+        <button
+          onClick={() => {
+            localStorage.removeItem("blk-exchange-walkthrough-completed");
+            window.location.href = "/market";
+          }}
+          className="border-2 border-[#7F77DD] px-4 py-2 font-mono text-sm text-[#7F77DD] hover:bg-[#7F77DD] hover:text-white transition-colors"
+        >
+          Take Tour
+        </button>
+
         {/* End Session button */}
         {activeSession && (
           <button
