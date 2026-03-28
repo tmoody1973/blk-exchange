@@ -8,6 +8,7 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { BarChart3, Wallet, BookOpen, User } from "lucide-react";
 import { BottomTabs } from "@/components/layout/bottom-tabs";
+import { Walkthrough } from "@/components/onboarding/walkthrough";
 import { SectorMarquee } from "@/components/market/sector-marquee";
 import { BLKIndex } from "@/components/market/blk-index";
 import { MarketAlert } from "@/components/market/market-alert";
@@ -104,6 +105,9 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
 
       {/* Market alert overlay */}
       <MarketAlert />
+
+      {/* Onboarding walkthrough — shows once for new users */}
+      <Walkthrough />
     </div>
   );
 }

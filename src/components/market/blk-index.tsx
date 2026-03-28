@@ -24,7 +24,7 @@ export function BLKIndex() {
   const changePrefix = isPositive ? "+" : "";
 
   return (
-    <div className="flex items-center gap-3 font-mono text-sm">
+    <div data-tour="blk-index" className="flex items-center gap-3 font-mono text-sm">
       <span className="font-bold tracking-wide text-[#FDE047]">BLK INDEX</span>
       <span className="text-white">{formatCents(data.priceInCents)}</span>
       <span style={{ color: changeColor }}>

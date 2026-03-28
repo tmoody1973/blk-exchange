@@ -2,7 +2,7 @@ import { ElevenLabsClient } from "elevenlabs";
 import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 
-const CHARLIE_VOICE_ID = "IKne3meq5aSn9XLyUdCD";
+const VOICE_ID = "6lbtrJXRylVZ6EqIQQPT";
 
 export async function POST(request: NextRequest) {
   // Auth check: only authenticated users can use TTS
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
   try {
     const client = new ElevenLabsClient({ apiKey });
 
-    const audioStream = await client.textToSpeech.convert(CHARLIE_VOICE_ID, {
+    const audioStream = await client.textToSpeech.convert(VOICE_ID, {
       text: text.slice(0, 500), // guard against overly long text
       model_id: "eleven_flash_v2_5",
       output_format: "mp3_44100_128",

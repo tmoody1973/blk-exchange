@@ -16,6 +16,7 @@ type NewsItemProps = {
   headline: string;
   source: string;
   sourceType: "fictional" | "real";
+  sourceUrl?: string;
   affectedStocks: AffectedStock[];
   conceptTaught?: string;
   timestamp: number;
@@ -25,13 +26,14 @@ export function NewsItem({
   headline,
   source,
   sourceType,
+  sourceUrl,
   affectedStocks,
   conceptTaught,
   timestamp,
 }: NewsItemProps) {
   const sourceColor = sourceType === "real" ? "#ffffff" : "#7F77DD";
   const sourceLabel =
-    sourceType === "real" ? `via ${source}` : "BLK Exchange News Desk";
+    sourceType === "real" ? source : "BLK Exchange News Desk";
 
   return (
     <div
@@ -40,12 +42,24 @@ export function NewsItem({
     >
       {/* Source + timestamp */}
       <div className="flex items-center justify-between mb-2 gap-2">
-        <span
-          className="font-mono text-xs font-bold uppercase tracking-wider"
-          style={{ color: sourceColor }}
-        >
-          {sourceLabel}
-        </span>
+        {sourceType === "real" && sourceUrl ? (
+          <a
+            href={sourceUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-mono text-xs font-bold uppercase tracking-wider hover:underline"
+            style={{ color: sourceColor }}
+          >
+            {sourceLabel} ↗
+          </a>
+        ) : (
+          <span
+            className="font-mono text-xs font-bold uppercase tracking-wider"
+            style={{ color: sourceColor }}
+          >
+            {sourceLabel}
+          </span>
+        )}
         <span className="font-mono text-xs text-white/30 shrink-0">
           {ago(timestamp)}
         </span>

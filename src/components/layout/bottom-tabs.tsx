@@ -25,6 +25,7 @@ export function BottomTabs() {
           <Link
             key={href}
             href={href}
+            data-tour={`nav-${label.toLowerCase()}`}
             className="flex flex-1 flex-col items-center justify-center gap-1 text-xs font-mono transition-colors"
             style={{ color: isActive ? "#7F77DD" : "#ffffff" }}
             aria-current={isActive ? "page" : undefined}

@@ -39,7 +39,7 @@ export const discover = internalAction({
             {
               role: "system",
               content:
-                "You are a news aggregator focused on Black business, culture, and economic news. Return exactly 3-5 recent news items as a JSON array. Each item must have: title (string), url (string), summary (1-2 sentence string), source (publication name string). Only include real, verifiable news from the past 7 days. Return ONLY the JSON array, no other text.",
+                "You are a news aggregator focused on Black business, culture, and economic news. Return exactly 3-5 recent news items as a JSON array. Each item must have: title (string), url (string), summary (1-2 sentence string), source (publication name string). CRITICAL: Only include news published within the last 48 hours. Do NOT include old news, historical events, or articles older than 2 days. Return ONLY the JSON array, no other text.",
             },
             {
               role: "user",

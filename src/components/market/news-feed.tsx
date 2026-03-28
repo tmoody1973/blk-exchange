@@ -9,6 +9,7 @@ export function NewsFeed() {
 
   return (
     <div
+      data-tour="news-feed"
       className="border-2 border-[#ffffff] bg-[#1a1a1a]"
       style={{ boxShadow: "4px 4px 0px 0px #ffffff" }}
     >
@@ -46,6 +47,7 @@ export function NewsFeed() {
                 headline={event.headline}
                 source={event.source}
                 sourceType={event.sourceType}
+                sourceUrl={event.sourceUrl}
                 affectedStocks={event.affectedStocks}
                 conceptTaught={event.conceptTaught}
                 timestamp={event.timestamp}

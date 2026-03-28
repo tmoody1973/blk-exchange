@@ -64,7 +64,7 @@ export function SectorMarquee() {
   const sectorAverages = computeSectorAverages(stocks ?? []);
 
   return (
-    <div className="relative flex w-full overflow-x-hidden border-b-2 border-border bg-[#1a1a1a]">
+    <div data-tour="marquee" className="relative flex w-full overflow-x-hidden border-b-2 border-border bg-[#1a1a1a]">
       <div className="animate-marquee whitespace-nowrap py-2">
         {sectorAverages.map((sector) => (
           <SectorTickerItem key={sector.id} sector={sector} />

@@ -76,6 +76,7 @@ export default defineSchema({
     ),
     conceptTaught: v.optional(v.string()),
     commentary: v.optional(v.string()),
+    sourceUrl: v.optional(v.string()),
     timestamp: v.number(),
     fired: v.boolean(),
     firedAt: v.optional(v.number()),

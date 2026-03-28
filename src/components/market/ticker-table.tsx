@@ -83,7 +83,7 @@ export function TickerTable() {
   const sorted = sortStocks(stocks as StockDoc[], sortKey, sortDirection);
 
   return (
-    <div className="border-2 border-[#ffffff]" style={{ boxShadow: "4px 4px 0px 0px #ffffff" }}>
+    <div data-tour="ticker-table" className="border-2 border-[#ffffff]" style={{ boxShadow: "4px 4px 0px 0px #ffffff" }}>
       <Table>
         <TableHeader>
           <TableRow className="bg-[#1a1a1a]">

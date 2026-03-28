@@ -91,6 +91,7 @@ Real Estate: BLOK, BUILD, HOOD | Sports: DRAFT, ARENA, STATS | Entertainment: SC
         affectedStocks,
         conceptTaught: result.conceptTaught ?? undefined,
         articleId: args.articleId,
+        sourceUrl: args.url,
       });
     }
   },
@@ -105,6 +106,7 @@ export const createEventFromArticle = internalMutation({
     affectedStocks: v.array(v.object({ symbol: v.string(), changePercent: v.number() })),
     conceptTaught: v.optional(v.string()),
     articleId: v.id("articles"),
+    sourceUrl: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     // Insert event
@@ -116,6 +118,7 @@ export const createEventFromArticle = internalMutation({
       primarySymbol: args.primarySymbol,
       affectedStocks: args.affectedStocks,
       conceptTaught: args.conceptTaught,
+      sourceUrl: args.sourceUrl,
       timestamp: Date.now(),
       fired: false,
     });
