@@ -21,6 +21,7 @@ type NewsItemProps = {
   conceptTaught?: string;
   commentary?: string;
   timestamp: number;
+  onSourceClick?: () => void;
 };
 
 export function NewsItem({
@@ -32,6 +33,7 @@ export function NewsItem({
   conceptTaught,
   commentary,
   timestamp,
+  onSourceClick,
 }: NewsItemProps) {
   const sourceColor = sourceType === "real" ? "#ffffff" : "#7F77DD";
   const sourceLabel =
@@ -44,7 +46,15 @@ export function NewsItem({
     >
       {/* Source + timestamp */}
       <div className="flex items-center justify-between mb-2 gap-2">
-        {sourceType === "real" && sourceUrl ? (
+        {sourceType === "real" && onSourceClick ? (
+          <button
+            onClick={onSourceClick}
+            className="font-mono text-xs font-bold uppercase tracking-wider hover:underline text-left"
+            style={{ color: sourceColor }}
+          >
+            {sourceLabel} ↗
+          </button>
+        ) : sourceType === "real" && sourceUrl ? (
           <a
             href={sourceUrl}
             target="_blank"
