@@ -11,8 +11,12 @@ const isPublicRoute = createRouteMatcher([
 
 export default clerkMiddleware(async (auth, req) => {
   if (!isPublicRoute(req)) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (auth as any).protect();
+    const { userId } = await auth();
+    if (!userId) {
+      const signInUrl = new URL("/sign-in", req.url);
+      signInUrl.searchParams.set("redirect_url", req.url);
+      return Response.redirect(signInUrl);
+    }
   }
 });
 
