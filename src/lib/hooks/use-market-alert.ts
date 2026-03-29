@@ -28,6 +28,8 @@ export function useMarketAlert(onNewEvent?: () => void): UseMarketAlertReturn {
   const latestEvent = useQuery(api.events.getLatestFiredEvent);
   const lastSeenIdRef = useRef<string | null>(null);
   const dismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const onNewEventRef = useRef(onNewEvent);
+  onNewEventRef.current = onNewEvent;
 
   const [alert, setAlert] = useState<MarketAlertEvent | null>(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -57,7 +59,7 @@ export function useMarketAlert(onNewEvent?: () => void): UseMarketAlertReturn {
       setIsVisible(true);
 
       // Notify parent that a new event was seen (for session tracking)
-      onNewEvent?.();
+      onNewEventRef.current?.();
 
       // Fire TTS in background — non-blocking
       void playAlertTTS(latestEvent.headline);

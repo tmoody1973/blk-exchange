@@ -26,6 +26,11 @@ export function GameStatusBar({
     playerId ? { playerId } : "skip"
   );
 
+  const portfolioValue = useQuery(
+    api.players.getPortfolioValue,
+    playerId ? { playerId } : "skip"
+  );
+
   const [now, setNow] = useState(Date.now());
 
   // Update every 30 seconds for countdown timers
@@ -37,6 +42,11 @@ export function GameStatusBar({
   const season = getSeasonInfo();
   const resetCountdown = formatCountdown(getMsUntilNextMonday());
   const vaultCount = vault?.length ?? 0;
+  const totalValue = portfolioValue?.totalValueInCents ?? 1_000_000;
+  const pnlCents = totalValue - 1_000_000;
+  const pnlPercent = ((pnlCents / 1_000_000) * 100).toFixed(1);
+  const pnlColor = pnlCents >= 0 ? "#22c55e" : "#ef4444";
+  const pnlPrefix = pnlCents >= 0 ? "+" : "";
 
   // Session duration
   const sessionMins = sessionStartedAt
@@ -65,8 +75,18 @@ export function GameStatusBar({
         </span>
       </div>
 
-      {/* Row 2: Session + Vault */}
+      {/* Row 2: Portfolio + Session + Vault */}
       <div className="flex items-center gap-4 flex-wrap">
+        <StatusPill
+          label="Portfolio"
+          value={`$${(totalValue / 100).toLocaleString()}`}
+          color="#ffffff"
+        />
+        <StatusPill
+          label="P&L"
+          value={`${pnlPrefix}${pnlPercent}%`}
+          color={pnlColor}
+        />
         <StatusPill
           label="Session"
           value={`${sessionMins} min`}
