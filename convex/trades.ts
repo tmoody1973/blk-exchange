@@ -1,4 +1,5 @@
 import { mutation } from "./_generated/server";
+import { internal } from "./_generated/api";
 import { v } from "convex/values";
 
 export const executeTrade = mutation({
@@ -137,6 +138,11 @@ export const executeTrade = mutation({
         cashInCents: player.cashInCents + args.amountInCents,
       });
     }
+
+    // Update leaderboard scores after trade
+    await ctx.scheduler.runAfter(0, internal.leaderboards.updatePlayerScores, {
+      playerId: args.playerId,
+    });
 
     return {
       success: true,

@@ -111,5 +111,17 @@ export const fireNextEvent = internalMutation({
       internal.groq.marketCommentary.generate,
       { eventId: nextEvent._id }
     );
+
+    // 7. Check event-driven concept unlocks for all active players
+    await ctx.scheduler.runAfter(0, internal.vault.checkEventTriggers, {
+      eventHeadline: nextEvent.headline,
+      eventConceptTaught: nextEvent.conceptTaught,
+    });
+
+    // 8. Update biggest-mover leaderboard for affected stocks
+    // (track which player benefited most from this event)
+    await ctx.scheduler.runAfter(0, internal.leaderboards.updateBiggestMover, {
+      affectedStocks: nextEvent.affectedStocks,
+    });
   },
 });

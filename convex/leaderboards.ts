@@ -1,4 +1,4 @@
-import { query, mutation, internalMutation } from "./_generated/server";
+import { query, mutation, internalMutation, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
 
 // ─── Period helpers ────────────────────────────────────────────────────────────
@@ -104,6 +104,155 @@ export const updateScore = internalMutation({
         playerName: args.playerName,
         score: args.score,
         period: args.period,
+        updatedAt: Date.now(),
+      });
+    }
+  },
+});
+
+// ─── updateBiggestMover: called after events fire ────────────────────────────
+// Finds players holding the most-moved stock and updates their biggest-mover score
+
+export const updateBiggestMover = internalMutation({
+  args: {
+    affectedStocks: v.array(v.object({ symbol: v.string(), changePercent: v.number() })),
+  },
+  handler: async (ctx, args) => {
+    if (args.affectedStocks.length === 0) return;
+
+    // Find the biggest move
+    const biggestMove = args.affectedStocks.reduce((best, s) =>
+      Math.abs(s.changePercent) > Math.abs(best.changePercent) ? s : best
+    );
+
+    // Find all holdings of this stock
+    const stock = await ctx.db
+      .query("stocks")
+      .withIndex("by_symbol", (q) => q.eq("symbol", biggestMove.symbol))
+      .first();
+    if (!stock) return;
+
+    const holdings = await ctx.db
+      .query("holdings")
+      .withIndex("by_player_stock")
+      .filter((q) => q.eq(q.field("stockId"), stock._id))
+      .collect();
+
+    const week = getCurrentWeek();
+    for (const holding of holdings) {
+      const gainCents = Math.round(
+        holding.shares * stock.priceInCents * (Math.abs(biggestMove.changePercent) / 100)
+      );
+      const player = await ctx.db.get(holding.playerId);
+      if (!player) continue;
+
+      // Get existing score, keep the max
+      const existing = await ctx.db
+        .query("leaderboards")
+        .withIndex("by_player_board", (q) =>
+          q.eq("playerId", holding.playerId).eq("board", "biggest-mover")
+        )
+        .first();
+
+      const currentBest = existing?.score ?? 0;
+      if (gainCents > currentBest) {
+        if (existing && existing.period === week) {
+          await ctx.db.patch(existing._id, {
+            score: gainCents,
+            updatedAt: Date.now(),
+          });
+        } else {
+          await ctx.db.insert("leaderboards", {
+            board: "biggest-mover",
+            playerId: holding.playerId,
+            playerName: player.name,
+            score: gainCents,
+            period: week,
+            updatedAt: Date.now(),
+          });
+        }
+      }
+    }
+  },
+});
+
+// ─── updatePlayerScores: called after trades ─────────────────────────────────
+// Updates portfolio-value and diversification leaderboards for a player
+
+export const updatePlayerScores = internalMutation({
+  args: {
+    playerId: v.id("players"),
+  },
+  handler: async (ctx, args) => {
+    const player = await ctx.db.get(args.playerId);
+    if (!player) return;
+
+    const holdings = await ctx.db
+      .query("holdings")
+      .withIndex("by_player", (q) => q.eq("playerId", args.playerId))
+      .collect();
+
+    // Compute portfolio value
+    let totalValue = player.cashInCents;
+    const sectors = new Set<string>();
+    for (const h of holdings) {
+      const stock = await ctx.db.get(h.stockId);
+      if (stock) {
+        totalValue += Math.round(h.shares * stock.priceInCents);
+        sectors.add(stock.sector);
+      }
+    }
+
+    const week = getCurrentWeek();
+    const name = player.name;
+
+    // Portfolio value board (weekly)
+    const pvExisting = await ctx.db
+      .query("leaderboards")
+      .withIndex("by_player_board", (q) =>
+        q.eq("playerId", args.playerId).eq("board", "portfolio-value")
+      )
+      .first();
+
+    if (pvExisting && pvExisting.period === week) {
+      await ctx.db.patch(pvExisting._id, {
+        score: totalValue,
+        playerName: name,
+        updatedAt: Date.now(),
+      });
+    } else {
+      await ctx.db.insert("leaderboards", {
+        board: "portfolio-value",
+        playerId: args.playerId,
+        playerName: name,
+        score: totalValue,
+        period: week,
+        updatedAt: Date.now(),
+      });
+    }
+
+    // Diversification board (weekly)
+    const divScore = Math.round((sectors.size / 12) * 100);
+    const divExisting = await ctx.db
+      .query("leaderboards")
+      .withIndex("by_player_board", (q) =>
+        q.eq("playerId", args.playerId).eq("board", "diversification")
+      )
+      .first();
+
+    if (divExisting && divExisting.period === week) {
+      await ctx.db.patch(divExisting._id, {
+        score: divScore,
+        playerName: name,
+        updatedAt: Date.now(),
+      });
+    } else {
+      await ctx.db.insert("leaderboards", {
+        board: "diversification",
+        playerId: args.playerId,
+        playerName: name,
+        score: divScore,
+        period: week,
         updatedAt: Date.now(),
       });
     }
