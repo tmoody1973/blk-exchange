@@ -54,13 +54,15 @@ export const getBLKIndex = query({
 export const dailyReset = internalMutation({
   handler: async (ctx) => {
     const stocks = await ctx.db.query("stocks").collect();
-    for (const stock of stocks) {
-      await ctx.db.patch(stock._id, {
-        previousCloseInCents: stock.priceInCents,
-        dailyChangeInCents: 0,
-        dailyChangePercent: 0,
-      });
-    }
+    await Promise.all(
+      stocks.map((stock) =>
+        ctx.db.patch(stock._id, {
+          previousCloseInCents: stock.priceInCents,
+          dailyChangeInCents: 0,
+          dailyChangePercent: 0,
+        })
+      )
+    );
     console.log(`[dailyReset] Reset ${stocks.length} stocks`);
   },
 });
@@ -87,20 +89,22 @@ export const resetPrices = internalMutation({
     const stocks = await ctx.db.query("stocks").collect();
     let resetCount = 0;
 
-    for (const stock of stocks) {
-      const startPrice = STARTING_PRICES[stock.symbol];
-      if (!startPrice) continue;
-
-      await ctx.db.patch(stock._id, {
-        priceInCents: startPrice,
-        previousCloseInCents: startPrice,
-        dailyChangeInCents: 0,
-        dailyChangePercent: 0,
-        marketCapInCents: startPrice * 1_000_000,
-        priceHistory: [{ timestamp: Date.now(), priceInCents: startPrice }],
-      });
-      resetCount++;
-    }
+    const now = Date.now();
+    await Promise.all(
+      stocks.map((stock) => {
+        const startPrice = STARTING_PRICES[stock.symbol];
+        if (!startPrice) return Promise.resolve();
+        resetCount++;
+        return ctx.db.patch(stock._id, {
+          priceInCents: startPrice,
+          previousCloseInCents: startPrice,
+          dailyChangeInCents: 0,
+          dailyChangePercent: 0,
+          marketCapInCents: startPrice * 1_000_000,
+          priceHistory: [{ timestamp: now, priceInCents: startPrice }],
+        });
+      })
+    );
 
     return { reset: resetCount };
   },

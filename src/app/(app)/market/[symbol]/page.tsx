@@ -5,9 +5,14 @@ import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { api } from "../../../../../convex/_generated/api";
+import dynamic from "next/dynamic";
 import { Badge } from "@/components/ui/badge";
-import { PriceChart } from "@/components/market/price-chart";
 import { SECTORS } from "@/lib/constants/sectors";
+
+const PriceChart = dynamic(
+  () => import("@/components/market/price-chart").then((m) => m.PriceChart),
+  { ssr: false }
+);
 import { COMPANY_BACKSTORIES } from "@/data/company-backstories";
 import { TradeModal } from "@/components/trade/trade-modal";
 import { ProfessorMode } from "@/components/education/professor-mode";

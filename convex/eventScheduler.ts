@@ -70,40 +70,42 @@ export const fireNextEvent = internalMutation({
     });
 
     // 5. Apply price changes NOW — prices move at the moment the alert shows
-    for (const affected of nextEvent.affectedStocks) {
-      const stock = await ctx.db
-        .query("stocks")
-        .withIndex("by_symbol", (q) => q.eq("symbol", affected.symbol))
-        .first();
+    await Promise.all(
+      nextEvent.affectedStocks.map(async (affected) => {
+        const stock = await ctx.db
+          .query("stocks")
+          .withIndex("by_symbol", (q) => q.eq("symbol", affected.symbol))
+          .first();
 
-      if (!stock) continue;
+        if (!stock) return;
 
-      // Cap individual event impact to ±15%
-      const clampedPercent = Math.max(-15, Math.min(15, affected.changePercent));
-      const changeFraction = clampedPercent / 100;
-      const changeInCents = Math.round(stock.priceInCents * changeFraction);
-      const newPriceInCents = Math.max(100, stock.priceInCents + changeInCents); // min $1.00
+        // Cap individual event impact to ±15%
+        const clampedPercent = Math.max(-15, Math.min(15, affected.changePercent));
+        const changeFraction = clampedPercent / 100;
+        const changeInCents = Math.round(stock.priceInCents * changeFraction);
+        const newPriceInCents = Math.max(100, stock.priceInCents + changeInCents); // min $1.00
 
-      const newDailyChangeInCents = stock.dailyChangeInCents + changeInCents;
-      const newDailyChangePercent =
-        Math.round(
-          ((newPriceInCents - stock.previousCloseInCents) /
-            stock.previousCloseInCents) *
-            10000
-        ) / 100;
+        const newDailyChangeInCents = stock.dailyChangeInCents + changeInCents;
+        const newDailyChangePercent =
+          Math.round(
+            ((newPriceInCents - stock.previousCloseInCents) /
+              stock.previousCloseInCents) *
+              10000
+          ) / 100;
 
-      const newPriceHistory = [
-        ...stock.priceHistory.slice(-199), // cap at 200 entries
-        { timestamp: now, priceInCents: newPriceInCents },
-      ];
+        const newPriceHistory = [
+          ...stock.priceHistory.slice(-199), // cap at 200 entries
+          { timestamp: now, priceInCents: newPriceInCents },
+        ];
 
-      await ctx.db.patch(stock._id, {
-        priceInCents: newPriceInCents,
-        dailyChangeInCents: newDailyChangeInCents,
-        dailyChangePercent: newDailyChangePercent,
-        priceHistory: newPriceHistory,
-      });
-    }
+        await ctx.db.patch(stock._id, {
+          priceInCents: newPriceInCents,
+          dailyChangeInCents: newDailyChangeInCents,
+          dailyChangePercent: newDailyChangePercent,
+          priceHistory: newPriceHistory,
+        });
+      })
+    );
 
     // 6. Schedule market commentary for this event
     await ctx.scheduler.runAfter(

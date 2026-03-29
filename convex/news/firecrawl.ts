@@ -21,10 +21,8 @@ export const scrape = internalAction({
       { name: "Invest Fest", url: "https://investfest.com" },
     ];
 
-    let totalScraped = 0;
-
-    for (const pub of publications) {
-      try {
+    const results = await Promise.allSettled(
+      publications.map(async (pub) => {
         // Use Firecrawl REST API directly via fetch to avoid ESM/CJS issues in Convex
         const response = await fetch("https://api.firecrawl.dev/v1/scrape", {
           method: "POST",
@@ -39,13 +37,14 @@ export const scrape = internalAction({
           }),
         });
 
-        if (!response.ok) continue;
+        if (!response.ok) return 0;
         const data = await response.json() as { data?: { markdown?: string } };
 
         // Extract article titles from scraped markdown
         const content = data.data?.markdown ?? "";
         const titles = extractTitles(content);
 
+        let scraped = 0;
         for (const title of titles.slice(0, 5)) {
           // Generate URL hash for deduplication
           const urlHash = simpleHash(`${pub.url}/${title}`);
@@ -74,11 +73,18 @@ export const scrape = internalAction({
             url: pub.url,
           });
 
-          totalScraped++;
+          scraped++;
         }
-      } catch (error) {
-        // Skip failed publications, continue with others
-        console.error(`Failed to scrape ${pub.name}:`, error);
+        return scraped;
+      })
+    );
+
+    let totalScraped = 0;
+    for (const result of results) {
+      if (result.status === "fulfilled") {
+        totalScraped += result.value;
+      } else {
+        console.error("Failed to scrape publication:", result.reason);
       }
     }
 

@@ -8,14 +8,25 @@ import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
 import { BarChart3, Wallet, BookOpen, User, LogOut } from "lucide-react";
+import dynamic from "next/dynamic";
 import { BottomTabs } from "@/components/layout/bottom-tabs";
-import { Walkthrough } from "@/components/onboarding/walkthrough";
 import { GameStatusBar } from "@/components/game/status-bar";
-import { DebriefPrompt } from "@/components/game/debrief-prompt";
 import { SectorMarquee } from "@/components/market/sector-marquee";
 import { BLKIndex } from "@/components/market/blk-index";
-import { MarketAlert } from "@/components/market/market-alert";
 import { useSession } from "@/lib/hooks/use-session";
+
+const Walkthrough = dynamic(
+  () => import("@/components/onboarding/walkthrough").then((m) => m.Walkthrough),
+  { ssr: false }
+);
+const DebriefPrompt = dynamic(
+  () => import("@/components/game/debrief-prompt").then((m) => m.DebriefPrompt),
+  { ssr: false }
+);
+const MarketAlert = dynamic(
+  () => import("@/components/market/market-alert").then((m) => m.MarketAlert),
+  { ssr: false }
+);
 
 const NAV_ITEMS = [
   { href: "/market", label: "Market", icon: BarChart3 },

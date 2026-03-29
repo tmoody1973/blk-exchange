@@ -24,36 +24,27 @@ export const generateDebrief = internalAction({
       throw new Error(`Session ${args.sessionId} not found`);
     }
 
-    // Fetch player
-    const player: any = await ctx.runQuery(internal.claude.generateDebrief.getPlayerForDebrief, {
-      playerId: session.playerId,
-    });
+    // Fetch player, holdings, trades, and vault in parallel (all depend on session.playerId)
+    const [player, holdings, trades, vault]: [any, any[], any[], any[]] = await Promise.all([
+      ctx.runQuery(internal.claude.generateDebrief.getPlayerForDebrief, {
+        playerId: session.playerId,
+      }),
+      ctx.runQuery(internal.claude.generateDebrief.getHoldingsForDebrief, {
+        playerId: session.playerId,
+      }),
+      ctx.runQuery(internal.claude.generateDebrief.getTradesForDebrief, {
+        playerId: session.playerId,
+        startedAt: session.startedAt,
+        endedAt: session.endedAt ?? Date.now(),
+      }),
+      ctx.runQuery(internal.claude.generateDebrief.getVaultForDebrief, {
+        playerId: session.playerId,
+      }),
+    ]);
 
     if (!player) {
       throw new Error(`Player ${session.playerId} not found`);
     }
-
-    // Fetch current holdings
-    const holdings: any[] = await ctx.runQuery(
-      internal.claude.generateDebrief.getHoldingsForDebrief,
-      { playerId: session.playerId }
-    );
-
-    // Fetch trades during session window
-    const trades: any[] = await ctx.runQuery(
-      internal.claude.generateDebrief.getTradesForDebrief,
-      {
-        playerId: session.playerId,
-        startedAt: session.startedAt,
-        endedAt: session.endedAt ?? Date.now(),
-      }
-    );
-
-    // Fetch vault concepts
-    const vault: any[] = await ctx.runQuery(
-      internal.claude.generateDebrief.getVaultForDebrief,
-      { playerId: session.playerId }
-    );
 
     // ─── Build session context ─────────────────────────────────────────────
 

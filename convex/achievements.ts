@@ -47,6 +47,16 @@ export const checkAchievements = internalMutation({
       )
       .first();
 
+    // Pre-fetch all stocks for holdings in a single pass
+    const stockMap = new Map<string, any>();
+    {
+      const stocks = await Promise.all(holdings.map((h) => ctx.db.get(h.stockId)));
+      for (let i = 0; i < holdings.length; i++) {
+        const stock = stocks[i];
+        if (stock) stockMap.set(holdings[i].stockId, stock);
+      }
+    }
+
     // Already unlocked achievement IDs
     const existingUnlocks = await ctx.db
       .query("playerAchievements")
@@ -77,7 +87,7 @@ export const checkAchievements = internalMutation({
     {
       let totalValue = player.cashInCents;
       for (const h of holdings) {
-        const stock = await ctx.db.get(h.stockId);
+        const stock = stockMap.get(h.stockId);
         if (stock) totalValue += Math.round(h.shares * stock.priceInCents);
       }
       if (totalValue > 1_100_000) {
@@ -99,7 +109,7 @@ export const checkAchievements = internalMutation({
       );
 
       for (const h of holdings) {
-        const stock = await ctx.db.get(h.stockId);
+        const stock = stockMap.get(h.stockId);
         if (
           stock &&
           stock.dailyChangePercent <= -10 &&
@@ -146,7 +156,7 @@ export const checkAchievements = internalMutation({
     {
       const sectorCounts = new Map<string, number>();
       for (const h of holdings) {
-        const stock = await ctx.db.get(h.stockId);
+        const stock = stockMap.get(h.stockId);
         if (stock) {
           sectorCounts.set(stock.sector, (sectorCounts.get(stock.sector) ?? 0) + 1);
         }

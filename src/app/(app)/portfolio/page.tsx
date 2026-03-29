@@ -3,10 +3,17 @@
 import { useUser } from "@clerk/nextjs";
 import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
+import dynamic from "next/dynamic";
 import { PortfolioSummary } from "@/components/portfolio/portfolio-summary";
-import { AllocationChart } from "@/components/portfolio/allocation-chart";
 import { HoldingsTable } from "@/components/portfolio/holdings-table";
+
+const AllocationChart = dynamic(
+  () => import("@/components/portfolio/allocation-chart").then((m) => m.AllocationChart),
+  { ssr: false }
+);
 import { DiversificationScore } from "@/components/portfolio/diversification-score";
+import { PortfolioCoach } from "@/components/education/portfolio-coach";
+import { ProfessorMode } from "@/components/education/professor-mode";
 
 export default function PortfolioPage() {
   const { user, isLoaded } = useUser();
@@ -105,6 +112,15 @@ export default function PortfolioPage() {
         <HoldingsTable
           holdings={holdings}
           totalHoldingsValueInCents={holdingsValueInCents}
+        />
+
+        {/* AI Portfolio Coach */}
+        <PortfolioCoach playerId={player._id} />
+
+        {/* Professor Mode — general investing Q&A */}
+        <ProfessorMode
+          playerId={player._id}
+          placeholder="Ask about your portfolio… (e.g. &quot;How do I reduce my risk?&quot;)"
         />
       </div>
     </div>

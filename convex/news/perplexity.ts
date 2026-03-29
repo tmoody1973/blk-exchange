@@ -29,10 +29,8 @@ export const discover = internalAction({
       "Black fashion, beauty, and consumer brand launches and partnerships recently",
     ];
 
-    let totalDiscovered = 0;
-
-    for (const query of queries) {
-      try {
+    const results = await Promise.allSettled(
+      queries.map(async (query) => {
         const response = await client.chat.completions.create({
           model: "sonar",
           messages: [
@@ -49,7 +47,7 @@ export const discover = internalAction({
         });
 
         const content = response.choices[0]?.message?.content;
-        if (!content) continue;
+        if (!content) return 0;
 
         // Parse the JSON array from the response
         let articles: Array<{
@@ -62,14 +60,15 @@ export const discover = internalAction({
         try {
           // Try to extract JSON from the response (may be wrapped in markdown code blocks)
           const jsonMatch = content.match(/\[[\s\S]*\]/);
-          if (!jsonMatch) continue;
+          if (!jsonMatch) return 0;
           articles = JSON.parse(jsonMatch[0]);
         } catch {
-          continue;
+          return 0;
         }
 
-        if (!Array.isArray(articles)) continue;
+        if (!Array.isArray(articles)) return 0;
 
+        let discovered = 0;
         for (const article of articles.slice(0, 5)) {
           if (!article.title || !article.url) continue;
 
@@ -115,10 +114,18 @@ export const discover = internalAction({
             }
           );
 
-          totalDiscovered++;
+          discovered++;
         }
-      } catch (error) {
-        console.error(`Perplexity query failed: ${query}`, error);
+        return discovered;
+      })
+    );
+
+    let totalDiscovered = 0;
+    for (const result of results) {
+      if (result.status === "fulfilled") {
+        totalDiscovered += result.value;
+      } else {
+        console.error("Perplexity query failed:", result.reason);
       }
     }
 
