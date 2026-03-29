@@ -56,11 +56,36 @@ export const generate = internalAction({
       "DRAFT","ARENA","STATS","SCREEN","STAGE","GAME",
     ];
 
-    // Find stocks with 0 recent events (underserved)
+    // Sector rotation by time of day (ET = UTC-5)
+    const hourET = (new Date().getUTCHours() - 5 + 24) % 24;
+    const SECTOR_SCHEDULE: Record<string, string[]> = {
+      morning: ["finance", "realestate", "publishing"], // 6am-12pm
+      afternoon: ["sportswear", "fashion", "beauty"],   // 12pm-6pm
+      evening: ["media", "streaming", "music"],         // 6pm-12am
+      night: ["gaming", "entertainment", "sports"],     // 12am-6am
+    };
+    const timeSlot = hourET < 6 ? "night" : hourET < 12 ? "morning" : hourET < 18 ? "afternoon" : "evening";
+    const prioritySectors = SECTOR_SCHEDULE[timeSlot];
+
+    // Map symbols to sectors
+    const SYMBOL_SECTORS: Record<string, string> = {
+      LOUD:"media",SCROLL:"media",VERSE:"media",VIZN:"streaming",NETFLO:"streaming",LIVE:"streaming",
+      RYTHM:"music",BLOC:"music",CRATE:"music",PIXL:"gaming",MOBILE:"gaming",SQUAD:"gaming",
+      KICKS:"sportswear",FLEX:"sportswear",COURT:"sportswear",DRIP:"fashion",RARE:"fashion",THREAD:"fashion",
+      INK:"publishing",READS:"publishing",PRESS:"publishing",CROWN:"beauty",GLOW:"beauty",SHEEN:"beauty",
+      VAULT:"finance",STAX:"finance",GROW:"finance",BLOK:"realestate",BUILD:"realestate",HOOD:"realestate",
+      DRAFT:"sports",ARENA:"sports",STATS:"sports",SCREEN:"entertainment",STAGE:"entertainment",GAME:"entertainment",
+    };
+
+    // Find stocks with 0 recent events (underserved), preferring current time slot sectors
     const underserved = ALL_SYMBOLS.filter(s => !recentSymbolCounts.has(s));
-    // Pick 3-5 random underserved symbols to suggest
-    const shuffled = underserved.sort(() => Math.random() - 0.5);
-    const suggestedSymbols = shuffled.slice(0, 5);
+    const priorityUnderserved = underserved.filter(s => prioritySectors.includes(SYMBOL_SECTORS[s]));
+    const otherUnderserved = underserved.filter(s => !prioritySectors.includes(SYMBOL_SECTORS[s]));
+
+    // Combine: priority sectors first, then others, shuffled within each group
+    const shuffledPriority = priorityUnderserved.sort(() => Math.random() - 0.5);
+    const shuffledOther = otherUnderserved.sort(() => Math.random() - 0.5);
+    const suggestedSymbols = [...shuffledPriority, ...shuffledOther].slice(0, 5);
     // Also note which stocks had too many events (overserved)
     const overserved = [...recentSymbolCounts.entries()]
       .filter(([, count]) => count >= 3)

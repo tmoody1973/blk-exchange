@@ -44,17 +44,33 @@ export const fireNextEvent = internalMutation({
       return;
     }
 
-    // 2. Look for an unfired event already in the queue
-    const nextEvent = await ctx.db
+    // 2. Smart balance: alternate between real and fictional events
+    // Target: ~40% real, ~60% fictional (real news is more impactful when scarce)
+    const last10 = recentFired
+      .filter((e) => e.firedAt !== undefined)
+      .sort((a, b) => (b.firedAt ?? 0) - (a.firedAt ?? 0))
+      .slice(0, 10);
+    const recentRealCount = last10.filter((e) => e.sourceType === "real").length;
+    const preferReal = recentRealCount < 4; // if less than 40% real, prefer real next
+
+    // Look for queued events, preferring real or fictional based on balance
+    const allQueued = await ctx.db
       .query("events")
       .withIndex("by_fired", (q) => q.eq("fired", false))
       .order("asc")
-      .first();
+      .take(20);
 
-    console.log(`[fireNextEvent] Next event in queue: ${nextEvent ? nextEvent.headline.slice(0, 50) : "NONE"}`);
+    let nextEvent = null;
+    if (preferReal) {
+      // Try to find a real event first
+      nextEvent = allQueued.find((e) => e.sourceType === "real") ?? allQueued[0] ?? null;
+    } else {
+      // Try to find a fictional event first
+      nextEvent = allQueued.find((e) => e.sourceType === "fictional") ?? allQueued[0] ?? null;
+    }
 
     if (!nextEvent) {
-      // 3. Queue is empty — ask Groq to generate a new event
+      // 3. Queue is empty — generate a fictional event
       await ctx.scheduler.runAfter(
         0,
         internal.groq.generateFictionalEvent.generate,
