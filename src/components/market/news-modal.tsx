@@ -1,75 +1,111 @@
 "use client";
 
-import { useState } from "react";
 import { X, ExternalLink } from "lucide-react";
 
 interface NewsModalProps {
   url: string;
   source: string;
   headline: string;
+  commentary?: string;
+  affectedStocks?: Array<{ symbol: string; changePercent: number }>;
+  conceptTaught?: string;
   isOpen: boolean;
   onClose: () => void;
 }
 
-export function NewsModal({ url, source, headline, isOpen, onClose }: NewsModalProps) {
-  const [loading, setLoading] = useState(true);
-
+export function NewsModal({
+  url,
+  source,
+  headline,
+  commentary,
+  affectedStocks,
+  conceptTaught,
+  isOpen,
+  onClose,
+}: NewsModalProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-2 lg:p-8">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
       {/* Overlay */}
       <div className="absolute inset-0 bg-black/80" onClick={onClose} />
 
-      {/* Modal */}
+      {/* Card */}
       <div
-        className="relative z-10 w-full max-w-4xl h-[85vh] flex flex-col border-2 border-white bg-[#1a1a1a]"
+        className="relative z-10 w-full max-w-lg border-2 border-white bg-[#1a1a1a] p-6"
         style={{ boxShadow: "6px 6px 0px 0px #7F77DD" }}
       >
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b-2 border-white bg-[#0e0e0e]">
-          <div className="flex-1 min-w-0 mr-4">
-            <span className="font-mono text-xs text-[#7F77DD] uppercase tracking-widest">
-              {source}
-            </span>
-            <p className="font-mono text-sm text-white truncate mt-0.5">
-              {headline}
+        {/* Close */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-white/40 hover:text-white transition-colors"
+        >
+          <X size={18} />
+        </button>
+
+        {/* Source label */}
+        <span className="font-mono text-xs text-[#7F77DD] uppercase tracking-widest">
+          {source}
+        </span>
+
+        {/* Headline */}
+        <h2 className="font-mono font-bold text-white text-lg mt-2 mb-4 leading-snug">
+          {headline}
+        </h2>
+
+        {/* Affected stocks */}
+        {affectedStocks && affectedStocks.length > 0 && (
+          <div className="flex flex-wrap gap-2 mb-4">
+            {affectedStocks.map((s) => {
+              const isPos = s.changePercent >= 0;
+              const color = isPos ? "#22c55e" : "#ef4444";
+              const prefix = isPos ? "+" : "";
+              return (
+                <span
+                  key={s.symbol}
+                  className="font-mono text-xs px-2 py-0.5 border"
+                  style={{
+                    color,
+                    borderColor: color,
+                    backgroundColor: `${color}15`,
+                  }}
+                >
+                  {s.symbol} {prefix}{s.changePercent.toFixed(1)}%
+                </span>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Commentary */}
+        {commentary && (
+          <div className="border-l-2 border-[#7F77DD] pl-3 mb-4">
+            <p className="font-mono text-sm text-white/70 leading-relaxed">
+              {commentary}
             </p>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <a
-              href={url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 font-mono text-xs text-white/40 hover:text-white transition-colors px-2 py-1 border border-white/20 hover:border-white"
-            >
-              <ExternalLink size={12} />
-              Open
-            </a>
-            <button
-              onClick={onClose}
-              className="text-white/40 hover:text-white transition-colors p-1"
-            >
-              <X size={18} />
-            </button>
-          </div>
-        </div>
+        )}
 
-        {/* iframe */}
-        <div className="flex-1 relative">
-          {loading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-[#1a1a1a]">
-              <span className="font-mono text-sm text-white/30">Loading article...</span>
-            </div>
-          )}
-          <iframe
-            src={url}
-            className="w-full h-full border-0"
-            onLoad={() => setLoading(false)}
-            sandbox="allow-same-origin allow-scripts"
-            title={headline}
-          />
-        </div>
+        {/* Concept */}
+        {conceptTaught && (
+          <div className="mb-6">
+            <span className="inline-block font-mono text-xs px-2 py-0.5 border border-[#FDE047] text-[#FDE047] bg-[#FDE047]/10">
+              Concept: {conceptTaught}
+            </span>
+          </div>
+        )}
+
+        {/* CTA */}
+        <a
+          href={url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center justify-center gap-2 w-full font-mono text-sm font-bold py-3 border-2 border-white bg-[#7F77DD] text-white transition-transform hover:translate-x-[2px] hover:translate-y-[2px]"
+          style={{ boxShadow: "3px 3px 0px 0px #ffffff" }}
+        >
+          <ExternalLink size={14} />
+          Read Full Article
+        </a>
       </div>
     </div>
   );

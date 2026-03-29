@@ -15,6 +15,9 @@ export function NewsFeed() {
     url: string;
     source: string;
     headline: string;
+    commentary?: string;
+    affectedStocks?: Array<{ symbol: string; changePercent: number }>;
+    conceptTaught?: string;
   } | null>(null);
 
   const filteredEvents =
@@ -121,6 +124,9 @@ export function NewsFeed() {
                           url: event.sourceUrl!,
                           source: event.source,
                           headline: event.headline,
+                          commentary: event.commentary,
+                          affectedStocks: event.affectedStocks,
+                          conceptTaught: event.conceptTaught,
                         })
                     : undefined
                 }
@@ -137,6 +143,9 @@ export function NewsFeed() {
           url={modalData.url}
           source={modalData.source}
           headline={modalData.headline}
+          commentary={modalData.commentary}
+          affectedStocks={modalData.affectedStocks}
+          conceptTaught={modalData.conceptTaught}
           isOpen={true}
           onClose={() => setModalData(null)}
         />
