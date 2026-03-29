@@ -16,7 +16,7 @@ export default function BoardsPage() {
   const season = getSeasonInfo();
   const resetIn = formatCountdown(getMsUntilNextMonday());
 
-  if (!isLoaded) {
+  if (!isLoaded || player === undefined) {
     return (
       <div className="p-6">
         <div className="h-8 bg-white/10 w-1/3 mb-4" />

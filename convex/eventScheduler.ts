@@ -37,10 +37,8 @@ export const fireNextEvent = internalMutation({
       (e) => e.firedAt !== undefined && e.firedAt >= windowStart
     ).length;
 
-    console.log(`[fireNextEvent] recentFired: ${recentFired.length}, recentInWindow: ${recentCount}`);
 
     if (recentCount >= MAX_EVENTS_PER_WINDOW) {
-      console.log("[fireNextEvent] Rate limited, skipping");
       return;
     }
 
@@ -98,13 +96,16 @@ export const fireNextEvent = internalMutation({
         // Cap individual event impact to ±15%
         const clampedPercent = Math.max(-15, Math.min(15, affected.changePercent));
 
-        // Daily total cap: if stock has already moved ±30% today, skip further changes
+        // Daily circuit breaker: cap total daily movement to ±30%
         const currentDailyPct = stock.previousCloseInCents > 0
-          ? Math.abs((stock.priceInCents - stock.previousCloseInCents) / stock.previousCloseInCents * 100)
+          ? ((stock.priceInCents - stock.previousCloseInCents) / stock.previousCloseInCents * 100)
           : 0;
-        if (currentDailyPct >= 30) return; // circuit breaker — stock hit daily limit
+        const remainingRoom = 30 - Math.abs(currentDailyPct);
+        if (remainingRoom <= 0) return; // stock hit daily limit
 
-        const changeFraction = clampedPercent / 100;
+        // Clamp this event's impact to remaining room
+        const effectivePercent = Math.max(-remainingRoom, Math.min(remainingRoom, clampedPercent));
+        const changeFraction = effectivePercent / 100;
         const changeInCents = Math.round(stock.priceInCents * changeFraction);
         const newPriceInCents = Math.max(100, stock.priceInCents + changeInCents); // min $1.00
 

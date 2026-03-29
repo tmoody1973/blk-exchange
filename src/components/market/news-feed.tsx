@@ -133,6 +133,7 @@ export function NewsFeed() {
       {/* In-app article modal */}
       {modalData && (
         <NewsModal
+          key={modalData.url}
           url={modalData.url}
           source={modalData.source}
           headline={modalData.headline}

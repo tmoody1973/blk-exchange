@@ -40,7 +40,17 @@ function StatCard({
 
 export default function ProfilePage() {
   const { user, isLoaded } = useUser();
-  const [debriefSessionId, setDebriefSessionId] = useState<Id<"sessions"> | null>(null);
+  const [debriefSessionId, setDebriefSessionId] = useState<Id<"sessions"> | null>(() => {
+    // Auto-show debrief if redirected from the debrief prompt
+    if (typeof window !== "undefined") {
+      const pending = localStorage.getItem("blk-exchange-pending-debrief");
+      if (pending) {
+        localStorage.removeItem("blk-exchange-pending-debrief");
+        return pending as Id<"sessions">;
+      }
+    }
+    return null;
+  });
 
   const player = useQuery(
     api.players.getPlayer,

@@ -72,7 +72,10 @@ export function DebriefPrompt({
     try {
       await onRequestDebrief();
       setVisible(false);
-      // Navigate to profile page where the debrief is displayed
+      // Store session ID so profile page auto-shows the debrief
+      if (sessionId) {
+        localStorage.setItem("blk-exchange-pending-debrief", sessionId);
+      }
       router.push("/profile");
     } catch {
       setLoading(false);

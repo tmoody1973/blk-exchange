@@ -63,7 +63,6 @@ export const dailyReset = internalMutation({
         })
       )
     );
-    console.log(`[dailyReset] Reset ${stocks.length} stocks`);
   },
 });
 
