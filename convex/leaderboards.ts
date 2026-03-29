@@ -261,15 +261,17 @@ export const updatePlayerScores = internalMutation({
 const WEEKLY_BOARDS = ["portfolio-value", "diversification", "biggest-mover"] as const;
 
 export const weeklyReset = internalMutation({
+  args: {},
   handler: async (ctx) => {
     const newWeek = getCurrentWeek();
     let resetCount = 0;
 
+    // TODO: batch via scheduler if > 500 entries to avoid transaction limits
     for (const board of WEEKLY_BOARDS) {
       const entries = await ctx.db
         .query("leaderboards")
         .withIndex("by_board_period", (q) => q.eq("board", board))
-        .collect();
+        .take(500);
 
       for (const entry of entries) {
         await ctx.db.patch(entry._id, {
@@ -280,7 +282,5 @@ export const weeklyReset = internalMutation({
         resetCount++;
       }
     }
-
-    console.log(`[weeklyReset] Reset ${resetCount} entries to period ${newWeek}`);
   },
 });

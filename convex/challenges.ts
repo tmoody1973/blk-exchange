@@ -81,9 +81,11 @@ export const checkChallengeProgress = internalMutation({
       const weekStart = challenge.weekStart;
       const trades = await ctx.db
         .query("trades")
-        .withIndex("by_player", (q) => q.eq("playerId", args.playerId))
+        .withIndex("by_player_time", (q) =>
+          q.eq("playerId", args.playerId).gte("timestamp", weekStart)
+        )
         .collect();
-      currentValue = trades.filter((t) => t.timestamp >= weekStart).length;
+      currentValue = trades.length;
     } else if (challenge.targetType === "portfolio_value") {
       const player = await ctx.db.get(args.playerId);
       const holdings = await ctx.db
@@ -161,7 +163,7 @@ Make it achievable in a week but not trivially easy. Vary the type each week.`,
         title: result.title ?? "Weekly Challenge",
         description: result.description ?? "Complete this week's challenge!",
         conceptTaught: result.conceptTaught ?? "Trading",
-        targetType: result.targetType ?? "trades_count",
+        targetType: (["sectors_held", "trades_count", "portfolio_value"].includes(result.targetType) ? result.targetType : "trades_count") as "sectors_held" | "trades_count" | "portfolio_value",
         targetValue: result.targetValue ?? 5,
         weekStart: now,
         weekEnd,

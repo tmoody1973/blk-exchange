@@ -10,7 +10,7 @@ crons.interval(
   internal.eventScheduler.fireNextEvent
 );
 
-// News pipeline every 15 minutes — Firecrawl + Perplexity (single pipeline, no duplicates)
+// News pipeline every 15 minutes — Firecrawl + Perplexity
 crons.interval(
   "news pipeline",
   { minutes: 15 },
@@ -24,23 +24,23 @@ crons.interval(
   internal.groq.generateFictionalEvent.generate
 );
 
-// Daily price reset at midnight ET — prevents compounding inflation
-crons.daily(
+// Daily price reset at midnight ET (5:00 UTC)
+crons.cron(
   "daily price reset",
-  { hourUTC: 5, minuteUTC: 0 },
-  internal.market.dailyReset
+  "0 5 * * *",
+  internal.market.dailyReset,
+  {}
 );
 
-// Weekly leaderboard reset — Monday midnight ET
-// Resets: portfolio-value, diversification, biggest-mover
-// Preserves: knowledge-vault, blueprint-award
-crons.weekly(
+// Weekly leaderboard reset — Monday midnight ET (5:00 UTC Monday)
+crons.cron(
   "weekly leaderboard reset",
-  { dayOfWeek: "monday", hourUTC: 5, minuteUTC: 0 },
-  internal.leaderboards.weeklyReset
+  "0 5 * * 1",
+  internal.leaderboards.weeklyReset,
+  {}
 );
 
-// Generate weekly challenge — Monday 6am UTC (1am ET)
+// Generate weekly challenge — Monday 1am ET (6:00 UTC Monday)
 crons.cron(
   "generate weekly challenge",
   "0 6 * * 1",

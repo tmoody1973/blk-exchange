@@ -24,6 +24,13 @@ export function DebriefPrompt({
   const [visible, setVisible] = useState(false);
   const hasShownRef = useRef(false);
 
+  // Periodic timer so the 45-min check works even if no events fire
+  const [tick, setTick] = useState(0);
+  useEffect(() => {
+    const interval = setInterval(() => setTick((t) => t + 1), 60_000);
+    return () => clearInterval(interval);
+  }, []);
+
   useEffect(() => {
     if (!sessionStartedAt || !sessionId) return;
     if (hasShownRef.current) return;
@@ -42,7 +49,8 @@ export function DebriefPrompt({
 
     hasShownRef.current = true;
     setVisible(true);
-  }, [sessionStartedAt, eventsExperienced, sessionId]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sessionStartedAt, eventsExperienced, sessionId, tick]);
 
   if (!visible) return null;
 
