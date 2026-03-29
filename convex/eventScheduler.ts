@@ -81,6 +81,13 @@ export const fireNextEvent = internalMutation({
 
         // Cap individual event impact to ±15%
         const clampedPercent = Math.max(-15, Math.min(15, affected.changePercent));
+
+        // Daily total cap: if stock has already moved ±30% today, skip further changes
+        const currentDailyPct = stock.previousCloseInCents > 0
+          ? Math.abs((stock.priceInCents - stock.previousCloseInCents) / stock.previousCloseInCents * 100)
+          : 0;
+        if (currentDailyPct >= 30) return; // circuit breaker — stock hit daily limit
+
         const changeFraction = clampedPercent / 100;
         const changeInCents = Math.round(stock.priceInCents * changeFraction);
         const newPriceInCents = Math.max(100, stock.priceInCents + changeInCents); // min $1.00

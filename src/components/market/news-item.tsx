@@ -19,6 +19,7 @@ type NewsItemProps = {
   sourceUrl?: string;
   affectedStocks: AffectedStock[];
   conceptTaught?: string;
+  commentary?: string;
   timestamp: number;
 };
 
@@ -29,6 +30,7 @@ export function NewsItem({
   sourceUrl,
   affectedStocks,
   conceptTaught,
+  commentary,
   timestamp,
 }: NewsItemProps) {
   const sourceColor = sourceType === "real" ? "#ffffff" : "#7F77DD";
@@ -92,6 +94,13 @@ export function NewsItem({
             );
           })}
         </div>
+      )}
+
+      {/* Commentary — plain-language explanation of why stocks moved */}
+      {commentary && (
+        <p className="font-mono text-xs text-white/50 leading-relaxed mb-2 border-l-2 border-[#7F77DD] pl-3">
+          {commentary}
+        </p>
       )}
 
       {/* Concept taught */}

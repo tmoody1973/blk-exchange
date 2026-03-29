@@ -50,6 +50,7 @@ export function NewsFeed() {
                 sourceUrl={event.sourceUrl}
                 affectedStocks={event.affectedStocks}
                 conceptTaught={event.conceptTaught}
+                commentary={event.commentary}
                 timestamp={event.timestamp}
               />
             ))}
