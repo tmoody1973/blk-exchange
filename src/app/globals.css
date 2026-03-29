@@ -265,3 +265,361 @@
   0%, 100% { opacity: 1; }
   50% { opacity: 0.3; }
 }
+
+/* ─── iOS / PWA Global Fixes ─── */
+
+html, body {
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+body {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+  min-height: 100dvh;
+  min-height: -webkit-fill-available;
+}
+
+html {
+  height: 100%;
+}
+
+.game-area {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.fixed-header,
+.fixed-footer {
+  position: fixed;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+input[type="number"],
+input[type="text"],
+select {
+  font-size: 16px !important;
+}
+
+.scrollable {
+  -webkit-overflow-scrolling: touch;
+  overflow-y: auto;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.app-header {
+  padding-top: calc(env(safe-area-inset-top) + 12px);
+}
+
+/* ─── Animated Splash Screen ─── */
+
+.splash-container {
+  position: fixed;
+  inset: 0;
+  background: #0A0A0A;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Courier New', monospace;
+  color: #FFFFFF;
+  transition: clip-path 0.6s cubic-bezier(0.77, 0, 0.175, 1);
+}
+
+.splash-scanlines {
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(127, 119, 221, 0.03) 2px,
+    rgba(127, 119, 221, 0.03) 4px
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+.splash-corners {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+.splash-corners[data-visible="true"] { opacity: 1; }
+
+.corner {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+}
+.corner-tl {
+  top: 0; left: 0;
+  border-top: 2px solid #FFFFFF;
+  border-left: 2px solid #FFFFFF;
+  animation: cornerFade 0.4s ease forwards;
+}
+.corner-tr {
+  top: 0; right: 0;
+  border-top: 2px solid #FFFFFF;
+  border-right: 2px solid #FFFFFF;
+  animation: cornerFade 0.4s ease 0.1s forwards;
+}
+.corner-bl {
+  bottom: 0; left: 0;
+  border-bottom: 2px solid #FFFFFF;
+  border-left: 2px solid #FFFFFF;
+  animation: cornerFade 0.4s ease 0.2s forwards;
+}
+.corner-br {
+  bottom: 0; right: 0;
+  border-bottom: 2px solid #FFFFFF;
+  border-right: 2px solid #FFFFFF;
+  animation: cornerFade 0.4s ease 0.3s forwards;
+}
+
+@keyframes cornerFade {
+  from { opacity: 0; transform: scale(0.8); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.splash-logo {
+  display: flex;
+  align-items: baseline;
+  margin-bottom: 8px;
+  position: relative;
+  z-index: 2;
+}
+
+.splash-letter {
+  font-size: 64px;
+  font-weight: 900;
+  color: #FFFFFF;
+  letter-spacing: -2px;
+  transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.splash-x {
+  font-size: 64px;
+  font-weight: 900;
+  color: #7F77DD;
+  letter-spacing: -2px;
+  transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  text-shadow: 0 0 20px rgba(127, 119, 221, 0.5),
+               0 0 40px rgba(127, 119, 221, 0.25);
+}
+
+.splash-subtitle {
+  display: flex;
+  margin-bottom: 32px;
+  position: relative;
+  z-index: 2;
+  height: 16px;
+}
+.splash-subtitle span {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 8px;
+  color: #7F77DD;
+  transition: opacity 0.1s ease;
+}
+
+.splash-tagline {
+  font-size: 12px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  margin-bottom: 48px;
+  transition: opacity 0.8s ease;
+  position: relative;
+  z-index: 2;
+}
+
+.splash-ticker {
+  position: absolute;
+  bottom: 120px;
+  left: 0;
+  right: 0;
+  overflow: hidden;
+  height: 24px;
+  transition: opacity 0.5s ease;
+  border-top: 1px solid #2A2A2A;
+  border-bottom: 1px solid #2A2A2A;
+}
+
+.splash-ticker-track {
+  display: flex;
+  animation: tickerScroll 12s linear infinite;
+  white-space: nowrap;
+  padding-top: 3px;
+}
+
+.ticker-content {
+  display: flex;
+  gap: 32px;
+  padding-right: 32px;
+}
+
+.ticker-item {
+  font-size: 11px;
+  display: inline-flex;
+  gap: 6px;
+}
+.ticker-sym { color: #FFFFFF; font-weight: 700; }
+.ticker-price { color: #FFFFFF; opacity: 0.5; }
+.ticker-chg-up { color: #4ADE80; font-weight: 700; }
+.ticker-chg-down { color: #EF4444; font-weight: 700; }
+
+@keyframes tickerScroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.splash-status {
+  position: absolute;
+  bottom: 60px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: opacity 0.4s ease;
+}
+
+.splash-status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #4ADE80;
+  animation: statusPulse 1s ease infinite;
+}
+
+.splash-status span {
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  opacity: 0.4;
+}
+
+@keyframes statusPulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%      { opacity: 0.4; transform: scale(0.8); }
+}
+
+.splash-version {
+  position: absolute;
+  bottom: 24px;
+  font-size: 9px;
+  letter-spacing: 2px;
+  opacity: 0.15;
+}
+
+@media (max-width: 640px) {
+  .splash-letter, .splash-x {
+    font-size: 48px;
+  }
+  .splash-corners {
+    width: 160px;
+    height: 160px;
+  }
+  .splash-ticker {
+    bottom: 100px;
+  }
+  .splash-status {
+    bottom: 50px;
+  }
+}
+
+/* ─── Install Prompt ─── */
+
+.install-prompt {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 8000;
+  padding: 0 16px 16px;
+  animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.install-prompt-inner {
+  background: #1A1A1A;
+  border: 2px solid #FFFFFF;
+  box-shadow: 4px 4px 0px #7F77DD;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-family: 'Courier New', monospace;
+  position: relative;
+}
+
+.install-prompt-close {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  background: none;
+  border: none;
+  color: #E5E5E5;
+  font-size: 14px;
+  cursor: pointer;
+  opacity: 0.4;
+  padding: 4px;
+}
+
+.install-prompt-icon {
+  font-weight: 900;
+  font-size: 18px;
+  color: #FFFFFF;
+  white-space: nowrap;
+  font-family: 'Courier New', monospace;
+}
+
+.install-prompt-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+}
+.install-prompt-text strong {
+  font-size: 13px;
+  color: #FFFFFF;
+}
+.install-prompt-text span {
+  font-size: 11px;
+  color: #E5E5E5;
+  opacity: 0.5;
+}
+
+.install-prompt-btn {
+  padding: 8px 16px;
+  background: #7F77DD;
+  color: #FFFFFF;
+  font-family: 'Courier New', monospace;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  cursor: pointer;
+  border: 2px solid #FFFFFF;
+  box-shadow: 2px 2px 0px #FFFFFF;
+  white-space: nowrap;
+}
+
+.install-prompt-ios {
+  font-size: 11px;
+  color: #E5E5E5;
+  opacity: 0.7;
+  text-align: right;
+}
+
+.install-share-icon {
+  display: inline-block;
+  font-size: 16px;
+  vertical-align: middle;
+}

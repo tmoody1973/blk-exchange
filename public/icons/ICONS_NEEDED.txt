@@ -1,0 +1,29 @@
+ICONS NEEDED FOR PWA
+====================
+
+Generate these PNG files before launch using pwa-asset-generator or Figma export:
+
+  icon-192.png          — 192x192  (standard any-purpose)
+  icon-512.png          — 512x512  (standard any-purpose)
+  icon-maskable-192.png — 192x192  (maskable — safe zone is center 80%)
+  icon-maskable-512.png — 512x512  (maskable — safe zone is center 80%)
+  apple-touch-icon-180.png — 180x180 (iOS home screen icon)
+
+Design spec:
+  Background: #0A0A0A (solid black)
+  Logo: "BLKX" in Courier New Bold, white for BLK, #7F77DD purple for X
+  Safe zone for maskable: inner 80% circle only — no content in outer 20%
+
+Generate command:
+  npx pwa-asset-generator ./public/icons/splash-source.png ./public/icons \
+    --background "#0A0A0A" \
+    --padding "20%" \
+    --manifest ./public/manifest.json
+
+SPLASH IMAGES NEEDED (in /public/splash/):
+  apple-splash-1320x2868.png  — iPhone 16 Pro Max
+  apple-splash-1206x2622.png  — iPhone 16 Pro
+  apple-splash-1170x2532.png  — iPhone 15/14
+  apple-splash-750x1334.png   — iPhone SE
+
+  All splash images: solid #0A0A0A background with centered BLKX logo.
