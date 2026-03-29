@@ -34,15 +34,13 @@ export const advanceOnboarding = mutation({
       if (newState === "first_trade_complete") {
         updates.firstTradeTimestamp = Date.now();
       }
-      if (newState !== "new_player") {
-        updates.eventsCompleted = (existing.eventsCompleted || 0) + 1;
-      }
+      updates.eventsCompleted = (existing.eventsCompleted || 0) + 1;
       await ctx.db.patch(existing._id, updates);
     } else {
       await ctx.db.insert("onboardingStatus", {
         playerId,
         state: newState,
-        eventsCompleted: newState === "new_player" ? 0 : 1,
+        eventsCompleted: 1,
         seedEventId: "onboarding-001",
       });
     }
