@@ -13,6 +13,7 @@ export function PwaInstallPrompt() {
   const [dismissed, setDismissed] = useState(false);
   const [isIos, setIsIos] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     // Check if already installed as PWA
@@ -20,6 +21,11 @@ export function PwaInstallPrompt() {
       window.matchMedia("(display-mode: standalone)").matches ||
       (navigator as unknown as { standalone?: boolean }).standalone === true;
     setIsStandalone(standalone);
+
+    // Only show on mobile/tablet devices
+    const mobile = window.matchMedia("(max-width: 768px)").matches ||
+      /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    setIsMobile(mobile);
 
     // Check if previously dismissed
     if (sessionStorage.getItem("blkx-install-dismissed")) {
@@ -55,8 +61,8 @@ export function PwaInstallPrompt() {
     sessionStorage.setItem("blkx-install-dismissed", "true");
   }, []);
 
-  // Don't show if already installed, dismissed, or no prompt available (and not iOS)
-  if (isStandalone || dismissed) return null;
+  // Don't show on desktop, if already installed, dismissed, or no prompt available
+  if (!isMobile || isStandalone || dismissed) return null;
   if (!deferredPrompt && !isIos) return null;
 
   return (

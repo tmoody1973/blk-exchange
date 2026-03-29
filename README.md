@@ -1,82 +1,163 @@
-# BLK Exchange
+<p align="center">
+  <img src="public/icons/icon-512.png" alt="BLK Exchange Logo" width="120" />
+</p>
 
-> A real-time cultural stock market simulator teaching financial literacy through gameplay.
+<h1 align="center">BLK Exchange</h1>
 
-**Hackenomics 2026 Submission** | Deadline: March 30, 2026
+<p align="center">
+  <strong>Learn to Invest. Trade the Culture.</strong><br/>
+  A culturally grounded stock market simulator for financial literacy.
+</p>
 
-## Overview
+<p align="center">
+  <a href="https://blk-exchange.vercel.app">Live App</a> &middot;
+  <a href="https://blk-exchange.vercel.app/judges">Judges View</a> &middot;
+  <a href="docs/blk-exchange-research-paper.md">Research Paper</a>
+</p>
 
-BLK Exchange is a stock market simulator where players trade 36 fictional Black-economy companies whose prices are driven by real cultural news and AI-generated events. Claude and Groq teach 23 investing concepts through gameplay -- not lectures.
+<p align="center">
+  <img src="docs/assets/landing-screenshot.png" alt="BLK Exchange Landing Page" width="800" />
+</p>
 
-Players start with $10,000 in virtual capital, trade across 12 sectors, and unlock financial literacy concepts by demonstrating them through portfolio behavior. Every event teaches. Every trade is a decision. Every session ends with a personalized AI debrief.
+---
+
+## The Problem
+
+The financial literacy gap between Black and White Americans is not a matter of individual effort. It is structurally reinforced and persistent. Black Americans answer an average of 37% of financial literacy questions correctly, compared to 55% for White Americans. Only 18% of Black households own stocks, bonds, and mutual funds, compared to 35% of White households. For every $100 in wealth held by White families, Black families hold $15.
+
+And here's what makes it worse: education alone doesn't close the gap. Even among highly educated individuals, Black Americans exhibit lower financial literacy than similarly educated White Americans, because the structural conditions surrounding that degree --- family wealth, intergenerational knowledge transfer, labor market access --- are fundamentally different.
+
+The existing tools weren't built for this audience. Generic stock simulators trade Apple and Tesla with news from Bloomberg and CNBC. They assume a baseline of cultural familiarity with the stock market that Black Americans disproportionately lack. They teach trading mechanics without teaching financial reasoning. The learning is incidental and unstructured, dependent on preexisting curiosity and knowledge.
+
+**BLK Exchange takes a different approach.**
+
+## What BLK Exchange Does
+
+BLK Exchange is a financial literacy game disguised as a stock trading app. Players start with $10,000 in virtual cash and trade 36 fictional companies that represent the sectors shaping Black cultural and economic life: a podcast network (LOUD), a natural hair care brand (CROWN), a streetwear label (DRIP), a Black-owned streaming platform (VIZN), a community bank (VAULT), an athletic footwear company (KICKS).
+
+Real cultural news from Black media publications drives the market. When a headline drops about a streaming deal or a sneaker collaboration, prices move. An AI coach explains the investing concept behind each move --- diversification, sector correlation, risk tolerance, earnings reports --- not as a lecture, but as context for the decision you're already making.
+
+The hidden curriculum: by the time a player has traded through a few sessions, they've learned 23 investing concepts across four tiers, from "Supply & Demand" to "Generational Wealth." They learned them because they experienced them, not because someone assigned them.
+
+## Why It Works: Three Research Pillars
+
+BLK Exchange is built on the convergence of three evidence-backed principles:
+
+### 1. Game-Based Learning
+
+A 2024 randomized controlled trial of 2,220 students across four countries found that game-based financial education improved literacy by 0.313 standard deviations. A University of San Francisco study found that game-based interventions didn't just teach facts --- they changed how participants felt about their ability to navigate financial systems (Agency Index increase of 0.4985, p < 0.01). Games work. Especially for financial literacy.
+
+### 2. Culturally Responsive Education
+
+Research from NYU's Metropolitan Center for Research on Equity found that students who received culturally relevant teaching reported more positive academic outcomes and positive racial identity development. When financial concepts are embedded in culturally resonant narratives, comprehension improves because the learner has an existing schema to attach new knowledge to. A fictional Black media company is more culturally resonant than Apple Inc. for the target audience --- even though Apple is the real company.
+
+### 3. Structured Curriculum Through Play
+
+Unlike other simulators where learning is incidental, BLK Exchange embeds a 23-concept curriculum directly into gameplay through a "curriculum debt queue." The system tracks which concepts each player has encountered and biases event generation toward the gaps. Every player, over the course of a season, is guaranteed to encounter all 23 concepts. No lectures. No forced progression. Just gameplay that teaches.
+
+> For the full research paper with 28 peer-reviewed citations, see [docs/blk-exchange-research-paper.md](docs/blk-exchange-research-paper.md).
+
+---
+
+## Features
+
+### The Market
+- **36 fictional companies** across 12 sectors of the Black economy
+- **Real-time prices** via Convex subscriptions --- all players see the same market
+- **Scrolling sector marquee** with live price changes
+- **Yahoo Finance-style layout** with neobrutalism dark mode styling
+
+### Trading
+- **Market orders** by dollar amount (fractional shares supported)
+- **25% dynamic position limit** prevents over-concentration
+- **Atomic execution** --- trades are all-or-nothing Convex mutations
+- **$10,000 starting capital** with seasonal resets
+
+### Dual AI System
+- **Groq** (llama-3.3-70b at 758 tok/sec) --- generates fictional market events, classifies real news articles to tickers and concepts, produces real-time commentary
+- **Claude** (Sonnet 4.6) --- grades portfolio diversification, answers investing questions using your actual holdings, generates personalized session debriefs
+- **ElevenLabs** (Flash v2.5) --- reads market alerts aloud the moment they drop
+
+### Knowledge Vault
+- **23 financial literacy concepts** across 4 tiers: Foundation, Intermediate, Advanced, Economics
+- **Hybrid unlocking** --- ~15 behavior-driven (your portfolio proves the concept) + ~8 event-driven
+- **Curriculum debt queue** --- AI generates events targeting your unlearned concepts
+- **Shareable concept cards** with OG image generation
+
+### News Pipeline
+- **Firecrawl** scrapes curated Black media publications every 15 minutes
+- **Perplexity** researches broader cultural and economic trends
+- **Groq** generates fictional company lifecycle events 3x daily
+- All articles are classified to map to specific tickers and investing concepts
+
+### Progressive Web App
+- **Installable** on mobile home screens (Android + iOS)
+- **Animated splash screen** with 8-phase timeline on launch
+- **Service worker** with network-first navigation, cache-first static assets
+- **Offline fallback** when connectivity is lost
+
+### Competition
+- **5 leaderboards**: Portfolio Value, Knowledge Vault, Diversification Score, Biggest Mover, The Blueprint Award
+- **8-week seasons** with themed weeks and championship
+- **Daily streaks** with capital bonuses
+
+---
+
+## The 36 Tickers
+
+| Sector | Tickers | Examples |
+|--------|---------|----------|
+| Media & Content | LOUD, SCROLL, VERSE | Podcast network, digital media, literary platform |
+| Streaming | VIZN, NETFLO, LIVE | Black-owned streaming, corporate streaming, live events |
+| Music | RYTHM, BLOC, CRATE | Music distribution, indie label, music discovery |
+| Gaming | PIXL, MOBILE, SQUAD | Game studio, mobile gaming, esports org |
+| Sportswear | KICKS, FLEX, COURT | Athletic footwear, apparel, equipment |
+| Fashion | DRIP, RARE, THREAD | Streetwear, limited drops, creator merch |
+| Publishing | INK, READS, PRESS | Book publishing, digital reading, indie press |
+| Beauty | CROWN, GLOW, SHEEN | Hair care, skincare, salon chain |
+| Finance | VAULT, STAX, GROW | Community bank, fintech, CDFI lending |
+| Real Estate | BLOK, BUILD, HOOD | REIT, construction, affordable housing |
+| Sports | DRAFT, ARENA, STATS | Athlete agency, sports venues, analytics |
+| Entertainment | SCREEN, STAGE, GAME | Film studio, live events, gaming |
+
+---
 
 ## Tech Stack
 
 | Layer | Technology |
-|-------|------------|
-| Framework | Next.js 14 (App Router) + TypeScript |
-| Backend / DB / Realtime | Convex |
-| Auth | Clerk |
-| Deep AI Reasoning | Claude Sonnet 4.6 (coaching, professor mode, debrief) |
-| Fast Structured AI | Groq llama-3.3-70b-versatile (event generation, classification) |
-| Fast Commentary | Groq llama-3.1-8b-instant (2-sentence explanations) |
-| TTS | ElevenLabs (Market Alerts only, eleven_flash_v2_5) |
-| News Scraping | Firecrawl (12 publications every 15 min) |
-| Semantic Discovery | Exa (neural search every 30 min) |
-| Search Fallback | Tavily (when other layers yield <3 articles) |
-| Styling | Tailwind CSS + neobrutalism.dev (shadcn/ui overrides) |
-| Charts | Recharts |
-| Deployment | Vercel + Convex Cloud |
+|-------|-----------|
+| Frontend | Next.js 14 (App Router), React 18, Tailwind CSS, shadcn/ui |
+| Backend | [Convex](https://convex.dev) --- real-time database + serverless functions |
+| Auth | [Clerk](https://clerk.com) --- authentication + user management |
+| AI (Deep) | Claude Sonnet 4.6 --- coaching, debriefs, Q&A |
+| AI (Fast) | Groq llama-3.3-70b --- events, classification, commentary |
+| TTS | ElevenLabs Flash v2.5 --- voice narration |
+| News | Firecrawl + Perplexity |
+| Hosting | Vercel + Convex Cloud |
+| Design | Neobrutalism dark theme (`Courier New`, hard corners, #7F77DD purple) |
+
+---
 
 ## Quick Start
 
 ### Prerequisites
 
-- Node.js 20+
-- pnpm 9+
-- Convex account
-- Clerk account
+- Node.js 20+, pnpm 9+
+- [Convex](https://convex.dev) account (free tier)
+- [Clerk](https://clerk.com) account (free tier)
 
-### Installation
+### Install & Run
 
 ```bash
 git clone https://github.com/tmoody1973/blk-exchange.git
 cd blk-exchange
 pnpm install
-```
 
-### Environment Variables
+# Set environment variables
+cp .env.example .env.local
+# Fill in NEXT_PUBLIC_CONVEX_URL, CLERK keys, CONVEX_DEPLOYMENT
 
-Copy `.env.local` and fill in your keys:
-
-| Variable | Description | Required | Phase |
-|----------|-------------|----------|-------|
-| `NEXT_PUBLIC_CONVEX_URL` | Convex deployment URL | Yes | 1 |
-| `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk publishable key | Yes | 1 |
-| `CLERK_SECRET_KEY` | Clerk secret key | Yes | 1 |
-| `CLERK_JWT_ISSUER_DOMAIN` | Clerk JWT issuer for Convex | Yes | 1 |
-| `ANTHROPIC_API_KEY` | Claude API key (Convex env) | Yes | 2 |
-| `GROQ_API_KEY` | Groq API key (Convex env) | Yes | 2 |
-| `ELEVENLABS_API_KEY` | ElevenLabs API key | Yes | 2 |
-| `FIRECRAWL_API_KEY` | Firecrawl API key (Convex env) | No | 3 |
-| `EXA_API_KEY` | Exa API key (Convex env) | No | 3 |
-| `TAVILY_API_KEY` | Tavily API key (Convex env) | No | 3 |
-
-AI keys (Anthropic, Groq, ElevenLabs, Firecrawl, Exa, Tavily) must be set as **Convex environment variables**, not in `.env.local`:
-
-```bash
-npx convex env set GROQ_API_KEY <your-key>
-npx convex env set ANTHROPIC_API_KEY <your-key>
-npx convex env set ELEVENLABS_API_KEY <your-key>
-```
-
-### Development
-
-```bash
-# Start Convex dev server (in one terminal)
-npx convex dev
-
-# Start Next.js dev server (in another terminal)
+# Start development
 pnpm dev
 ```
 
@@ -86,185 +167,70 @@ pnpm dev
 npx convex run seed:seedDatabase
 ```
 
-This inserts all 36 tickers and 36 company states.
+This inserts all 36 tickers and company states.
+
+### AI Keys
+
+Set AI service keys as Convex environment variables:
+
+```bash
+npx convex env set GROQ_API_KEY <key>
+npx convex env set ANTHROPIC_API_KEY <key>
+npx convex env set ELEVENLABS_API_KEY <key>
+npx convex env set FIRECRAWL_API_KEY <key>
+```
+
+### Deploy
+
+```bash
+npx convex deploy          # Backend
+npx vercel --prod           # Frontend
+```
+
+---
 
 ## Project Structure
 
 ```
 blk-exchange/
-├── convex/                    # Convex backend
-│   ├── schema.ts              # Database schema (14 tables)
-│   ├── market.ts              # Stock queries
-│   ├── players.ts             # Player management
+├── convex/                    # Backend (Convex)
+│   ├── schema.ts              # 14-table database schema
+│   ├── market.ts              # Price engine
 │   ├── trades.ts              # Atomic trade execution
-│   ├── holdings.ts            # Holdings with P&L
-│   ├── events.ts              # Event queries
 │   ├── vault.ts               # Knowledge Vault + concept unlocking
-│   ├── sessions.ts            # Session lifecycle
-│   ├── leaderboards.ts        # 5 leaderboards
+│   ├── eventScheduler.ts      # Event firing logic
 │   ├── curriculumDebt.ts      # Curriculum gap tracking
-│   ├── eventScheduler.ts      # Max 2 events per 10-min window
-│   ├── crons.ts               # Scheduled jobs
-│   ├── groq/                  # Groq AI actions
-│   │   ├── generateFictionalEvent.ts
-│   │   ├── marketCommentary.ts
-│   │   └── classifyArticle.ts
+│   ├── crons.ts               # Scheduled jobs (events, news, resets)
 │   ├── claude/                # Claude AI actions
-│   │   ├── gradePortfolio.ts
-│   │   ├── answerQuestion.ts
-│   │   └── generateDebrief.ts
-│   └── news/                  # News pipeline
-│       ├── firecrawl.ts       # Article scraping
-│       ├── perplexity.ts      # Research layer
-│       └── scheduler.ts       # Pipeline orchestration
+│   ├── groq/                  # Groq AI actions
+│   └── news/                  # Firecrawl + Perplexity pipeline
 ├── src/
-│   ├── app/
-│   │   ├── (landing)/         # Public pages
-│   │   │   ├── page.tsx       # Landing page (7 sections)
-│   │   │   └── judges/        # Hackathon pitch page
-│   │   ├── (app)/             # Authenticated app
-│   │   │   ├── market/        # Dashboard + ticker detail
-│   │   │   ├── portfolio/     # Portfolio view
-│   │   │   ├── vault/         # Knowledge Vault
-│   │   │   └── profile/       # Profile + leaderboards
-│   │   ├── offline/           # PWA offline fallback
-│   │   └── api/
-│   │       ├── tts/           # ElevenLabs TTS endpoint
-│   │       └── og/            # OG image generation
-│   ├── components/
-│   │   ├── market/            # Ticker table, sparklines, news feed, alerts
-│   │   ├── trade/             # Trade modal + preview
-│   │   ├── portfolio/         # Summary, holdings, donut chart
-│   │   ├── vault/             # Concept cards, progress bars
-│   │   ├── education/         # Coach, professor mode, debrief
-│   │   ├── leaderboard/       # Board tables + tabs
-│   │   ├── landing/           # Marketing page sections
-│   │   ├── judges/            # Pitch page components
-│   │   ├── splash/            # Animated PWA splash screen
-│   │   ├── onboarding/        # New player onboarding flow
-│   │   ├── glossary/          # Financial glossary UI
-│   │   ├── game/              # Achievements, status bar, debrief
-│   │   ├── layout/            # Bottom tabs, sidebar, nav
-│   │   └── ui/                # neobrutalism shadcn components
-├── public/
-│   ├── manifest.json          # PWA manifest
-│   ├── sw.js                  # Service worker
-│   ├── icons/                 # PWA icons (192, 512, maskable)
-│   └── splash/                # iOS splash screens
-└── docs/
-    ├── BLK_Exchange_PRD_v3.md
-    ├── BLK_Exchange_Game_Mechanics.md
-    ├── BLK_Exchange_Claude_Code_Brief_v3.md
-    └── plans/                 # Design + implementation plans
+│   ├── app/                   # Next.js App Router
+│   │   ├── (app)/             # Authenticated: market, portfolio, vault, profile
+│   │   ├── (landing)/         # Public: landing page, judges view
+│   │   └── api/               # OG images, TTS endpoint
+│   ├── components/            # UI organized by feature domain
+│   └── middleware.ts          # Clerk auth + route protection
+├── public/                    # PWA manifest, service worker, icons, splash
+└── docs/                      # PRD, game mechanics, research paper, plans
 ```
-
-## Features
-
-### The Market
-- **36 fictional companies** across 12 sectors (Media, Streaming, Music, Gaming, Sportswear, Fashion, Publishing, Beauty, Finance, Real Estate, Sports, Entertainment)
-- **Real-time prices** via Convex subscriptions -- all players see the same prices
-- **Sector marquee** scrolling ticker tape at the top of every screen
-- **Yahoo Finance-style layout** with neobrutalism dark mode styling
-
-### Trading
-- **Market orders** by dollar amount (fractional shares)
-- **25% dynamic position limit** prevents over-concentration
-- **Atomic execution** -- trades are all-or-nothing Convex mutations
-- **$10,000 starting capital** with weekly resets
-
-### AI-Powered Education
-- **Groq event generation** -- fictional business news from 36 company states at 758 tok/sec
-- **3-layer real news pipeline** -- Firecrawl + Exa + Tavily scraping Black cultural publications
-- **Claude portfolio coaching** -- grades diversification, recommends specific tickers
-- **Claude professor mode** -- answers any question using your actual holdings as examples
-- **Claude session debrief** -- personalized 400-word narrative at session end
-- **ElevenLabs TTS** -- Market Alerts read aloud automatically
-
-### Knowledge Vault
-- **23 financial literacy concepts** across 4 tiers (Foundation, Intermediate, Advanced, Economics)
-- **Hybrid unlocking** -- ~15 behavior-driven (portfolio state proves the concept) + ~8 event-driven
-- **Curriculum debt queue** -- AI generates events targeting unlearned concepts
-- **Shareable cards** -- share your learning on social media with OG images
-
-### Progressive Web App
-- **Installable** on mobile home screens (Android + iOS)
-- **Animated splash screen** with 8-phase timeline on launch
-- **Service worker** with network-first navigation, cache-first static assets
-- **Offline fallback** page when connectivity is lost
-- **Install prompt** with native beforeinstallprompt + iOS Safari instructions
-
-### Competition
-- **5 leaderboards**: Portfolio Value, Knowledge Vault, Diversification Score, Biggest Mover, The Blueprint Award
-- **8-week seasons** with themed weeks and championship
-- **Daily streaks** with capital bonuses
-
-## The 36 Tickers
-
-| Sector | Tickers |
-|--------|---------|
-| Media & Content | LOUD, SCROLL, VERSE |
-| Streaming | VIZN, NETFLO, LIVE |
-| Music | RYTHM, BLOC, CRATE |
-| Gaming | PIXL, MOBILE, SQUAD |
-| Sportswear | KICKS, FLEX, COURT |
-| Streetwear & Fashion | DRIP, RARE, THREAD |
-| Publishing | INK, READS, PRESS |
-| Beauty & Wellness | CROWN, GLOW, SHEEN |
-| Finance & Banking | VAULT, STAX, GROW |
-| Real Estate | BLOK, BUILD, HOOD |
-| Sports & Athletics | DRAFT, ARENA, STATS |
-| Entertainment | SCREEN, STAGE, GAME |
-
-## Design System
-
-**UX Reference:** Yahoo Finance layout with neobrutalism dark mode styling from [neobrutalism.dev](https://neobrutalism.dev).
-
-| Token | Value |
-|-------|-------|
-| Background | `#0e0e0e` |
-| Card | `#1a1a1a` |
-| Primary | `#7F77DD` (brand purple) |
-| Accent | `#FDE047` (Knowledge Vault yellow) |
-| Border | `#ffffff` (all borders white) |
-| Radius | `0rem` (hard corners) |
-| Shadow | `4px 4px 0px 0px #ffffff` |
-| Font | `Courier New, monospace` |
-
-## Cost Estimate (Hackathon Scale)
-
-| Service | Monthly |
-|---------|---------|
-| Groq LLM | ~$8-15 |
-| ElevenLabs TTS | ~$22 |
-| Claude | ~$20-40 |
-| Convex | Free tier |
-| Clerk | Free tier |
-| Firecrawl | ~$16 |
-| Exa | ~$7 |
-| Tavily | Free tier |
-| Vercel | Free tier |
-| **Total** | **~$56-88/mo** |
-
-## Deploy
-
-```bash
-# Deploy Convex to production
-npx convex deploy
-
-# Deploy to Vercel
-vercel --prod
-```
-
-Set Vercel environment variables: `NEXT_PUBLIC_CONVEX_URL`, `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`, `CLERK_SECRET_KEY`, `ELEVENLABS_API_KEY`.
-
-## Author
-
-**Tarik Moody** -- Built for Hackenomics 2026
-
-## License
-
-All rights reserved. This project was built for the Hackenomics 2026 hackathon.
 
 ---
 
-*BLK Exchange is a financial literacy education tool. All companies, prices, and market events are fictional. No real money is involved.*
+## The Bigger Picture
+
+The racial wealth gap took centuries to construct. It will not be dismantled by a game. But the evidence suggests that the on-ramp to financial participation can be redesigned. If a young person in Milwaukee, Atlanta, or Detroit spends a season making trading decisions in a culturally familiar environment, encountering investing concepts through gameplay rather than lectures, and building investment comfort before they ever open a real brokerage account --- the research says that matters.
+
+The knowledge gap narrows. The psychological barrier to market participation lowers. The language of finance becomes less foreign.
+
+Black culture IS an economy. BLK Exchange treats it like one.
+
+---
+
+<p align="center">
+  Built by <strong>Tarik Moody</strong> for <strong>Hackenomics 2026</strong>
+</p>
+
+<p align="center">
+  <em>BLK Exchange is a financial literacy education tool. All companies, prices, and market events are fictional. No real money is involved.</em>
+</p>
