@@ -28,7 +28,6 @@ const CHIP_TRIGGERS: Record<string, string> = {
   "diversified": "diversification",
   "correlation": "correlation",
   "benchmark": "benchmark",
-  "bankruptcy": "bankruptcy",
   "sentiment": "sentiment",
   "volatility": "volatility",
   "portfolio": "portfolio",

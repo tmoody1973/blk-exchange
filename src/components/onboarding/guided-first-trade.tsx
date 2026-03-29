@@ -160,8 +160,14 @@ export function GuidedFirstTrade({
       });
       setStep(3);
     } catch {
-      // If 25% limit hit, we still advance to show result
-      // The mutation will throw, so we handle gracefully
+      // Trade failed (position limit, network, etc.) — still advance so user isn't stuck
+      await advanceOnboarding({ playerId, newState: "first_trade_complete" }).catch(() => {});
+      setTradeResult({
+        shares: buyAmountCents / currentPriceCents,
+        priceCents: currentPriceCents,
+        amountCents: buyAmountCents,
+      });
+      setStep(3);
     }
   }, [
     canBuy,

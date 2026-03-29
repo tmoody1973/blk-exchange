@@ -9,7 +9,17 @@ export const getOnboardingState = query({
       .withIndex("by_player", (q) => q.eq("playerId", playerId))
       .first();
 
-    if (!status) return { state: "new_player" as const, eventsCompleted: 0 };
+    if (!status) {
+      // Check if player has any trades — if so, they're not actually new
+      const hasTrades = await ctx.db
+        .query("trades")
+        .withIndex("by_player", (q) => q.eq("playerId", playerId))
+        .first();
+      if (hasTrades) {
+        return { state: "onboarding_complete" as const, eventsCompleted: 3 };
+      }
+      return { state: "new_player" as const, eventsCompleted: 0 };
+    }
     return status;
   },
 });
