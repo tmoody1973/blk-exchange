@@ -7,7 +7,7 @@ import { useUser, SignOutButton } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
-import { BarChart3, Wallet, BookOpen, User, LogOut } from "lucide-react";
+import { BarChart3, Wallet, BookOpen, Trophy, User, LogOut } from "lucide-react";
 import dynamic from "next/dynamic";
 import { BottomTabs } from "@/components/layout/bottom-tabs";
 import { GameStatusBar } from "@/components/game/status-bar";
@@ -32,6 +32,7 @@ const NAV_ITEMS = [
   { href: "/market", label: "Market", icon: BarChart3 },
   { href: "/portfolio", label: "Portfolio", icon: Wallet },
   { href: "/vault", label: "Vault", icon: BookOpen },
+  { href: "/boards", label: "Boards", icon: Trophy },
   { href: "/profile", label: "Me", icon: User },
 ] as const;
 

@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, Wallet, BookOpen, User } from "lucide-react";
+import { BarChart3, Wallet, BookOpen, Trophy, User } from "lucide-react";
 
 const TABS = [
   { href: "/market", label: "Market", icon: BarChart3 },
   { href: "/portfolio", label: "Portfolio", icon: Wallet },
   { href: "/vault", label: "Vault", icon: BookOpen },
+  { href: "/boards", label: "Boards", icon: Trophy },
   { href: "/profile", label: "Me", icon: User },
 ] as const;
 
