@@ -1,9 +1,9 @@
 export const SEASON_CONFIG = {
   number: 1,
   name: "Season 1",
-  startDate: new Date("2026-03-31T00:00:00-05:00"), // Monday after hackathon
+  startDate: new Date("2026-03-24T00:00:00-05:00"), // Season started with development
   weeks: 8,
-  endDate: new Date("2026-05-25T23:59:59-05:00"), // 8 weeks later
+  endDate: new Date("2026-05-18T23:59:59-05:00"), // 8 weeks from start
 } as const;
 
 export function getSeasonInfo() {
