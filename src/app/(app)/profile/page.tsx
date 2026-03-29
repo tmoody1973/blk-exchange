@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useUser } from "@clerk/nextjs";
+import { useUser, SignOutButton } from "@clerk/nextjs";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
@@ -132,6 +132,13 @@ export default function ProfilePage() {
         >
           Take Tour
         </button>
+
+        {/* Sign Out button */}
+        <SignOutButton redirectUrl="/">
+          <button className="border-2 border-[#ef4444] px-4 py-2 font-mono text-sm text-[#ef4444] hover:bg-[#ef4444] hover:text-white transition-colors">
+            Sign Out
+          </button>
+        </SignOutButton>
 
         {/* End Session button */}
         {activeSession && (

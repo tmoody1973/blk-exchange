@@ -3,11 +3,11 @@
 import { useEffect, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useUser } from "@clerk/nextjs";
+import { useUser, SignOutButton } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
-import { BarChart3, Wallet, BookOpen, User } from "lucide-react";
+import { BarChart3, Wallet, BookOpen, User, LogOut } from "lucide-react";
 import { BottomTabs } from "@/components/layout/bottom-tabs";
 import { Walkthrough } from "@/components/onboarding/walkthrough";
 import { GameStatusBar } from "@/components/game/status-bar";
@@ -65,8 +65,14 @@ function DesktopNav() {
         How to Play
       </Link>
 
-      <div className="ml-auto">
+      <div className="ml-auto flex items-center gap-4">
         <BLKIndex />
+        <SignOutButton redirectUrl="/">
+          <button className="flex items-center gap-1.5 font-mono text-xs text-white/40 hover:text-white transition-colors">
+            <LogOut size={14} />
+            Sign Out
+          </button>
+        </SignOutButton>
       </div>
     </nav>
   );
