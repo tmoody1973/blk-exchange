@@ -21,9 +21,19 @@ export default function MarketPage() {
     <div className="min-h-screen bg-[#0e0e0e] p-4 lg:p-6">
       {/* Page header */}
       <div className="mb-6">
-        <h1 className="font-mono font-bold text-2xl text-white tracking-widest uppercase">
-          BLK EXCHANGE
-        </h1>
+        <div className="flex items-center gap-4">
+          <h1 className="font-mono font-bold text-2xl text-white tracking-widest uppercase">
+            BLK EXCHANGE
+          </h1>
+          <a
+            href="https://buymeacoffee.com/tarikmoody"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-mono text-xs font-bold text-[#FDE047] border border-[#FDE047] px-3 py-1 hover:bg-[#FDE047] hover:text-[#0e0e0e] transition-colors uppercase tracking-wider"
+          >
+            Support
+          </a>
+        </div>
         {blkIndex !== undefined ? (
           <div className="mt-1 flex items-center gap-3 font-mono text-sm">
             <span className="text-white/50">BLK INDEX</span>
