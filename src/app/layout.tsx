@@ -6,12 +6,12 @@ export const metadata: Metadata = {
   title: "BLK Exchange — Learn to Invest. Trade the Culture.",
   description:
     "A real-time cultural stock market simulator where players trade 36 fictional Black-economy companies. Real cultural news moves the market. AI teaches 23 investing concepts through gameplay.",
-  metadataBase: new URL("https://blk-exchange.vercel.app"),
+  metadataBase: new URL("https://blkexchange.com"),
   openGraph: {
     title: "BLK Exchange — Learn to Invest. Trade the Culture.",
     description:
       "Trade 36 Black-economy companies. Real cultural news moves the market. Claude and Groq teach 23 investing concepts through gameplay — not lectures.",
-    url: "https://blk-exchange.vercel.app",
+    url: "https://blkexchange.com",
     siteName: "BLK Exchange",
     images: [
       {
