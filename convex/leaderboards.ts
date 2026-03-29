@@ -1,4 +1,4 @@
-import { query, mutation, internalMutation, internalQuery } from "./_generated/server";
+import { query, mutation, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 
 // ─── Period helpers ────────────────────────────────────────────────────────────
@@ -132,11 +132,9 @@ export const updateBiggestMover = internalMutation({
       .first();
     if (!stock) return;
 
-    const holdings = await ctx.db
-      .query("holdings")
-      .withIndex("by_player_stock")
-      .filter((q) => q.eq(q.field("stockId"), stock._id))
-      .collect();
+    // TODO: Add by_stock index for performance at scale. For MVP, full scan is acceptable.
+    const allHoldings = await ctx.db.query("holdings").collect();
+    const holdings = allHoldings.filter((h) => h.stockId === stock._id);
 
     const week = getCurrentWeek();
     for (const holding of holdings) {

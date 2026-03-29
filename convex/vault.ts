@@ -348,7 +348,7 @@ const EVENT_CONCEPT_MAP: Record<
     conceptId: "dividend-investing",
   },
   "pe-ratio": {
-    keywords: ["earnings", "revenue", "quarterly", "profit margin", "EPS"],
+    keywords: ["price to earnings", "p/e ratio", "overvalued", "undervalued", "valuation multiple", "earnings per share"],
     conceptId: "pe-ratio",
   },
   "economic-moat": {
@@ -368,7 +368,7 @@ const EVENT_CONCEPT_MAP: Record<
     conceptId: "inflation",
   },
   "consumer-confidence": {
-    keywords: ["consumer confidence", "spending", "retail", "consumer sentiment"],
+    keywords: ["consumer confidence", "consumer sentiment", "consumer outlook", "spending index"],
     conceptId: "consumer-confidence",
   },
 };
@@ -444,6 +444,22 @@ export const checkEventTriggers = internalMutation({
             conceptsUnlocked: [...concepts, conceptId],
           });
         }
+      }
+
+      // Update knowledge-vault leaderboard for this player
+      const totalUnlocked = await ctx.db
+        .query("vault")
+        .withIndex("by_player", (q) => q.eq("playerId", session.playerId))
+        .collect();
+      const player = await ctx.db.get(session.playerId);
+      if (player) {
+        await ctx.scheduler.runAfter(0, internal.leaderboards.updateScore, {
+          playerId: session.playerId,
+          playerName: player.name,
+          board: "knowledge-vault" as const,
+          score: totalUnlocked.length,
+          period: "season-1",
+        });
       }
     }
   },
