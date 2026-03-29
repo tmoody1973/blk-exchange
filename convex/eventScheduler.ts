@@ -79,9 +79,11 @@ export const fireNextEvent = internalMutation({
 
       if (!stock) continue;
 
-      const changeFraction = affected.changePercent / 100;
+      // Cap individual event impact to ±15%
+      const clampedPercent = Math.max(-15, Math.min(15, affected.changePercent));
+      const changeFraction = clampedPercent / 100;
       const changeInCents = Math.round(stock.priceInCents * changeFraction);
-      const newPriceInCents = Math.max(1, stock.priceInCents + changeInCents);
+      const newPriceInCents = Math.max(100, stock.priceInCents + changeInCents); // min $1.00
 
       const newDailyChangeInCents = stock.dailyChangeInCents + changeInCents;
       const newDailyChangePercent =

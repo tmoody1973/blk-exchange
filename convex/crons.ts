@@ -38,4 +38,11 @@ crons.interval(
   internal.groq.generateFictionalEvent.generate
 );
 
+// Daily price reset at midnight — prevents compounding inflation
+crons.daily(
+  "daily price reset",
+  { hourUTC: 5, minuteUTC: 0 }, // midnight ET
+  internal.market.dailyReset
+);
+
 export default crons;
