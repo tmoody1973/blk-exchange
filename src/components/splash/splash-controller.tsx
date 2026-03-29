@@ -24,19 +24,26 @@ export function SplashController({ children }: { children: React.ReactNode }) {
     if (typeof window === "undefined" || !("serviceWorker" in navigator)) {
       return;
     }
-    window.addEventListener("load", () => {
+    let intervalId: ReturnType<typeof setInterval> | undefined;
+
+    const onLoad = () => {
       navigator.serviceWorker
         .register("/sw.js")
         .then((registration) => {
-          // Check for SW updates every 30 minutes during active gameplay
-          setInterval(() => {
+          intervalId = setInterval(() => {
             registration.update();
           }, 30 * 60 * 1000);
         })
         .catch(() => {
           // SW registration failed — app still works, just no offline support
         });
-    });
+    };
+
+    window.addEventListener("load", onLoad);
+    return () => {
+      window.removeEventListener("load", onLoad);
+      if (intervalId) clearInterval(intervalId);
+    };
   }, []);
 
   // Poll Convex connection via lightweight health ping

@@ -29,8 +29,10 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ClerkProvider>
       <ConvexProviderWithClerk client={convex} useAuth={useAuthForConvex}>
-        <SplashController>{children}</SplashController>
-        <PwaInstallPrompt />
+        <SplashController>
+          {children}
+          <PwaInstallPrompt />
+        </SplashController>
       </ConvexProviderWithClerk>
     </ClerkProvider>
   );
