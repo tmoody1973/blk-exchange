@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { Id } from "../../../convex/_generated/dataModel";
 
 const DEBRIEF_DISMISSED_KEY = "blk-exchange-debrief-dismissed-at";
@@ -12,7 +13,7 @@ interface DebriefPromptProps {
   sessionStartedAt: number | null;
   eventsExperienced: number;
   sessionId: Id<"sessions"> | null;
-  onRequestDebrief: () => void;
+  onRequestDebrief: () => Promise<void>;
 }
 
 export function DebriefPrompt({
@@ -21,7 +22,9 @@ export function DebriefPrompt({
   sessionId,
   onRequestDebrief,
 }: DebriefPromptProps) {
+  const router = useRouter();
   const [visible, setVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
   const hasShownRef = useRef(false);
 
   // Periodic timer so the 45-min check works even if no events fire
@@ -61,12 +64,19 @@ export function DebriefPrompt({
   const handleDismiss = () => {
     localStorage.setItem(DEBRIEF_DISMISSED_KEY, String(Date.now()));
     setVisible(false);
-    hasShownRef.current = false; // allow re-trigger after 15 min
+    hasShownRef.current = false;
   };
 
-  const handleDebrief = () => {
-    setVisible(false);
-    onRequestDebrief();
+  const handleDebrief = async () => {
+    setLoading(true);
+    try {
+      await onRequestDebrief();
+      setVisible(false);
+      // Navigate to profile page where the debrief is displayed
+      router.push("/profile");
+    } catch {
+      setLoading(false);
+    }
   };
 
   return (
@@ -88,14 +98,16 @@ export function DebriefPrompt({
         <div className="flex gap-3">
           <button
             onClick={handleDebrief}
-            className="flex-1 font-mono text-sm font-bold py-2.5 border-2 border-white bg-[#7F77DD] text-white transition-transform hover:translate-x-[2px] hover:translate-y-[2px]"
-            style={{ boxShadow: "3px 3px 0px 0px #ffffff" }}
+            disabled={loading}
+            className="flex-1 font-mono text-sm font-bold py-2.5 border-2 border-white bg-[#7F77DD] text-white transition-transform hover:translate-x-[2px] hover:translate-y-[2px] disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ boxShadow: loading ? "none" : "3px 3px 0px 0px #ffffff" }}
           >
-            Get My Debrief
+            {loading ? "Generating..." : "Get My Debrief"}
           </button>
           <button
             onClick={handleDismiss}
-            className="flex-1 font-mono text-sm py-2.5 border-2 border-white/30 text-white/60 hover:text-white hover:border-white transition-colors"
+            disabled={loading}
+            className="flex-1 font-mono text-sm py-2.5 border-2 border-white/30 text-white/60 hover:text-white hover:border-white transition-colors disabled:opacity-50"
           >
             Keep Trading
           </button>
