@@ -1,9 +1,6 @@
 const CACHE_NAME = "blkx-shell-v1";
 const SHELL_ASSETS = [
-  "/",
-  "/offline",
   "/manifest.json",
-  // CSS and JS bundles will be added dynamically
 ];
 
 // Install: cache the app shell
@@ -56,7 +53,25 @@ self.addEventListener("fetch", (event) => {
   // Navigation requests: network-first, fall back to offline page
   if (request.mode === "navigate") {
     event.respondWith(
-      fetch(request).catch(() => caches.match("/offline"))
+      fetch(request)
+        .then((response) => {
+          // Cache the offline page when we successfully fetch it
+          if (url.pathname === "/offline") {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put("/offline", clone));
+          }
+          return response;
+        })
+        .catch(() =>
+          caches.match("/offline").then(
+            (cached) =>
+              cached ||
+              new Response(
+                '<html><body style="background:#0A0A0A;color:#fff;font-family:monospace;display:flex;align-items:center;justify-content:center;min-height:100vh"><div style="text-align:center"><h1>BLK<span style="color:#7F77DD">X</span></h1><p>No connection</p><button onclick="location.reload()" style="padding:12px 24px;background:#7F77DD;color:#fff;border:2px solid #fff;cursor:pointer;font-family:monospace;font-weight:900">RETRY</button></div></body></html>',
+                { headers: { "Content-Type": "text/html" } }
+              )
+          )
+        )
     );
     return;
   }
