@@ -145,4 +145,123 @@
   .animate-marquee2 {
     animation: marquee2 30s linear infinite;
   }
+
+  /* ─── Glossary Chip System ─── */
+
+  .glossary-chip-unseen {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 1px 8px;
+    font-family: 'Courier New', monospace;
+    font-weight: 700;
+    font-size: inherit;
+    color: #FDE047;
+    background: #2A2A2A;
+    border: 2px solid #FDE047;
+    box-shadow: 2px 2px 0px #FDE047;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    line-height: inherit;
+    vertical-align: baseline;
+  }
+
+  .glossary-chip-unseen:hover {
+    transform: translate(1px, 1px);
+    box-shadow: 1px 1px 0px #FDE047;
+  }
+
+  .glossary-chip-unseen:active {
+    transform: translate(2px, 2px);
+    box-shadow: 0px 0px 0px #FDE047;
+  }
+
+  .glossary-chip-indicator {
+    font-size: 10px;
+    opacity: 0.7;
+    line-height: 1;
+  }
+
+  .glossary-chip-seen {
+    display: inline;
+    color: #E5E5E5;
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-underline-offset: 3px;
+    cursor: pointer;
+    font-weight: inherit;
+    font-size: inherit;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    transition: color 0.15s ease;
+  }
+
+  .glossary-chip-seen:hover {
+    color: #FFFFFF;
+  }
+
+  .glossary-popover {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 0;
+    width: 280px;
+    padding: 12px 14px;
+    background: #1A1A1A;
+    border: 2px solid #7F77DD;
+    box-shadow: 4px 4px 0px #7F77DD;
+    font-family: 'Courier New', monospace;
+    font-size: 13px;
+    line-height: 1.5;
+    color: #E5E5E5;
+    z-index: 100;
+    display: block;
+  }
+
+  .glossary-popover-concept {
+    display: block;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #7F77DD;
+    margin-bottom: 4px;
+  }
+
+  .glossary-popover-term {
+    display: block;
+    font-weight: 700;
+    color: #FFFFFF;
+    margin-bottom: 6px;
+    font-size: 14px;
+  }
+
+  .glossary-popover-def {
+    display: block;
+  }
+
+  .glossary-popover-vault {
+    display: block;
+    margin-top: 8px;
+    font-size: 10px;
+    color: #FDE047;
+    opacity: 0.8;
+    animation: vaultPulse 2s ease-in-out forwards;
+  }
+}
+
+@keyframes vaultPulse {
+  0% { opacity: 0; transform: translateY(4px); }
+  30% { opacity: 0.8; transform: translateY(0); }
+  100% { opacity: 0.8; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes blkPulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
 }

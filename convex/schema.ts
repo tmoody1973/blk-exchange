@@ -217,4 +217,38 @@ export default defineSchema({
   })
     .index("by_player", ["playerId"])
     .index("by_player_achievement", ["playerId", "achievementId"]),
+
+  glossaryTerms: defineTable({
+    termId: v.string(),
+    term: v.string(),
+    concept: v.string(),
+    conceptId: v.string(),
+    shortDef: v.string(),
+    longDef: v.optional(v.string()),
+  })
+    .index("by_termId", ["termId"])
+    .index("by_concept", ["conceptId"]),
+
+  playerGlossary: defineTable({
+    playerId: v.id("players"),
+    termId: v.string(),
+    firstSeenAt: v.number(),
+    firstSeenInEvent: v.optional(v.string()),
+    seenCount: v.number(),
+  })
+    .index("by_player", ["playerId"])
+    .index("by_player_term", ["playerId", "termId"]),
+
+  onboardingStatus: defineTable({
+    playerId: v.id("players"),
+    state: v.union(
+      v.literal("new_player"),
+      v.literal("first_event_seen"),
+      v.literal("first_trade_complete"),
+      v.literal("onboarding_complete")
+    ),
+    firstTradeTimestamp: v.optional(v.number()),
+    eventsCompleted: v.number(),
+    seedEventId: v.string(),
+  }).index("by_player", ["playerId"]),
 });

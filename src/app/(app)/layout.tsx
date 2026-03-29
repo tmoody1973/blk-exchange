@@ -15,8 +15,11 @@ import { SectorMarquee } from "@/components/market/sector-marquee";
 import { BLKIndex } from "@/components/market/blk-index";
 import { useSession } from "@/lib/hooks/use-session";
 
-const Walkthrough = dynamic(
-  () => import("@/components/onboarding/walkthrough").then((m) => m.Walkthrough),
+const GuidedFirstTrade = dynamic(
+  () =>
+    import("@/components/onboarding/guided-first-trade").then(
+      (m) => m.GuidedFirstTrade
+    ),
   { ssr: false }
 );
 const DebriefPrompt = dynamic(
@@ -116,6 +119,12 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
     player?._id ? { playerId: player._id } : "skip"
   );
 
+  // Onboarding state — determines whether to show guided flow
+  const onboardingState = useQuery(
+    api.onboarding.getOnboardingState,
+    player?._id ? { playerId: player._id } : "skip"
+  );
+
   // Session event tracking — increment when a new market alert fires
   const incrementEvents = useMutation(api.sessions.incrementEventsExperienced);
   const handleNewEvent = useCallback(() => {
@@ -124,8 +133,23 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
     }
   }, [sessionId, incrementEvents]);
 
+  // Show guided onboarding overlay for new players and those mid-first-event
+  const showOnboarding =
+    player?._id !== undefined &&
+    onboardingState !== undefined &&
+    (onboardingState.state === "new_player" ||
+      onboardingState.state === "first_event_seen");
+
   return (
     <div className="flex min-h-screen w-full flex-col bg-[#0e0e0e]">
+      {/* Guided first trade overlay — renders on top of everything */}
+      {showOnboarding && player?._id && (
+        <GuidedFirstTrade
+          playerId={player._id}
+          playerCashInCents={player.cashInCents ?? 1000000}
+        />
+      )}
+
       <div className="sticky top-0 z-40">
         <SectorMarquee />
       </div>
@@ -154,7 +178,6 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
 
       <BottomTabs />
       <MarketAlert onNewEvent={handleNewEvent} />
-      <Walkthrough />
 
       {/* Debrief prompt — shows at 45 min or 5+ events */}
       <DebriefPrompt
