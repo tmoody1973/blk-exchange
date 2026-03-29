@@ -10,38 +10,24 @@ crons.interval(
   internal.eventScheduler.fireNextEvent
 );
 
-// Firecrawl every 15 minutes — scrape 12 Black publications
-crons.interval(
-  "scrape publications",
-  { minutes: 15 },
-  internal.news.firecrawl.scrape
-);
-
-// Perplexity every 30 minutes — AI-powered news discovery
-crons.interval(
-  "perplexity discovery",
-  { minutes: 30 },
-  internal.news.perplexity.discover
-);
-
-// Full pipeline every 30 minutes — Firecrawl + Perplexity
+// News pipeline every 15 minutes — Firecrawl + Perplexity (single pipeline, no duplicates)
 crons.interval(
   "news pipeline",
-  { minutes: 30 },
+  { minutes: 15 },
   internal.news.scheduler.runPipeline
 );
 
-// Fictional company news 3x/day (every 8 hours) — press releases, earnings, partnerships
+// Fictional company news 3x/day (every 8 hours)
 crons.interval(
   "fictional company news",
   { hours: 8 },
   internal.groq.generateFictionalEvent.generate
 );
 
-// Daily price reset at midnight — prevents compounding inflation
+// Daily price reset at midnight ET — prevents compounding inflation
 crons.daily(
   "daily price reset",
-  { hourUTC: 5, minuteUTC: 0 }, // midnight ET
+  { hourUTC: 5, minuteUTC: 0 },
   internal.market.dailyReset
 );
 

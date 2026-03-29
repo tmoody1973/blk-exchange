@@ -78,6 +78,8 @@ export function TradeModal({
   const checkBehaviorTriggers = useMutation(api.vault.checkBehaviorTriggers);
   const unlockConcept = useMutation(api.vault.unlockConcept);
   const updateDebt = useMutation(api.curriculumDebt.updateDebt);
+  const addConceptToSession = useMutation(api.sessions.addConceptToSession);
+  const activeSession = useQuery(api.sessions.getActiveSession, { playerId });
 
   // Fetch total portfolio value for the 25% limit calculation
   const portfolioValue = useQuery(api.players.getPortfolioValue, { playerId });
@@ -156,8 +158,16 @@ export function TradeModal({
               });
             }
           }
-          // Update curriculum debt after unlocking
+          // Track concepts in session + update curriculum debt
           if (newUnlockIds.length > 0) {
+            if (activeSession?._id) {
+              for (const conceptId of newUnlockIds) {
+                await addConceptToSession({
+                  sessionId: activeSession._id,
+                  conceptId,
+                });
+              }
+            }
             await updateDebt({ playerId });
           }
         } catch (err) {

@@ -67,7 +67,7 @@ export const dailyReset = internalMutation({
 
 // ─── Emergency price reset: restores all stocks to starting prices ───────────
 // Call via: npx convex run market:resetPrices
-export const resetPrices = mutation({
+export const resetPrices = internalMutation({
   handler: async (ctx) => {
     const STARTING_PRICES: Record<string, number> = {
       LOUD: 4200, SCROLL: 2800, VERSE: 1900,

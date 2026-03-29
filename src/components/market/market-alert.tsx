@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { X, Zap, Radio } from "lucide-react";
 import { useMarketAlert } from "@/lib/hooks/use-market-alert";
 
-export function MarketAlert() {
-  const { alert, isVisible, dismiss } = useMarketAlert();
+export function MarketAlert({ onNewEvent }: { onNewEvent?: () => void }) {
+  const { alert, isVisible, dismiss } = useMarketAlert(onNewEvent);
   const [mounted, setMounted] = useState(false);
 
   // Avoid SSR mismatch

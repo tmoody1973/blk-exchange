@@ -1,8 +1,8 @@
 import { internalMutation, mutation } from "./_generated/server";
 import { internal } from "./_generated/api";
 
-// Public wrapper for testing — call via `npx convex run eventScheduler:triggerFire`
-export const triggerFire = mutation({
+// Internal wrappers for testing — call via `npx convex run eventScheduler:triggerFire`
+export const triggerFire = internalMutation({
   args: {},
   handler: async (ctx) => {
     await ctx.scheduler.runAfter(0, internal.eventScheduler.fireNextEvent, {});
@@ -10,8 +10,7 @@ export const triggerFire = mutation({
   },
 });
 
-// Force generate a fictional event — call via `npx convex run eventScheduler:triggerFictional`
-export const triggerFictional = mutation({
+export const triggerFictional = internalMutation({
   args: {},
   handler: async (ctx) => {
     await ctx.scheduler.runAfter(0, internal.groq.generateFictionalEvent.generate, {});

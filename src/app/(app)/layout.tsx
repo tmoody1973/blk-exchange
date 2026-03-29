@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
+import { Id } from "../../../convex/_generated/dataModel";
 import { BarChart3, Wallet, BookOpen, User } from "lucide-react";
 import { BottomTabs } from "@/components/layout/bottom-tabs";
 import { Walkthrough } from "@/components/onboarding/walkthrough";
@@ -74,7 +75,15 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
     isLoaded && isSignedIn && user ? { clerkId: user.id } : "skip"
   );
 
-  useSession({ playerId: player?._id ?? null });
+  const { sessionId } = useSession({ playerId: player?._id ?? null });
+
+  // Session event tracking — increment when a new market alert fires
+  const incrementEvents = useMutation(api.sessions.incrementEventsExperienced);
+  const handleNewEvent = useCallback(() => {
+    if (sessionId) {
+      incrementEvents({ sessionId: sessionId as Id<"sessions"> }).catch(() => {});
+    }
+  }, [sessionId, incrementEvents]);
 
   return (
     <div className="flex min-h-screen w-full flex-col bg-[#0e0e0e]">
@@ -94,7 +103,7 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
       </main>
 
       <BottomTabs />
-      <MarketAlert />
+      <MarketAlert onNewEvent={handleNewEvent} />
       <Walkthrough />
     </div>
   );

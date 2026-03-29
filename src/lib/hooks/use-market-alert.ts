@@ -24,7 +24,7 @@ type UseMarketAlertReturn = {
 
 const ALERT_DURATION_MS = 15_000;
 
-export function useMarketAlert(): UseMarketAlertReturn {
+export function useMarketAlert(onNewEvent?: () => void): UseMarketAlertReturn {
   const latestEvent = useQuery(api.events.getLatestFiredEvent);
   const lastSeenIdRef = useRef<string | null>(null);
   const dismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -55,6 +55,9 @@ export function useMarketAlert(): UseMarketAlertReturn {
 
       setAlert(alertData);
       setIsVisible(true);
+
+      // Notify parent that a new event was seen (for session tracking)
+      onNewEvent?.();
 
       // Fire TTS in background — non-blocking
       void playAlertTTS(latestEvent.headline);
