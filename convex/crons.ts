@@ -31,4 +31,21 @@ crons.daily(
   internal.market.dailyReset
 );
 
+// Weekly leaderboard reset — Monday midnight ET
+// Resets: portfolio-value, diversification, biggest-mover
+// Preserves: knowledge-vault, blueprint-award
+crons.weekly(
+  "weekly leaderboard reset",
+  { dayOfWeek: "monday", hourUTC: 5, minuteUTC: 0 },
+  internal.leaderboards.weeklyReset
+);
+
+// Generate weekly challenge — Monday 6am UTC (1am ET)
+crons.cron(
+  "generate weekly challenge",
+  "0 6 * * 1",
+  internal.challenges.generateChallenge,
+  {}
+);
+
 export default crons;

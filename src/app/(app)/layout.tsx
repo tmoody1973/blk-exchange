@@ -10,6 +10,8 @@ import { Id } from "../../../convex/_generated/dataModel";
 import { BarChart3, Wallet, BookOpen, User } from "lucide-react";
 import { BottomTabs } from "@/components/layout/bottom-tabs";
 import { Walkthrough } from "@/components/onboarding/walkthrough";
+import { GameStatusBar } from "@/components/game/status-bar";
+import { DebriefPrompt } from "@/components/game/debrief-prompt";
 import { SectorMarquee } from "@/components/market/sector-marquee";
 import { BLKIndex } from "@/components/market/blk-index";
 import { MarketAlert } from "@/components/market/market-alert";
@@ -21,6 +23,8 @@ const NAV_ITEMS = [
   { href: "/vault", label: "Vault", icon: BookOpen },
   { href: "/profile", label: "Me", icon: User },
 ] as const;
+
+const HOW_TO_PLAY_HREF = "/how-to-play";
 
 function DesktopNav() {
   const pathname = usePathname();
@@ -50,6 +54,17 @@ function DesktopNav() {
         );
       })}
 
+      <Link
+        href={HOW_TO_PLAY_HREF}
+        className="flex items-center gap-2 px-3 py-1.5 font-mono text-sm transition-colors ml-2"
+        style={{
+          color: "#ffffff80",
+          borderBottom: "2px solid transparent",
+        }}
+      >
+        How to Play
+      </Link>
+
       <div className="ml-auto">
         <BLKIndex />
       </div>
@@ -75,7 +90,13 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
     isLoaded && isSignedIn && user ? { clerkId: user.id } : "skip"
   );
 
-  const { sessionId } = useSession({ playerId: player?._id ?? null });
+  const { sessionId, eventsExperienced, endSession } = useSession({ playerId: player?._id ?? null });
+
+  // Get active session start time
+  const activeSession = useQuery(
+    api.sessions.getActiveSession,
+    player?._id ? { playerId: player._id } : "skip"
+  );
 
   // Session event tracking — increment when a new market alert fires
   const incrementEvents = useMutation(api.sessions.incrementEventsExperienced);
@@ -98,6 +119,17 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
         <BLKIndex />
       </div>
 
+      {/* Game status bar */}
+      {player?._id && (
+        <div className="px-4 py-2">
+          <GameStatusBar
+            playerId={player._id}
+            sessionStartedAt={activeSession?.startedAt ?? null}
+            eventsExperienced={eventsExperienced}
+          />
+        </div>
+      )}
+
       <main className="flex-1 overflow-auto pb-16 lg:pb-0">
         {children}
       </main>
@@ -105,6 +137,14 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
       <BottomTabs />
       <MarketAlert onNewEvent={handleNewEvent} />
       <Walkthrough />
+
+      {/* Debrief prompt — shows at 45 min or 5+ events */}
+      <DebriefPrompt
+        sessionStartedAt={activeSession?.startedAt ?? null}
+        eventsExperienced={eventsExperienced}
+        sessionId={sessionId}
+        onRequestDebrief={endSession}
+      />
     </div>
   );
 }

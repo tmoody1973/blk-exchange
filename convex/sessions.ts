@@ -79,6 +79,11 @@ export const endSession = mutation({
       sessionId,
     });
 
+    // Check achievements at session end
+    await ctx.scheduler.runAfter(0, internal.achievements.checkAchievements, {
+      playerId: args.playerId,
+    });
+
     return sessionId;
   },
 });

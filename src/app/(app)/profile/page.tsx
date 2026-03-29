@@ -7,6 +7,7 @@ import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
 import { LeaderboardTabs } from "@/components/leaderboard/leaderboard-tabs";
 import { SessionDebrief } from "@/components/education/session-debrief";
+import { AchievementsPanel } from "@/components/game/achievements-panel";
 
 // ─── StatCard ─────────────────────────────────────────────────────────────────
 
@@ -204,6 +205,11 @@ export default function ProfilePage() {
           Leaderboards
         </h2>
         <LeaderboardTabs currentPlayerId={player._id} />
+      </div>
+
+      {/* Achievements */}
+      <div className="mb-8">
+        <AchievementsPanel playerId={player._id} />
       </div>
 
       {/* Recent sessions */}

@@ -76,6 +76,7 @@ export function useMarketAlert(onNewEvent?: () => void): UseMarketAlertReturn {
         clearTimeout(dismissTimerRef.current);
       }
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [latestEvent]);
 
   function dismiss() {

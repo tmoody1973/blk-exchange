@@ -144,6 +144,16 @@ export const executeTrade = mutation({
       playerId: args.playerId,
     });
 
+    // Check challenge progress
+    await ctx.scheduler.runAfter(0, internal.challenges.checkChallengeProgress, {
+      playerId: args.playerId,
+    });
+
+    // Check achievements
+    await ctx.scheduler.runAfter(0, internal.achievements.checkAchievements, {
+      playerId: args.playerId,
+    });
+
     return {
       success: true,
       symbol: stock.symbol,

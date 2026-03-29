@@ -184,4 +184,37 @@ export default defineSchema({
   })
     .index("by_board_period", ["board", "period"])
     .index("by_player_board", ["playerId", "board"]),
+
+  challenges: defineTable({
+    title: v.string(),
+    description: v.string(),
+    conceptTaught: v.string(),
+    targetType: v.union(
+      v.literal("sectors_held"),
+      v.literal("trades_count"),
+      v.literal("portfolio_value")
+    ),
+    targetValue: v.number(),
+    weekStart: v.number(),
+    weekEnd: v.number(),
+    active: v.boolean(),
+  }).index("by_active", ["active"]),
+
+  challengeProgress: defineTable({
+    playerId: v.id("players"),
+    challengeId: v.id("challenges"),
+    currentValue: v.number(),
+    completed: v.boolean(),
+    completedAt: v.optional(v.number()),
+  })
+    .index("by_player", ["playerId"])
+    .index("by_player_challenge", ["playerId", "challengeId"]),
+
+  playerAchievements: defineTable({
+    playerId: v.id("players"),
+    achievementId: v.string(),
+    unlockedAt: v.number(),
+  })
+    .index("by_player", ["playerId"])
+    .index("by_player_achievement", ["playerId", "achievementId"]),
 });

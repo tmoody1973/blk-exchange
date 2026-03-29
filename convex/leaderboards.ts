@@ -256,3 +256,31 @@ export const updatePlayerScores = internalMutation({
     }
   },
 });
+
+// ─── Weekly reset: patches weekly boards to score 0, updates period ──────────
+const WEEKLY_BOARDS = ["portfolio-value", "diversification", "biggest-mover"] as const;
+
+export const weeklyReset = internalMutation({
+  handler: async (ctx) => {
+    const newWeek = getCurrentWeek();
+    let resetCount = 0;
+
+    for (const board of WEEKLY_BOARDS) {
+      const entries = await ctx.db
+        .query("leaderboards")
+        .withIndex("by_board_period", (q) => q.eq("board", board))
+        .collect();
+
+      for (const entry of entries) {
+        await ctx.db.patch(entry._id, {
+          score: 0,
+          period: newWeek,
+          updatedAt: Date.now(),
+        });
+        resetCount++;
+      }
+    }
+
+    console.log(`[weeklyReset] Reset ${resetCount} entries to period ${newWeek}`);
+  },
+});
