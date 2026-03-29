@@ -188,7 +188,7 @@ export default function ProfilePage() {
         />
         <StatCard
           label="Events Experienced"
-          value={player.totalEventsExperienced}
+          value={activeSession?.eventsExperienced ?? player.totalEventsExperienced}
           valueColor="#22c55e"
         />
         <StatCard
