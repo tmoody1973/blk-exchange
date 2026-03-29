@@ -93,7 +93,7 @@ This inserts all 36 tickers and 36 company states.
 ```
 blk-exchange/
 ├── convex/                    # Convex backend
-│   ├── schema.ts              # Database schema (11 tables)
+│   ├── schema.ts              # Database schema (14 tables)
 │   ├── market.ts              # Stock queries
 │   ├── players.ts             # Player management
 │   ├── trades.ts              # Atomic trade execution
@@ -113,11 +113,10 @@ blk-exchange/
 │   │   ├── gradePortfolio.ts
 │   │   ├── answerQuestion.ts
 │   │   └── generateDebrief.ts
-│   └── news/                  # 3-layer news pipeline
-│       ├── firecrawl.ts
-│       ├── exa.ts
-│       ├── tavily.ts
-│       └── scheduler.ts
+│   └── news/                  # News pipeline
+│       ├── firecrawl.ts       # Article scraping
+│       ├── perplexity.ts      # Research layer
+│       └── scheduler.ts       # Pipeline orchestration
 ├── src/
 │   ├── app/
 │   │   ├── (landing)/         # Public pages
@@ -128,6 +127,7 @@ blk-exchange/
 │   │   │   ├── portfolio/     # Portfolio view
 │   │   │   ├── vault/         # Knowledge Vault
 │   │   │   └── profile/       # Profile + leaderboards
+│   │   ├── offline/           # PWA offline fallback
 │   │   └── api/
 │   │       ├── tts/           # ElevenLabs TTS endpoint
 │   │       └── og/            # OG image generation
@@ -140,12 +140,17 @@ blk-exchange/
 │   │   ├── leaderboard/       # Board tables + tabs
 │   │   ├── landing/           # Marketing page sections
 │   │   ├── judges/            # Pitch page components
+│   │   ├── splash/            # Animated PWA splash screen
+│   │   ├── onboarding/        # New player onboarding flow
+│   │   ├── glossary/          # Financial glossary UI
+│   │   ├── game/              # Achievements, status bar, debrief
 │   │   ├── layout/            # Bottom tabs, sidebar, nav
 │   │   └── ui/                # neobrutalism shadcn components
-│   ├── lib/
-│   │   ├── constants/         # Tickers, sectors, concepts, publications
-│   │   └── utils/             # Price formatting, calculations
-│   └── data/                  # Seed data, concept content
+├── public/
+│   ├── manifest.json          # PWA manifest
+│   ├── sw.js                  # Service worker
+│   ├── icons/                 # PWA icons (192, 512, maskable)
+│   └── splash/                # iOS splash screens
 └── docs/
     ├── BLK_Exchange_PRD_v3.md
     ├── BLK_Exchange_Game_Mechanics.md
@@ -180,6 +185,13 @@ blk-exchange/
 - **Hybrid unlocking** -- ~15 behavior-driven (portfolio state proves the concept) + ~8 event-driven
 - **Curriculum debt queue** -- AI generates events targeting unlearned concepts
 - **Shareable cards** -- share your learning on social media with OG images
+
+### Progressive Web App
+- **Installable** on mobile home screens (Android + iOS)
+- **Animated splash screen** with 8-phase timeline on launch
+- **Service worker** with network-first navigation, cache-first static assets
+- **Offline fallback** page when connectivity is lost
+- **Install prompt** with native beforeinstallprompt + iOS Safari instructions
 
 ### Competition
 - **5 leaderboards**: Portfolio Value, Knowledge Vault, Diversification Score, Biggest Mover, The Blueprint Award
