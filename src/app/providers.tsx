@@ -4,6 +4,7 @@ import { ClerkProvider, useAuth } from "@clerk/nextjs";
 import { ConvexProviderWithClerk } from "convex/react-clerk";
 import { ConvexReactClient } from "convex/react";
 import { SplashController } from "@/components/splash/splash-controller";
+import { PwaInstallPrompt } from "@/components/pwa-install-prompt";
 
 const convex = new ConvexReactClient(process.env.NEXT_PUBLIC_CONVEX_URL!);
 
@@ -29,6 +30,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
     <ClerkProvider>
       <ConvexProviderWithClerk client={convex} useAuth={useAuthForConvex}>
         <SplashController>{children}</SplashController>
+        <PwaInstallPrompt />
       </ConvexProviderWithClerk>
     </ClerkProvider>
   );
