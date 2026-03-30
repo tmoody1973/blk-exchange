@@ -84,17 +84,24 @@ export const updateScore = internalMutation({
     period: v.string(),
   },
   handler: async (ctx, args) => {
-    const existing = await ctx.db
+    // Find ALL entries for this player+board and keep only the latest
+    const allExisting = await ctx.db
       .query("leaderboards")
       .withIndex("by_player_board", (q) =>
         q.eq("playerId", args.playerId).eq("board", args.board)
       )
-      .first();
+      .collect();
 
-    if (existing && existing.period === args.period) {
-      await ctx.db.patch(existing._id, {
+    if (allExisting.length > 0) {
+      // Update the first entry, delete any duplicates
+      const [keep, ...duplicates] = allExisting;
+      for (const dup of duplicates) {
+        await ctx.db.delete(dup._id);
+      }
+      await ctx.db.patch(keep._id, {
         score: args.score,
         playerName: args.playerName,
+        period: args.period,
         updatedAt: Date.now(),
       });
     } else {
@@ -152,11 +159,21 @@ export const updateBiggestMover = internalMutation({
         )
         .first();
 
-      const currentBest = existing?.score ?? 0;
+      const allBm = await ctx.db
+        .query("leaderboards")
+        .withIndex("by_player_board", (q) =>
+          q.eq("playerId", holding.playerId).eq("board", "biggest-mover")
+        )
+        .collect();
+
+      const currentBest = allBm.length > 0 ? allBm[0].score : 0;
       if (gainCents > currentBest) {
-        if (existing && existing.period === week) {
-          await ctx.db.patch(existing._id, {
+        if (allBm.length > 0) {
+          const [keep, ...dups] = allBm;
+          for (const dup of dups) await ctx.db.delete(dup._id);
+          await ctx.db.patch(keep._id, {
             score: gainCents,
+            period: week,
             updatedAt: Date.now(),
           });
         } else {
@@ -204,18 +221,21 @@ export const updatePlayerScores = internalMutation({
     const week = getCurrentWeek();
     const name = player.name;
 
-    // Portfolio value board (weekly)
-    const pvExisting = await ctx.db
+    // Portfolio value board — upsert (delete duplicates if any)
+    const pvAll = await ctx.db
       .query("leaderboards")
       .withIndex("by_player_board", (q) =>
         q.eq("playerId", args.playerId).eq("board", "portfolio-value")
       )
-      .first();
+      .collect();
 
-    if (pvExisting && pvExisting.period === week) {
-      await ctx.db.patch(pvExisting._id, {
+    if (pvAll.length > 0) {
+      const [keep, ...dups] = pvAll;
+      for (const dup of dups) await ctx.db.delete(dup._id);
+      await ctx.db.patch(keep._id, {
         score: totalValue,
         playerName: name,
+        period: week,
         updatedAt: Date.now(),
       });
     } else {
@@ -229,19 +249,22 @@ export const updatePlayerScores = internalMutation({
       });
     }
 
-    // Diversification board (weekly)
+    // Diversification board — upsert (delete duplicates if any)
     const divScore = Math.round((sectors.size / 12) * 100);
-    const divExisting = await ctx.db
+    const divAll = await ctx.db
       .query("leaderboards")
       .withIndex("by_player_board", (q) =>
         q.eq("playerId", args.playerId).eq("board", "diversification")
       )
-      .first();
+      .collect();
 
-    if (divExisting && divExisting.period === week) {
-      await ctx.db.patch(divExisting._id, {
+    if (divAll.length > 0) {
+      const [keep, ...dups] = divAll;
+      for (const dup of dups) await ctx.db.delete(dup._id);
+      await ctx.db.patch(keep._id, {
         score: divScore,
         playerName: name,
+        period: week,
         updatedAt: Date.now(),
       });
     } else {
@@ -264,9 +287,7 @@ export const weeklyReset = internalMutation({
   args: {},
   handler: async (ctx) => {
     const newWeek = getCurrentWeek();
-    let resetCount = 0;
 
-    // TODO: batch via scheduler if > 500 entries to avoid transaction limits
     for (const board of WEEKLY_BOARDS) {
       const entries = await ctx.db
         .query("leaderboards")
@@ -274,12 +295,66 @@ export const weeklyReset = internalMutation({
         .take(500);
 
       for (const entry of entries) {
-        await ctx.db.patch(entry._id, {
-          score: 0,
+        // Only reset entries from previous weeks
+        if (entry.period !== newWeek) {
+          await ctx.db.patch(entry._id, {
+            score: 0,
+            period: newWeek,
+            updatedAt: Date.now(),
+          });
+        }
+      }
+    }
+
+    // Recalculate portfolio value for all players so the board isn't empty
+    const allPlayers = await ctx.db.query("players").collect();
+    for (const player of allPlayers) {
+      const holdings = await ctx.db
+        .query("holdings")
+        .withIndex("by_player", (q) => q.eq("playerId", player._id))
+        .collect();
+
+      let totalValue = player.cashInCents;
+      const sectors = new Set<string>();
+      for (const h of holdings) {
+        const stock = await ctx.db.get(h.stockId);
+        if (stock) {
+          totalValue += Math.round(h.shares * stock.priceInCents);
+          sectors.add(stock.sector);
+        }
+      }
+
+      // Update portfolio value
+      const pvEntry = await ctx.db
+        .query("leaderboards")
+        .withIndex("by_player_board", (q) =>
+          q.eq("playerId", player._id).eq("board", "portfolio-value")
+        )
+        .first();
+
+      if (pvEntry) {
+        await ctx.db.patch(pvEntry._id, {
+          score: totalValue,
           period: newWeek,
           updatedAt: Date.now(),
         });
-        resetCount++;
+      }
+
+      // Update diversification
+      const divEntry = await ctx.db
+        .query("leaderboards")
+        .withIndex("by_player_board", (q) =>
+          q.eq("playerId", player._id).eq("board", "diversification")
+        )
+        .first();
+
+      if (divEntry) {
+        const divScore = Math.round((sectors.size / 12) * 100);
+        await ctx.db.patch(divEntry._id, {
+          score: divScore,
+          period: newWeek,
+          updatedAt: Date.now(),
+        });
       }
     }
   },
