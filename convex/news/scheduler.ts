@@ -11,10 +11,10 @@ import { internal } from "../_generated/api";
  */
 export const runPipeline = internalAction({
   handler: async (ctx) => {
-    // Layer 1: Firecrawl — targeted scraping of known publications
+    // Layer 1: Firecrawl — scrapes 16 Black publications
     await ctx.runAction(internal.news.firecrawl.scrape);
 
-    // Layer 2: Perplexity Sonar — broad AI-powered news discovery
+    // Layer 2: Perplexity Sonar — 10 AI-powered news discovery queries
     await ctx.runAction(internal.news.perplexity.discover);
   },
 });

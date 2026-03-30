@@ -21,12 +21,16 @@ export const discover = internalAction({
     });
 
     const queries = [
-      "Latest Black-owned business news and funding announcements from the past 24 hours",
-      "Recent HBCU investments, endowments, and Black education finance news",
-      "Black entertainment, music, and media industry deals and launches this week",
-      "African American tech startups, fintech, and venture capital news today",
-      "Black real estate, community banking, and wealth building news this week",
-      "Black fashion, beauty, and consumer brand launches and partnerships recently",
+      "Latest Black-owned business news, funding announcements, and startup launches from the past 24 hours",
+      "Recent HBCU news, investments, endowments, and Black education finance from the past 48 hours",
+      "Black entertainment, music, streaming, and media industry deals and launches this week",
+      "African American tech startups, fintech, digital media, and venture capital news today",
+      "Black real estate development, community banking, CDFI lending, and wealth building news this week",
+      "Black fashion brands, beauty companies, hair care, skincare launches and partnerships recently",
+      "Black sports business, athlete ventures, esports, and sports media deals this week",
+      "Latest news from AfroTech, Blavity, Black Enterprise, Essence, and The Root about Black business and culture",
+      "Black-owned public companies stock news: Urban One UONE, Carver Bancorp CARV, Broadway Financial BYFC, Direct Digital DRCT",
+      "Recent Black Wall Street, financial literacy, investing education, and economic empowerment news",
     ];
 
     const results = await Promise.allSettled(
