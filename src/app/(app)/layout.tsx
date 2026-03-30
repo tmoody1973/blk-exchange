@@ -73,11 +73,21 @@ function DesktopNav() {
         href={HOW_TO_PLAY_HREF}
         className="flex items-center gap-2 px-3 py-1.5 font-mono text-sm transition-colors ml-2"
         style={{
-          color: "#ffffff80",
-          borderBottom: "2px solid transparent",
+          color: pathname === HOW_TO_PLAY_HREF ? "#7F77DD" : "#ffffff80",
+          borderBottom: pathname === HOW_TO_PLAY_HREF ? "2px solid #7F77DD" : "2px solid transparent",
         }}
       >
         How to Play
+      </Link>
+      <Link
+        href="/guide"
+        className="flex items-center gap-2 px-3 py-1.5 font-mono text-sm transition-colors"
+        style={{
+          color: pathname === "/guide" ? "#7F77DD" : "#ffffff80",
+          borderBottom: pathname === "/guide" ? "2px solid #7F77DD" : "2px solid transparent",
+        }}
+      >
+        Parents & Educators
       </Link>
 
       <div className="ml-auto flex items-center gap-4">
