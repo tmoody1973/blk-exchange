@@ -194,7 +194,7 @@ npx vercel --prod           # Frontend
 ```
 blk-exchange/
 ├── convex/                    # Backend (Convex)
-│   ├── schema.ts              # 14-table database schema
+│   ├── schema.ts              # 17-table database schema
 │   ├── market.ts              # Price engine
 │   ├── trades.ts              # Atomic trade execution
 │   ├── vault.ts               # Knowledge Vault + concept unlocking
@@ -206,13 +206,14 @@ blk-exchange/
 │   └── news/                  # Firecrawl + Perplexity pipeline
 ├── src/
 │   ├── app/                   # Next.js App Router
-│   │   ├── (app)/             # Authenticated: market, portfolio, vault, profile
+│   │   ├── (app)/             # Authenticated: market, portfolio, vault, profile, news, guide
 │   │   ├── (landing)/         # Public: landing page, judges view
-│   │   └── api/               # OG images, TTS endpoint
+│   │   ├── share/             # Public share pages with OG meta for social crawlers
+│   │   └── api/               # OG image cards, TTS endpoint
 │   ├── components/            # UI organized by feature domain
 │   └── middleware.ts          # Clerk auth + route protection
-├── public/                    # PWA manifest, service worker, icons, splash
-└── docs/                      # PRD, game mechanics, research paper, plans
+├── public/                    # PWA manifest, service worker, icons, splash, share cards
+└── docs/                      # Research paper, game mechanics, press release, plans
 ```
 
 ---
@@ -227,8 +228,29 @@ Black culture IS an economy. BLK Exchange treats it like one.
 
 ---
 
+## AI Transparency
+
+BLK Exchange was built entirely with AI coding assistance. Full transparency on what AI tools were used and how:
+
+| What | AI Tool | How It Was Used |
+|------|---------|-----------------|
+| Application code | Claude Code (Anthropic) | All frontend, backend, and infrastructure code was written by directing Claude Code through natural language. The author is not a software developer. |
+| Research paper | Claude (Anthropic) | AI assisted with research discovery, source synthesis, and drafting. All 28 citations are real, verified sources. Arguments and analysis are the author's own. |
+| AI coaching (in-app) | Claude Sonnet 4.6 | Portfolio grading, session debriefs, and Q&A during gameplay |
+| Event generation (in-app) | Groq llama-3.3-70b | Market event creation, article classification, real-time commentary |
+| News discovery (in-app) | Perplexity Sonar | AI-powered news search across Black media publications |
+| Voice narration (in-app) | ElevenLabs Flash v2.5 | Text-to-speech for market alerts |
+| Demo video voiceover | ElevenLabs | Voiceover for the hackathon demo video |
+| Share card backgrounds | Gemini 3.1 Flash Image (Nano Banana 2) | AI-generated card template backgrounds |
+| Press materials | Claude (Anthropic) | AI assisted with press release drafting and pitch email structure |
+
+The author reviewed, edited, and approved all AI-generated output. The product vision, design decisions, research arguments, and educational approach are the author's own.
+
+---
+
 <p align="center">
-  Built by <strong>Tarik Moody</strong> for <strong>Hackenomics 2026</strong>
+  Built by <strong>Tarik Moody</strong> for <strong>Hackonomics 2026</strong><br/>
+  <a href="https://buymeacoffee.com/tarikmoody">Support this project</a>
 </p>
 
 <p align="center">
