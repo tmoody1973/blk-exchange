@@ -151,6 +151,12 @@ STRICT GUARDRAILS:
     const rawText =
       response.content[0]?.type === "text" ? response.content[0].text : "";
 
+    // Strip markdown code fences if Claude wraps the JSON
+    const cleanedText = rawText
+      .replace(/^```(?:json)?\s*/i, "")
+      .replace(/\s*```\s*$/, "")
+      .trim();
+
     // Parse Claude's JSON response
     let parsed: {
       diversificationScore: number;
@@ -160,14 +166,14 @@ STRICT GUARDRAILS:
     };
 
     try {
-      parsed = JSON.parse(rawText);
+      parsed = JSON.parse(cleanedText);
     } catch {
       // Fallback if JSON parse fails
       parsed = {
         diversificationScore: 50,
         concentrationWarnings: concentrationWarnings,
         recommendation: "Consider diversifying across more sectors.",
-        summary: rawText.slice(0, 300),
+        summary: cleanedText.slice(0, 300),
       };
     }
 
