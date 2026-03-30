@@ -280,6 +280,101 @@ export const updatePlayerScores = internalMutation({
   },
 });
 
+// ─── One-time data repair: delete duplicates, recalculate all scores ─────────
+
+export const repairLeaderboards = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const week = getCurrentWeek();
+    const season = getCurrentSeason();
+
+    // Step 1: Delete ALL leaderboard entries (clean slate)
+    const allEntries = await ctx.db.query("leaderboards").collect();
+    for (const entry of allEntries) {
+      await ctx.db.delete(entry._id);
+    }
+
+    // Step 2: Recalculate and insert fresh entries for all players
+    const allPlayers = await ctx.db.query("players").collect();
+    for (const player of allPlayers) {
+      const holdings = await ctx.db
+        .query("holdings")
+        .withIndex("by_player", (q) => q.eq("playerId", player._id))
+        .collect();
+
+      let totalValue = player.cashInCents;
+      const sectors = new Set<string>();
+      for (const h of holdings) {
+        const stock = await ctx.db.get(h.stockId);
+        if (stock) {
+          totalValue += Math.round(h.shares * stock.priceInCents);
+          sectors.add(stock.sector);
+        }
+      }
+
+      // Portfolio value
+      await ctx.db.insert("leaderboards", {
+        board: "portfolio-value",
+        playerId: player._id,
+        playerName: player.name,
+        score: totalValue,
+        period: week,
+        updatedAt: Date.now(),
+      });
+
+      // Diversification
+      const divScore = Math.round((sectors.size / 12) * 100);
+      await ctx.db.insert("leaderboards", {
+        board: "diversification",
+        playerId: player._id,
+        playerName: player.name,
+        score: divScore,
+        period: week,
+        updatedAt: Date.now(),
+      });
+
+      // Biggest mover (start at 0, will update on next event)
+      await ctx.db.insert("leaderboards", {
+        board: "biggest-mover",
+        playerId: player._id,
+        playerName: player.name,
+        score: 0,
+        period: week,
+        updatedAt: Date.now(),
+      });
+
+      // Knowledge vault (season board)
+      const vaultEntries = await ctx.db
+        .query("vault")
+        .withIndex("by_player", (q) => q.eq("playerId", player._id))
+        .collect();
+
+      await ctx.db.insert("leaderboards", {
+        board: "knowledge-vault",
+        playerId: player._id,
+        playerName: player.name,
+        score: vaultEntries.length,
+        period: season,
+        updatedAt: Date.now(),
+      });
+
+      // Blueprint award (season board — combined score)
+      const blueprintScore = totalValue > 0
+        ? Math.round((divScore * 0.3) + (vaultEntries.length * 0.4 * 100 / 23) + (totalValue / 100000 * 0.3 * 100))
+        : 0;
+
+      await ctx.db.insert("leaderboards", {
+        board: "blueprint-award",
+        playerId: player._id,
+        playerName: player.name,
+        score: blueprintScore,
+        period: season,
+        updatedAt: Date.now(),
+      });
+    }
+  },
+});
+
 // ─── Weekly reset: patches weekly boards to score 0, updates period ──────────
 const WEEKLY_BOARDS = ["portfolio-value", "diversification", "biggest-mover"] as const;
 
