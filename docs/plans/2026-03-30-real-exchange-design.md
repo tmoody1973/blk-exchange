@@ -218,7 +218,59 @@ When a player taps a real ticker from the market list, the detail page shows fou
 
 **The "Learn the Fundamentals" section is the educational breakthrough.** Every metric card has the number AND a plain-English explanation. This is where vault concepts come alive with real data. The player learned "P/E Ratio" as an abstract concept in the sim. Now they see CARV's actual P/E ratio on NASDAQ and the AI coach ties it back to what they already know.
 
-**Key difference from sim ticker pages:** Real price, real financials, real news, real metrics with educational explanations. The AI coach references vault concepts the player already unlocked.
+### Glossary Chips on Every Metric
+
+Every metric label in the fundamentals section is wrapped in the existing `GlossaryChip` component. The label "P/E RATIO" is tappable. It opens the glossary popover (desktop) or bottom sheet (mobile) with:
+
+- The concept name ("P/E Ratio")
+- The glossary term
+- A short definition
+- "Adding to Knowledge Vault..." if the player hasn't seen this term before
+
+This means the Real Exchange detail page is itself a teaching surface. A player browsing CARV's fundamentals and tapping "MARKET CAP" for the first time adds that glossary term to their profile. The financial data IS the lesson.
+
+**Glossary term mapping for fundamentals:**
+
+| Metric | Glossary termId | Vault concept |
+|--------|----------------|---------------|
+| Market Cap | `market-cap` | Portfolio Value / Market Cap |
+| P/E Ratio | `pe-ratio` | P/E Ratio |
+| Revenue | `revenue` | Profit & Loss |
+| Net Income | `net-income` | Profit & Loss |
+| Total Assets | `total-assets` | Portfolio Value |
+| Book Value | `book-value` | Risk-Adjusted Return |
+| Employees | (no glossary, plain text) | — |
+| Dividend Yield | `dividend-yield` | Dividend Investing |
+| Debt/Equity | `debt-equity` | Risk-Adjusted Return |
+| 52-Week Range | `52-week-range` | Bull & Bear Markets |
+| Volume | `volume` | Supply & Demand |
+| EPS | `eps` | P/E Ratio |
+
+New glossary terms may need to be seeded for metrics not already in the glossary (revenue, net-income, total-assets, book-value, debt-equity, eps, 52-week-range, volume, dividend-yield). These are one-time seeds in the `glossaryTerms` table.
+
+**Example interaction:**
+
+Player taps "P/E RATIO" on the CARV detail page:
+
+```
+┌─────────────────────────────────────┐
+│  P/E RATIO                          │
+│  Price-to-Earnings Ratio            │
+│                                     │
+│  How much investors pay for every   │
+│  dollar of a company's profit.      │
+│  A P/E of 12 means $12 per $1 of   │
+│  earnings. Lower can mean           │
+│  undervalued. Higher can mean       │
+│  investors expect growth.           │
+│                                     │
+│  ✦ Adding to Knowledge Vault...     │
+└─────────────────────────────────────┘
+```
+
+The same chip that teaches vocabulary in the sim now teaches real financial data on real companies. The learning loop is continuous.
+
+**Key difference from sim ticker pages:** Real price, real financials, real news, real metrics with glossary chips and educational explanations. The AI coach references vault concepts the player already unlocked.
 
 ---
 
