@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
+import ReactMarkdown from "react-markdown";
 
 // ─── Types ─────────────────────────────────────────────────────────────────────
 
@@ -208,8 +209,59 @@ export function SessionDebrief({ sessionId, onStartNewSession }: SessionDebriefP
             </div>
 
             {hasDebrief ? (
-              <div className="font-mono text-white/80 text-sm leading-relaxed whitespace-pre-wrap">
-                {session.debriefText}
+              <div className="font-mono text-sm leading-relaxed debrief-markdown">
+                <ReactMarkdown
+                  components={{
+                    h1: ({ children }) => (
+                      <h1 className="text-lg font-bold text-white mb-3 mt-4 first:mt-0 border-b border-[#7F77DD]/30 pb-2">
+                        {children}
+                      </h1>
+                    ),
+                    h2: ({ children }) => (
+                      <h2 className="text-base font-bold text-white mb-2 mt-4 first:mt-0">
+                        {children}
+                      </h2>
+                    ),
+                    h3: ({ children }) => (
+                      <h3 className="text-sm font-bold text-[#FDE047] mb-2 mt-3 uppercase tracking-wider">
+                        {children}
+                      </h3>
+                    ),
+                    p: ({ children }) => (
+                      <p className="text-white/80 mb-3 leading-relaxed">
+                        {children}
+                      </p>
+                    ),
+                    strong: ({ children }) => (
+                      <strong className="text-white font-bold">{children}</strong>
+                    ),
+                    em: ({ children }) => (
+                      <em className="text-[#7F77DD] not-italic font-bold">{children}</em>
+                    ),
+                    ul: ({ children }) => (
+                      <ul className="space-y-1.5 mb-3 ml-1">{children}</ul>
+                    ),
+                    ol: ({ children }) => (
+                      <ol className="space-y-1.5 mb-3 ml-1 list-decimal list-inside">{children}</ol>
+                    ),
+                    li: ({ children }) => (
+                      <li className="text-white/70 flex gap-2">
+                        <span className="text-[#7F77DD] flex-shrink-0">•</span>
+                        <span>{children}</span>
+                      </li>
+                    ),
+                    blockquote: ({ children }) => (
+                      <blockquote className="border-l-4 border-[#7F77DD] pl-4 my-3 text-white/60 italic">
+                        {children}
+                      </blockquote>
+                    ),
+                    hr: () => (
+                      <hr className="border-white/10 my-4" />
+                    ),
+                  }}
+                >
+                  {session.debriefText ?? ""}
+                </ReactMarkdown>
               </div>
             ) : (
               <div>

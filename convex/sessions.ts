@@ -30,6 +30,26 @@ export const startSession = mutation({
       if (s) value += Math.round(h.shares * s.priceInCents);
     }
 
+    // Update streak
+    if (player) {
+      const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+      const lastPlayed = player.lastPlayedDate;
+
+      if (lastPlayed !== today) {
+        // Check if yesterday was the last played date (streak continues)
+        const yesterday = new Date(Date.now() - 86400000)
+          .toISOString()
+          .slice(0, 10);
+        const newStreak =
+          lastPlayed === yesterday ? player.streakDays + 1 : 1;
+
+        await ctx.db.patch(args.playerId, {
+          streakDays: newStreak,
+          lastPlayedDate: today,
+        });
+      }
+    }
+
     return await ctx.db.insert("sessions", {
       playerId: args.playerId,
       startedAt: Date.now(),
