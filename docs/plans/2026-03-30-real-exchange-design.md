@@ -441,7 +441,115 @@ When a player buys NACP, their Diversification Score gets a +10 bonus. One ETF h
 
 **The graduation message:**
 
-> "You've unlocked the capstone. Individual stocks teach you how companies work. ETFs teach you how markets work. The NAACP Minority Empowerment Fund teaches you that the two don't have to be separate from your values. Welcome to the real exchange."
+> "You've unlocked the capstone. Individual stocks teach you how companies work. ETFs teach you how markets work. The NAACP Minority Empowerment Fund taught you that values and investing don't have to be separate. One trade. 200+ companies. Purpose-driven. Welcome to the real exchange."
+
+### NACP Detail Page: Learn What an ETF Actually Is
+
+The NACP page is different from the other 8 real ticker pages. It's an ETF education experience. The player doesn't just see a price and a story. They see what's INSIDE the fund.
+
+**FMP endpoint:** `/stable/etf/holdings?symbol=NACP&apikey=KEY`
+
+Returns the full list of companies held inside NACP with weights and share counts.
+
+**Page layout:**
+
+```
+┌──────────────────────────────────────────────┐
+│  ★ NACP · NAACP Minority Empowerment ETF     │
+│  NYSE Arca · The Capstone                    │
+│                                              │
+│  $32.14  +0.3%                               │
+│  Last updated 2:15pm ET                      │
+│                                              │
+│  [Price chart — 1W/1M/3M/1Y]                 │
+│                                              │
+│  YOUR POSITION                               │
+│  5 shares · $160.70 invested                 │
+│  Diversification Bonus: +10                  │
+│  [BUY]  [SELL]                               │
+│                                              │
+│  ─────────────────────────────────────────    │
+│                                              │
+│  WHAT'S INSIDE THIS ETF?                     │
+│                                              │
+│  When you buy 1 share of NACP, you own a     │
+│  piece of all of these companies at once.    │
+│  That's what an ETF is. One purchase.        │
+│  Instant diversification.                    │
+│                                              │
+│  213 COMPANIES · TOP 10 HOLDINGS:            │
+│                                              │
+│  ┌──────────────────────────────────────┐    │
+│  │  MSFT  Microsoft        4.2%        │    │
+│  │  AAPL  Apple            3.8%        │    │
+│  │  NVDA  NVIDIA           3.1%        │    │
+│  │  AMZN  Amazon           2.9%        │    │
+│  │  JPM   JPMorgan Chase   2.4%        │    │
+│  │  GOOGL Alphabet         2.2%        │    │
+│  │  UNH   UnitedHealth     1.9%        │    │
+│  │  V     Visa             1.7%        │    │
+│  │  PG    Procter & Gamble 1.5%        │    │
+│  │  HD    Home Depot       1.4%        │    │
+│  └──────────────────────────────────────┘    │
+│                                              │
+│  [See all 213 holdings]                      │
+│                                              │
+│  ─────────────────────────────────────────    │
+│                                              │
+│  HOW IS THIS DIFFERENT FROM PICKING STOCKS?  │
+│                                              │
+│  You traded CARV, UONE, and DRCT as          │
+│  individual picks. If one company has a       │
+│  bad quarter, your portfolio feels it.       │
+│                                              │
+│  NACP holds 213 companies. If one drops,     │
+│  the others absorb it. That's why your       │
+│  Diversification Score jumped +10 when you   │
+│  bought it.                                  │
+│                                              │
+│  ─────────────────────────────────────────    │
+│                                              │
+│  WHY "MINORITY EMPOWERMENT"?                 │
+│                                              │
+│  NACP screens companies based on racial      │
+│  and social justice criteria set by the       │
+│  NAACP. It's the only ETF designed in        │
+│  partnership with a civil rights              │
+│  organization. Your money goes to            │
+│  companies that meet empowerment standards.  │
+│                                              │
+│  That's social screening. You're encoding    │
+│  your values into your investments.          │
+│                                              │
+│  GLOSSARY: [ETF] [Diversification]           │
+│  [Social Screening] [Index Investing]        │
+│                                              │
+│  ─────────────────────────────────────────    │
+│                                              │
+│  NEWS                                        │
+│  (real articles from FMP)                    │
+│                                              │
+│  KEY METRICS                                 │
+│  Expense Ratio: 0.49%                        │
+│  Dividend Yield: 1.5%                        │
+│  Holdings: 213 companies                     │
+│  Inception: 2018                             │
+└──────────────────────────────────────────────┘
+```
+
+**Glossary chips at the bottom:** ETF, Diversification, Social Screening, and Index Investing are all tappable glossary terms. Four concepts taught on one page.
+
+**Educational sections explain in plain English:**
+- "What's inside this ETF?" shows the actual holdings from FMP data
+- "How is this different from picking stocks?" ties back to the player's own real ticker holdings
+- "Why Minority Empowerment?" teaches social screening as an investing concept
+
+**FMP data used:**
+- ETF holdings endpoint (1 call, cached weekly): full list of companies inside NACP with weights
+- Quote endpoint (included in 4x/day price refresh): current price
+- ETF info/expense ratio (1 call, cached monthly): expense ratio, inception date, dividend yield
+
+This adds 2-3 calls per week to the FMP budget. Negligible.
 
 ---
 
