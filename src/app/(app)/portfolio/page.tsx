@@ -14,6 +14,7 @@ const AllocationChart = dynamic(
 import { DiversificationScore } from "@/components/portfolio/diversification-score";
 import { PortfolioCoach } from "@/components/education/portfolio-coach";
 import { ProfessorMode } from "@/components/education/professor-mode";
+import { SharePortfolioButton } from "@/components/portfolio/share-portfolio-button";
 
 export default function PortfolioPage() {
   const { user, isLoaded } = useUser();
@@ -82,6 +83,16 @@ export default function PortfolioPage() {
           dayPnlPercent={dayPnlPercent}
           cashInCents={player.cashInCents}
         />
+
+        {/* Share portfolio button */}
+        {!isEmpty && (
+          <SharePortfolioButton
+            totalValueInCents={totalValueInCents}
+            dayPnlPercent={dayPnlPercent}
+            holdingsCount={holdings.length}
+            sectorCount={new Set(holdings.map((h) => h.sector)).size}
+          />
+        )}
 
         {/* Middle row: allocation chart + diversification score side by side on desktop */}
         <div className="flex flex-col lg:flex-row gap-6">

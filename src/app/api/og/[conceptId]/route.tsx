@@ -99,11 +99,16 @@ const CONCEPT_MAP: Record<string, { name: string; oneLiner: string }> = {
 };
 
 export async function GET(
-  _request: Request,
+  request: Request,
   props: { params: Promise<{ conceptId: string }> }
 ) {
   const { conceptId } = await props.params;
   const concept = CONCEPT_MAP[conceptId];
+
+  const url = new URL(request.url);
+  const playerName = url.searchParams.get("player") ?? "";
+  const unlocked = url.searchParams.get("unlocked") ?? "";
+  const total = url.searchParams.get("total") ?? "23";
 
   const name = concept?.name ?? "Financial Concept";
   const oneLiner = concept?.oneLiner ?? "Learn to build wealth on BLK Exchange.";
@@ -153,7 +158,9 @@ export async function GET(
               textTransform: "uppercase",
             }}
           >
-            Vault Concept
+            {playerName
+              ? `${playerName} · ${unlocked} of ${total} concepts`
+              : "Knowledge Vault"}
           </span>
         </div>
 
@@ -217,23 +224,18 @@ export async function GET(
               letterSpacing: "0.1em",
             }}
           >
-            #BLKExchange · #FinancialLiteracy
+            Learn to Invest. Trade the Culture.
           </span>
-          <div
+          <span
             style={{
-              backgroundColor: "#FDE047",
-              color: "#0e0e0e",
-              fontSize: "16px",
+              color: "#7F77DD",
+              fontSize: "20px",
               fontWeight: "700",
-              letterSpacing: "0.15em",
-              textTransform: "uppercase",
-              padding: "10px 20px",
-              border: "2px solid #000000",
-              boxShadow: "3px 3px 0px 0px #000000",
+              letterSpacing: "0.1em",
             }}
           >
-            Unlock Your Knowledge
-          </div>
+            blkexchange.com
+          </span>
         </div>
       </div>
     ),

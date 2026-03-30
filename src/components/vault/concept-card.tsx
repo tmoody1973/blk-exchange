@@ -51,10 +51,9 @@ function buildShareText(
   portfolioValueAtUnlock: number,
   definition: string
 ): string {
-  // Extract a one-liner: first sentence of the definition
   const oneLiner = definition.split(".")[0].trim() + ".";
   const portfolioFormatted = formatCents(portfolioValueAtUnlock);
-  return `I just learned about ${conceptName} on BLK Exchange! My portfolio was at ${portfolioFormatted} when I unlocked it. ${oneLiner} 🎓📈 #BLKExchange #FinancialLiteracy`;
+  return `I just learned about ${conceptName} on BLK Exchange! My portfolio was at ${portfolioFormatted} when I unlocked it. ${oneLiner}\n\nblkexchange.com #BLKExchange #FinancialLiteracy`;
 }
 
 export function ConceptCard({
@@ -206,23 +205,41 @@ export function ConceptCard({
             </div>
           </div>
 
-          {/* Share button */}
-          <button
-            className="w-full border-2 py-2 font-mono text-xs font-bold uppercase tracking-widest transition-all"
-            style={{
-              borderColor: shareState !== "idle" ? "#FDE047" : "#ffffff30",
-              color: shareState !== "idle" ? "#0e0e0e" : "#ffffff80",
-              backgroundColor: shareState !== "idle" ? "#FDE047" : "transparent",
-              boxShadow: shareState !== "idle" ? "3px 3px 0px 0px #000000" : "none",
-            }}
-            onClick={handleShare}
-          >
-            {shareState === "copied"
-              ? "Copied!"
-              : shareState === "shared"
-              ? "Shared!"
-              : "Share Knowledge"}
-          </button>
+          {/* Share buttons */}
+          <div className="flex gap-2">
+            <button
+              className="flex-1 border-2 py-2 font-mono text-xs font-bold uppercase tracking-widest transition-all"
+              style={{
+                borderColor: shareState !== "idle" ? "#FDE047" : "#ffffff30",
+                color: shareState !== "idle" ? "#0e0e0e" : "#ffffff80",
+                backgroundColor: shareState !== "idle" ? "#FDE047" : "transparent",
+                boxShadow: shareState !== "idle" ? "3px 3px 0px 0px #000000" : "none",
+              }}
+              onClick={handleShare}
+            >
+              {shareState === "copied"
+                ? "Copied!"
+                : shareState === "shared"
+                ? "Shared!"
+                : "Share Knowledge"}
+            </button>
+            <a
+              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
+                buildShareText(conceptName, portfolioValueAtUnlock, definition)
+              )}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="border-2 py-2 px-4 font-mono text-xs font-bold uppercase tracking-widest transition-all"
+              style={{
+                borderColor: "#ffffff30",
+                color: "#ffffff80",
+                backgroundColor: "transparent",
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              Post to X
+            </a>
+          </div>
         </div>
       )}
     </div>
