@@ -16,6 +16,7 @@ const PriceChart = dynamic(
 import { COMPANY_BACKSTORIES } from "@/data/company-backstories";
 import { TradeModal } from "@/components/trade/trade-modal";
 import { ProfessorMode } from "@/components/education/professor-mode";
+import { StockNewsFeed } from "@/components/market/stock-news-feed";
 
 type PageProps = {
   params: { symbol: string };
@@ -197,6 +198,11 @@ export default function TickerDetailPage({ params }: PageProps) {
               </p>
             </div>
           </div>
+        </div>
+
+        {/* News & Events for this stock */}
+        <div className="mb-6">
+          <StockNewsFeed symbol={symbol.toUpperCase()} />
         </div>
 
         {/* Your Position */}

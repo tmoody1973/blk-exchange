@@ -60,6 +60,21 @@ export const countRecentArticles = internalQuery({
   },
 });
 
+// Get articles classified to a specific ticker
+export const getArticlesByTicker = query({
+  args: { symbol: v.string() },
+  handler: async (ctx, args) => {
+    const allArticles = await ctx.db
+      .query("articles")
+      .order("desc")
+      .take(200);
+
+    return allArticles
+      .filter((a) => a.classifiedTickers.includes(args.symbol))
+      .slice(0, 10);
+  },
+});
+
 // Mark article as processed into event
 export const markProcessed = internalMutation({
   args: { articleId: v.id("articles") },
