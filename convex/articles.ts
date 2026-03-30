@@ -20,6 +20,7 @@ export const insertArticle = internalMutation({
     title: v.string(),
     publication: v.string(),
     summary: v.optional(v.string()),
+    imageUrl: v.optional(v.string()),
     significance: v.number(),
     classifiedTickers: v.array(v.string()),
     classifiedConcept: v.optional(v.string()),
@@ -72,6 +73,17 @@ export const getArticlesByTicker = query({
     return allArticles
       .filter((a) => a.classifiedTickers.includes(args.symbol))
       .slice(0, 10);
+  },
+});
+
+// Get all recent articles for the news feed page
+export const getRecentArticles = query({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db
+      .query("articles")
+      .order("desc")
+      .take(50);
   },
 });
 

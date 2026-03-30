@@ -37,6 +37,8 @@ export const discover = internalAction({
       queries.map(async (query) => {
         const response = await client.chat.completions.create({
           model: "sonar",
+          // @ts-expect-error - return_images is a Perplexity extension not in OpenAI types
+          return_images: true,
           messages: [
             {
               role: "system",
@@ -49,6 +51,19 @@ export const discover = internalAction({
             },
           ],
         });
+
+        // Extract images from Perplexity response
+        const imageMap = new Map<string, string>();
+        const rawResponse = response as unknown as {
+          images?: Array<{ image_url: string; origin_url: string }>;
+        };
+        if (rawResponse.images) {
+          for (const img of rawResponse.images) {
+            if (img.origin_url && img.image_url) {
+              imageMap.set(img.origin_url, img.image_url);
+            }
+          }
+        }
 
         const content = response.choices[0]?.message?.content;
         if (!content) return 0;
@@ -90,6 +105,9 @@ export const discover = internalAction({
             hostname = article.source || "unknown";
           }
 
+          // Try to find an image for this article
+          const articleImage = imageMap.get(article.url) ?? undefined;
+
           const articleId = await ctx.runMutation(
             internal.articles.insertArticle,
             {
@@ -98,6 +116,7 @@ export const discover = internalAction({
               title: article.title,
               publication: article.source || hostname,
               summary: article.summary?.slice(0, 500),
+              imageUrl: articleImage,
               significance: 0,
               classifiedTickers: [],
               sourceLayer: "perplexity",

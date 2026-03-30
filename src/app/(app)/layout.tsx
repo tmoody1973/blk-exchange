@@ -7,7 +7,7 @@ import { useUser, SignOutButton } from "@clerk/nextjs";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
-import { BarChart3, Wallet, BookOpen, Trophy, User, LogOut } from "lucide-react";
+import { BarChart3, Wallet, BookOpen, Trophy, User, LogOut, Newspaper } from "lucide-react";
 import dynamic from "next/dynamic";
 import { BottomTabs } from "@/components/layout/bottom-tabs";
 import { GameStatusBar } from "@/components/game/status-bar";
@@ -69,6 +69,17 @@ function DesktopNav() {
         );
       })}
 
+      <Link
+        href="/news"
+        className="flex items-center gap-2 px-3 py-1.5 font-mono text-sm transition-colors ml-2"
+        style={{
+          color: pathname === "/news" ? "#7F77DD" : "#ffffff80",
+          borderBottom: pathname === "/news" ? "2px solid #7F77DD" : "2px solid transparent",
+        }}
+      >
+        <Newspaper size={16} />
+        News
+      </Link>
       <Link
         href={HOW_TO_PLAY_HREF}
         className="flex items-center gap-2 px-3 py-1.5 font-mono text-sm transition-colors ml-2"

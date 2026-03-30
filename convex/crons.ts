@@ -10,11 +10,19 @@ crons.interval(
   internal.eventScheduler.fireNextEvent
 );
 
-// News pipeline every 15 minutes — Firecrawl + Perplexity
+// Perplexity news discovery every 15 minutes (free/cheap)
 crons.interval(
-  "news pipeline",
+  "perplexity news",
   { minutes: 15 },
-  internal.news.scheduler.runPipeline
+  internal.news.perplexity.discover
+);
+
+// Firecrawl publication scraping 3x/day (conserves 3,000 monthly credits)
+// 16 publications x 3/day = 48 scrapes/day x 30 = 1,440/month (within budget)
+crons.interval(
+  "firecrawl scrape",
+  { hours: 8 },
+  internal.news.firecrawl.scrape
 );
 
 // Fictional company news 3x/day (every 8 hours)

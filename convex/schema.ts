@@ -91,6 +91,7 @@ export default defineSchema({
     title: v.string(),
     publication: v.string(),
     summary: v.optional(v.string()),
+    imageUrl: v.optional(v.string()),
     significance: v.number(),
     classifiedTickers: v.array(v.string()),
     classifiedConcept: v.optional(v.string()),
