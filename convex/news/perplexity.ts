@@ -28,7 +28,7 @@ export const discover = internalAction({
       "Black real estate development, community banking, CDFI lending, and wealth building news this week",
       "Black fashion brands, beauty companies, hair care, skincare launches and partnerships recently",
       "Black sports business, athlete ventures, esports, and sports media deals this week",
-      "Latest news from AfroTech, Blavity, Black Enterprise, Essence, and The Root about Black business and culture",
+      "Latest news from AfroTech, Blavity, Black Enterprise, Essence, The Root, and Capital B News about Black business and culture",
       "Black-owned public companies stock news: Urban One UONE, Carver Bancorp CARV, Broadway Financial BYFC, Direct Digital DRCT",
       "Recent Black Wall Street, financial literacy, investing education, and economic empowerment news",
     ];

@@ -52,7 +52,7 @@ export const updateClassification = internalMutation({
   },
 });
 
-// Count recent articles (for Tavily fallback trigger)
+// Count recent articles (for monitoring)
 export const countRecentArticles = internalQuery({
   args: { sinceTimestamp: v.number() },
   handler: async (ctx, args) => {
@@ -92,5 +92,49 @@ export const markProcessed = internalMutation({
   args: { articleId: v.id("articles") },
   handler: async (ctx, args) => {
     await ctx.db.patch(args.articleId, { processedAsEvent: true });
+  },
+});
+
+// One-time cleanup: delete junk articles (nav links, browser warnings, donation forms)
+export const cleanupJunkArticles = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const allArticles = await ctx.db.query("articles").collect();
+    let deleted = 0;
+
+    for (const article of allArticles) {
+      const title = article.title.toLowerCase();
+      const isJunk =
+        // Markdown link syntax still in title
+        article.title.includes("](http") ||
+        article.title.includes("[") ||
+        // Browser warnings
+        title.includes("ie 11") ||
+        title.includes("not supported") ||
+        title.includes("optimal experience") ||
+        // Site chrome / nav
+        title.includes("cookie") ||
+        title.includes("subscribe") ||
+        title.includes("newsletter") ||
+        title.includes("sign up") ||
+        title.includes("log in") ||
+        title.includes("donation amount") ||
+        title.includes("stay informed") ||
+        title.includes("privacy") ||
+        title.includes("terms of") ||
+        // Too short to be a real headline
+        article.title.split(/\s+/).length < 5 ||
+        // Starts with markdown
+        article.title.startsWith("##") ||
+        article.title.startsWith("**") ||
+        article.title.startsWith("- ");
+
+      if (isJunk) {
+        await ctx.db.delete(article._id);
+        deleted++;
+      }
+    }
+
+    return { deleted, total: allArticles.length };
   },
 });
