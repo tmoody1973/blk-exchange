@@ -99,18 +99,33 @@ export const scrape = internalAction({
 function extractTitles(markdown: string): string[] {
   const lines = markdown.split("\n");
   return lines
-    .filter((line) => {
-      const trimmed = line.trim();
-      // Headlines are typically 20-200 chars, not too short or long
-      return (
-        trimmed.length >= 20 &&
-        trimmed.length <= 200 &&
-        !trimmed.startsWith("http") &&
-        !trimmed.startsWith("[") &&
-        !trimmed.startsWith("*") &&
-        !trimmed.includes("cookie") &&
-        !trimmed.includes("subscribe")
-      );
+    .map((line) => {
+      let trimmed = line.trim();
+      // Strip markdown heading markers
+      trimmed = trimmed.replace(/^#{1,4}\s*/, "");
+      // Strip markdown link syntax: [text](url) -> text
+      trimmed = trimmed.replace(/\[([^\]]+)\]\([^)]+\)/g, "$1");
+      return trimmed;
+    })
+    .filter((trimmed) => {
+      // Must be article-headline length
+      if (trimmed.length < 30 || trimmed.length > 200) return false;
+      // Skip URLs
+      if (trimmed.startsWith("http") || trimmed.includes("://")) return false;
+      // Skip nav items, categories, and short labels
+      if (trimmed.startsWith("[") || trimmed.startsWith("*") || trimmed.startsWith("-")) return false;
+      // Skip common non-article patterns
+      const lower = trimmed.toLowerCase();
+      if (lower.includes("cookie") || lower.includes("subscribe") || lower.includes("newsletter")) return false;
+      if (lower.includes("sign up") || lower.includes("log in") || lower.includes("privacy policy")) return false;
+      if (lower.includes("terms of") || lower.includes("about us") || lower.includes("contact us")) return false;
+      if (lower.includes("category") || lower.includes("explore") || lower.includes("see more")) return false;
+      if (lower.includes("advertisement") || lower.includes("sponsored")) return false;
+      // Skip lines that are just a few words (nav links)
+      if (trimmed.split(/\s+/).length < 5) return false;
+      // Must have at least one capital letter (headline-like)
+      if (!/[A-Z]/.test(trimmed)) return false;
+      return true;
     })
     .slice(0, 10);
 }
