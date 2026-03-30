@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 
@@ -40,6 +41,7 @@ type ArticleItem = {
 type FeedItem = EventItem | ArticleItem;
 
 export function StockNewsFeed({ symbol }: StockNewsFeedProps) {
+  const [isOpen, setIsOpen] = useState(false);
   const events = useQuery(api.events.getEventsBySymbol, { symbol });
   const articles = useQuery(api.articles.getArticlesByTicker, { symbol });
 
@@ -49,12 +51,12 @@ export function StockNewsFeed({ symbol }: StockNewsFeedProps) {
         className="border-2 border-[#ffffff] bg-[#1a1a1a] p-4"
         style={{ boxShadow: "4px 4px 0px 0px #ffffff" }}
       >
-        <h2 className="font-mono font-bold text-white text-sm uppercase tracking-wider mb-3 border-b-2 border-[#ffffff] pb-2">
+        <h2 className="font-mono font-bold text-white text-sm uppercase tracking-wider">
           News & Events
         </h2>
-        <div className="space-y-3">
+        <div className="mt-3 space-y-3">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-16 bg-white/5 animate-pulse" />
+            <div key={i} className="h-12 bg-white/5 animate-pulse" />
           ))}
         </div>
       </div>
@@ -96,35 +98,65 @@ export function StockNewsFeed({ symbol }: StockNewsFeedProps) {
 
   const isEmpty = feedItems.length === 0;
 
+  const itemCount = feedItems.length;
+
   return (
     <div
-      className="border-2 border-[#ffffff] bg-[#1a1a1a] p-4"
+      className="border-2 border-[#ffffff] bg-[#1a1a1a]"
       style={{ boxShadow: "4px 4px 0px 0px #ffffff" }}
     >
-      <h2 className="font-mono font-bold text-white text-sm uppercase tracking-wider mb-3 border-b-2 border-[#ffffff] pb-2">
-        News & Events
-      </h2>
-
-      {isEmpty ? (
-        <div className="py-6 text-center">
-          <p className="font-mono text-white/30 text-sm">
-            No news yet for {symbol}. Events will appear as the market moves.
-          </p>
-        </div>
-      ) : (
-        <div className="space-y-0">
-          {feedItems.slice(0, 8).map((item, i) => (
-            <div
-              key={i}
-              className="py-3 border-b border-white/10 last:border-b-0"
+      {/* Accordion header */}
+      <button
+        onClick={() => setIsOpen((prev) => !prev)}
+        className="w-full flex items-center justify-between p-4 text-left"
+        aria-expanded={isOpen}
+      >
+        <div className="flex items-center gap-3">
+          <h2 className="font-mono font-bold text-white text-sm uppercase tracking-wider">
+            News & Events
+          </h2>
+          {itemCount > 0 && (
+            <span
+              className="font-mono text-[10px] font-bold px-2 py-0.5 border"
+              style={{ borderColor: "#7F77DD", color: "#7F77DD" }}
             >
-              {item.kind === "event" ? (
-                <EventCard item={item} />
-              ) : (
-                <ArticleCard item={item} />
-              )}
+              {itemCount}
+            </span>
+          )}
+        </div>
+        <span
+          className="font-mono text-lg text-white/40 transition-transform"
+          style={{ transform: isOpen ? "rotate(0deg)" : "rotate(-90deg)" }}
+        >
+          ▾
+        </span>
+      </button>
+
+      {/* Accordion content */}
+      {isOpen && (
+        <div className="border-t border-white/10 px-4 pb-4">
+          {isEmpty ? (
+            <div className="py-6 text-center">
+              <p className="font-mono text-white/30 text-sm">
+                No news yet for {symbol}. Events will appear as the market moves.
+              </p>
             </div>
-          ))}
+          ) : (
+            <div className="space-y-0">
+              {feedItems.slice(0, 8).map((item, i) => (
+                <div
+                  key={i}
+                  className="py-3 border-b border-white/10 last:border-b-0"
+                >
+                  {item.kind === "event" ? (
+                    <EventCard item={item} />
+                  ) : (
+                    <ArticleCard item={item} />
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
     </div>

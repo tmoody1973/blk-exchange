@@ -19,6 +19,7 @@ export const scrape = internalAction({
       { name: "Rolling Out", url: "https://rollingout.com" },
       { name: "EURweb", url: "https://eurweb.com" },
       { name: "Invest Fest", url: "https://investfest.com" },
+      { name: "Capital B News", url: "https://capitalbnews.org" },
     ];
 
     const results = await Promise.allSettled(

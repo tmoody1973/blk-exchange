@@ -17,6 +17,7 @@ import { COMPANY_BACKSTORIES } from "@/data/company-backstories";
 import { TradeModal } from "@/components/trade/trade-modal";
 import { ProfessorMode } from "@/components/education/professor-mode";
 import { StockNewsFeed } from "@/components/market/stock-news-feed";
+import { GlossaryChip } from "@/components/glossary/glossary-chip";
 
 type PageProps = {
   params: { symbol: string };
@@ -183,7 +184,13 @@ export default function TickerDetailPage({ params }: PageProps) {
           <div className="mt-4 grid grid-cols-2 gap-4">
             <div>
               <p className="font-mono text-xs text-white/40 uppercase tracking-wider">
-                Market Cap
+                {player ? (
+                  <GlossaryChip termId="market-cap" playerId={player._id}>
+                    Market Cap
+                  </GlossaryChip>
+                ) : (
+                  "Market Cap"
+                )}
               </p>
               <p className="font-mono text-white text-sm font-bold">
                 ${(stock.marketCapInCents / 100).toLocaleString()}
