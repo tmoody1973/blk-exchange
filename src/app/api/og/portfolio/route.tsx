@@ -4,12 +4,12 @@ export const runtime = "edge";
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
-  const playerName = url.searchParams.get("player") ?? "Trader";
-  const portfolioValue = url.searchParams.get("value") ?? "$10,000.00";
-  const change = url.searchParams.get("change") ?? "+0.00%";
-  const sectors = url.searchParams.get("sectors") ?? "0";
-  const concepts = url.searchParams.get("concepts") ?? "0";
-  const holdings = url.searchParams.get("holdings") ?? "0";
+  const playerName = (url.searchParams.get("player") ?? "Trader").slice(0, 30);
+  const portfolioValue = (url.searchParams.get("value") ?? "$10,000.00").slice(0, 20);
+  const change = (url.searchParams.get("change") ?? "+0.00%").slice(0, 10);
+  const sectors = (url.searchParams.get("sectors") ?? "0").slice(0, 5);
+  const concepts = (url.searchParams.get("concepts") ?? "0").slice(0, 5);
+  const holdings = (url.searchParams.get("holdings") ?? "0").slice(0, 5);
 
   const isPositive = !change.startsWith("-");
   const changeColor = isPositive ? "#22c55e" : "#ef4444";
@@ -59,7 +59,7 @@ export async function GET(request: Request) {
               textTransform: "uppercase",
             }}
           >
-            {playerName}&apos;s Portfolio
+            {`${playerName}\u2019s Portfolio`}
           </span>
         </div>
 

@@ -106,9 +106,9 @@ export async function GET(
   const concept = CONCEPT_MAP[conceptId];
 
   const url = new URL(request.url);
-  const playerName = url.searchParams.get("player") ?? "";
-  const unlocked = url.searchParams.get("unlocked") ?? "";
-  const total = url.searchParams.get("total") ?? "23";
+  const playerName = (url.searchParams.get("player") ?? "").slice(0, 30);
+  const unlocked = (url.searchParams.get("unlocked") ?? "").slice(0, 5);
+  const total = (url.searchParams.get("total") ?? "23").slice(0, 5);
 
   const name = concept?.name ?? "Financial Concept";
   const oneLiner = concept?.oneLiner ?? "Learn to build wealth on BLK Exchange.";
