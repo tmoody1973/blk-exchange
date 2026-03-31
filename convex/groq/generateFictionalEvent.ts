@@ -96,18 +96,27 @@ export const generate = internalAction({
       apiKey,
     });
 
-    // Force ~40% negative events by checking recent sentiment balance
+    // Balance sentiment: target ~60% positive, ~40% negative
     const recentPositive = recentEvents.filter(e =>
       e.affectedStocks.length > 0 && e.affectedStocks[0].changePercent > 0
     ).length;
     const recentNegative = recentEvents.filter(e =>
       e.affectedStocks.length > 0 && e.affectedStocks[0].changePercent < 0
     ).length;
-    const needsNegative = recentPositive > recentNegative * 1.5;
+    const total = recentPositive + recentNegative;
+    const positiveRatio = total > 0 ? recentPositive / total : 0.5;
 
-    const sentimentInstruction = needsNegative
-      ? `\n\nCRITICAL: The market has been too positive. You MUST generate a NEGATIVE event. Earnings miss, product recall, executive departure, lawsuit, competitive loss, or regulatory setback. The primary stock MUST go DOWN (changePercent between -2 and -8).`
-      : `\n\nSENTIMENT: Real markets have bad days. About 40% of events should be negative: earnings misses, product delays, departures, competitive losses, regulatory issues. Do not default to good news.`;
+    let sentimentInstruction: string;
+    if (positiveRatio > 0.7) {
+      // Too positive — force a negative event
+      sentimentInstruction = `\n\nCRITICAL: The market has been too positive lately (${recentPositive} positive vs ${recentNegative} negative). You MUST generate a NEGATIVE event. Earnings miss, product recall, executive departure, or competitive loss. The primary stock MUST go DOWN (changePercent between -2 and -8).`;
+    } else if (positiveRatio < 0.4) {
+      // Too negative — force a positive event
+      sentimentInstruction = `\n\nCRITICAL: The market has been too negative lately (${recentPositive} positive vs ${recentNegative} negative). You MUST generate a POSITIVE event. New partnership, revenue beat, product launch, or expansion announcement. The primary stock MUST go UP (changePercent between +2 and +8).`;
+    } else {
+      // Balanced — let the model decide naturally
+      sentimentInstruction = `\n\nSENTIMENT: The market is currently balanced. Generate whatever event feels most realistic for the chosen company. Real markets have a mix of good and bad days.`;
+    }
 
     const systemPrompt = `You are the BLK Exchange News Desk, generating fictional business news for a Black cultural stock market simulator. Generate a realistic business news event for one of the 36 fictional Black-economy companies.
 
