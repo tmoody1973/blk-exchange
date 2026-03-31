@@ -56,8 +56,8 @@ export default function MarketPage() {
 
         {/* Right column — 35% on desktop */}
         <div className="w-full lg:w-[35%] space-y-6">
-          <SectorPerformance />
           <NewsFeed />
+          <SectorPerformance />
         </div>
       </div>
     </div>

@@ -49,17 +49,17 @@ const SECTOR_NAMES: Record<string, string> = {
 // Map BLK Exchange sectors to real ETFs
 const SECTOR_TO_ETF: Record<string, string> = {
   media: "XLC",
-  streaming: "XLC",
-  music: "XLC",
-  gaming: "XLY",
+  streaming: "NERD",
+  music: "MUSQ",
+  gaming: "HERO",
   sportswear: "XLY",
-  fashion: "XLY",
+  fashion: "KLXY",
   publishing: "XLC",
   beauty: "XLP",
   finance: "XLF",
-  realestate: "XLRE",
-  sports: "XLY",
-  entertainment: "XLC",
+  realestate: "VNQ",
+  sports: "FANZ",
+  entertainment: "PEJ",
 };
 
 export const getSimSectorPerformance = query({
@@ -129,10 +129,16 @@ export const fetchRealSectorData = internalAction({
 
     const etfs = [
       { symbol: "XLF", name: "Financials" },
-      { symbol: "XLC", name: "Communication Services" },
-      { symbol: "XLY", name: "Consumer Discretionary" },
+      { symbol: "XLC", name: "Comm. Services" },
+      { symbol: "XLY", name: "Consumer Disc." },
       { symbol: "XLP", name: "Consumer Staples" },
-      { symbol: "XLRE", name: "Real Estate" },
+      { symbol: "VNQ", name: "Real Estate" },
+      { symbol: "HERO", name: "Gaming & Esports" },
+      { symbol: "MUSQ", name: "Music Industry" },
+      { symbol: "NERD", name: "Streaming & Digital" },
+      { symbol: "PEJ", name: "Leisure & Entertainment" },
+      { symbol: "KLXY", name: "Global Luxury" },
+      { symbol: "FANZ", name: "Pro Sports" },
     ];
 
     for (const etf of etfs) {
