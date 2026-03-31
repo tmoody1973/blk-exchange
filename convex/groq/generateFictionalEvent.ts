@@ -96,9 +96,23 @@ export const generate = internalAction({
       apiKey,
     });
 
+    // Force ~40% negative events by checking recent sentiment balance
+    const recentPositive = recentEvents.filter(e =>
+      e.affectedStocks.length > 0 && e.affectedStocks[0].changePercent > 0
+    ).length;
+    const recentNegative = recentEvents.filter(e =>
+      e.affectedStocks.length > 0 && e.affectedStocks[0].changePercent < 0
+    ).length;
+    const needsNegative = recentPositive > recentNegative * 1.5;
+
+    const sentimentInstruction = needsNegative
+      ? `\n\nCRITICAL: The market has been too positive. You MUST generate a NEGATIVE event. Earnings miss, product recall, executive departure, lawsuit, competitive loss, or regulatory setback. The primary stock MUST go DOWN (changePercent between -2 and -8).`
+      : `\n\nSENTIMENT: Real markets have bad days. About 40% of events should be negative: earnings misses, product delays, departures, competitive losses, regulatory issues. Do not default to good news.`;
+
     const systemPrompt = `You are the BLK Exchange News Desk, generating fictional business news for a Black cultural stock market simulator. Generate a realistic business news event for one of the 36 fictional Black-economy companies.
 
 IMPORTANT ROTATION RULE: You MUST pick from these underserved stocks that haven't had events recently: ${suggestedSymbols.join(", ")}. Do NOT generate events for: ${overserved.join(", ")} — they already had too many recent events.
+${sentimentInstruction}
 
 You must return valid JSON with these fields:
 - headline: string (1-2 sentence business headline)
@@ -107,6 +121,14 @@ You must return valid JSON with these fields:
 - eventType: "earnings" | "product" | "partnership" | "personnel" | "macro"
 - conceptTaught: string (one of the 23 financial literacy concepts this event demonstrates, or null)
 - commentary: null (will be filled by commentary model)
+
+NEGATIVE EVENT EXAMPLES (use these as inspiration when generating bad news):
+- "[TICKER] Reports Q4 Revenue Miss, Down 12% Year-Over-Year"
+- "[TICKER] Loses Key Executive as Chief Revenue Officer Departs"
+- "[TICKER] Faces Regulatory Scrutiny Over Data Practices"
+- "[TICKER] Product Launch Delayed to Q3, Citing Supply Chain Issues"
+- "[TICKER] Loses Major Distribution Deal to Competitor"
+- "Sector Downturn Hits [SECTOR] Stocks as Consumer Spending Slows"
 
 The event should feel like real business news from AfroTech or Black Enterprise. Keep price moves realistic: most are 2-5%, significant events 5-8%. Do NOT exceed 10%.`;
 

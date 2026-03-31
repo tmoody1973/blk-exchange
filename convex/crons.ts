@@ -32,6 +32,14 @@ crons.interval(
   internal.groq.generateFictionalEvent.generate
 );
 
+// Market simulation engine: background noise, sector rotation, mean reversion
+// Runs every 30 min to make prices feel alive between events
+crons.interval(
+  "market simulation",
+  { minutes: 30 },
+  internal.marketEngine.simulateMarket
+);
+
 // Daily price reset at midnight ET (5:00 UTC)
 crons.cron(
   "daily price reset",
