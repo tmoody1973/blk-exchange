@@ -156,28 +156,11 @@ export function SectorPerformance() {
 
               {/* Expanded dropdown */}
               {isExpanded && (
-                <div className="pb-3 pl-3 pr-1">
-                  {/* Real ETF comparison */}
-                  {realEtf && (
-                    <div className="flex items-center gap-2 mb-3 p-3 bg-[#0e0e0e] border border-white/10">
-                      <span className="font-mono text-xs text-white/50">Real Market:</span>
-                      <span className="font-mono text-xs font-bold text-white/70">
-                        {ETF_NAMES[sector.realEtf!] ?? sector.realEtf}
-                      </span>
-                      <span
-                        className="font-mono text-xs font-bold ml-auto"
-                        style={{ color: realEtf.changePercent >= 0 ? "#22c55e" : "#ef4444" }}
-                      >
-                        {realEtf.changePercent >= 0 ? "+" : ""}{realEtf.changePercent.toFixed(2)}%
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Explanation */}
-                  <p className="font-mono text-xs text-white/60 leading-relaxed">
-                    {SECTOR_EXPLANATIONS[sector.id] ?? ""}
-                  </p>
-                </div>
+                <SectorDetail
+                  sectorId={sector.id}
+                  realEtf={realEtf}
+                  realEtfSymbol={sector.realEtf}
+                />
               )}
             </div>
           );
@@ -193,3 +176,119 @@ export function SectorPerformance() {
     </div>
   );
 }
+
+// ─── Sector Detail Dropdown ─────────────────────────────────────────────────
+
+function SectorDetail({
+  sectorId,
+  realEtf,
+  realEtfSymbol,
+}: {
+  sectorId: string;
+  realEtf: { changePercent: number; price: number } | null;
+  realEtfSymbol: string | null;
+}) {
+  const stocks = useQuery(api.sectorData.getStocksBySector, { sector: sectorId });
+
+  return (
+    <div className="pb-4 pl-2 pr-1">
+      {/* Individual stocks in this sector */}
+      <div className="mb-3">
+        <p className="font-mono text-[10px] text-white/30 uppercase tracking-widest mb-2">
+          BLK Exchange Tickers
+        </p>
+        <div className="space-y-1">
+          {stocks === undefined ? (
+            <div className="h-16 bg-white/5 animate-pulse" />
+          ) : (
+            stocks.map((stock) => {
+              const stockPositive = stock.dailyChangePercent >= 0;
+              const stockColor = stockPositive ? "#22c55e" : "#ef4444";
+              return (
+                <div
+                  key={stock.symbol}
+                  className="flex items-center justify-between py-1.5 px-2 bg-[#0e0e0e] border border-white/5"
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-xs font-bold text-white">
+                      {stock.symbol}
+                    </span>
+                    <span className="font-mono text-[10px] text-white/30 hidden sm:inline">
+                      {stock.name}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="font-mono text-xs text-white/60">
+                      ${(stock.priceInCents / 100).toFixed(2)}
+                    </span>
+                    <span
+                      className="font-mono text-xs font-bold min-w-[50px] text-right"
+                      style={{ color: stockColor }}
+                    >
+                      {stockPositive ? "+" : ""}{stock.dailyChangePercent.toFixed(1)}%
+                    </span>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </div>
+
+      {/* Real ETF comparison */}
+      {realEtf && realEtfSymbol && (
+        <div className="mb-3">
+          <p className="font-mono text-[10px] text-white/30 uppercase tracking-widest mb-2">
+            Real Market Equivalent
+          </p>
+          <div className="p-3 bg-[#0e0e0e] border border-[#7F77DD]/30">
+            <div className="flex items-center justify-between mb-2">
+              <div>
+                <span className="font-mono text-sm font-bold text-white">
+                  {realEtfSymbol}
+                </span>
+                <span className="font-mono text-xs text-white/40 ml-2">
+                  {ETF_NAMES[realEtfSymbol] ?? ""}
+                </span>
+              </div>
+              <div className="text-right">
+                <span className="font-mono text-sm font-bold text-white">
+                  ${realEtf.price.toFixed(2)}
+                </span>
+                <span
+                  className="font-mono text-xs font-bold ml-2"
+                  style={{ color: realEtf.changePercent >= 0 ? "#22c55e" : "#ef4444" }}
+                >
+                  {realEtf.changePercent >= 0 ? "+" : ""}{realEtf.changePercent.toFixed(2)}%
+                </span>
+              </div>
+            </div>
+            <p className="font-mono text-[10px] text-white/30 leading-relaxed">
+              This real ETF tracks companies similar to the ones in your BLK Exchange {SECTOR_NAMES_MAP[sectorId] ?? sectorId} sector. When both move in the same direction, that is sector correlation.
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Educational explanation */}
+      <p className="font-mono text-xs text-white/50 leading-relaxed">
+        {SECTOR_EXPLANATIONS[sectorId] ?? ""}
+      </p>
+    </div>
+  );
+}
+
+const SECTOR_NAMES_MAP: Record<string, string> = {
+  media: "Media & Content",
+  streaming: "Streaming",
+  music: "Music",
+  gaming: "Gaming",
+  sportswear: "Sportswear",
+  fashion: "Fashion",
+  publishing: "Publishing",
+  beauty: "Beauty",
+  finance: "Finance",
+  realestate: "Real Estate",
+  sports: "Sports",
+  entertainment: "Entertainment",
+};

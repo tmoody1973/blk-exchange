@@ -88,6 +88,25 @@ export const getSimSectorPerformance = query({
   },
 });
 
+// Per-stock data for sector dropdown detail view
+export const getStocksBySector = query({
+  args: { sector: v.string() },
+  handler: async (ctx, args) => {
+    const stocks = await ctx.db
+      .query("stocks")
+      .withIndex("by_sector", (q) => q.eq("sector", args.sector))
+      .collect();
+
+    return stocks.map((s) => ({
+      symbol: s.symbol,
+      name: s.name,
+      priceInCents: s.priceInCents,
+      dailyChangePercent: s.dailyChangePercent,
+      dailyChangeInCents: s.dailyChangeInCents,
+    }));
+  },
+});
+
 // ─── Real sector ETF data (fetched from Finnhub) ───────────────────────────
 
 export const getRealSectorData = query({
