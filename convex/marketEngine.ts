@@ -1,4 +1,5 @@
 import { internalMutation } from "./_generated/server";
+import { internal } from "./_generated/api";
 
 /**
  * Realistic market simulation engine.
@@ -111,8 +112,9 @@ export const simulateMarket = internalMutation({
       // Cap mean reversion to ±1.5% per tick
       const clampedReversion = Math.max(-1.5, Math.min(1.5, meanReversion));
 
-      // Layer 4: Negative bias (-0.1%) to counteract AI positive news tendency
-      const negativeBias = -0.1;
+      // Layer 4: Slight negative bias to counteract AI positive news tendency
+      // -0.03% per 30min tick = ~1.4%/day downward drift, offset by positive events
+      const negativeBias = -0.03;
 
       // Combine all layers
       const totalPctChange = noise + sectorPressure + clampedReversion + negativeBias;
@@ -140,6 +142,15 @@ export const simulateMarket = internalMutation({
         dailyChangePercent: newDailyChangePercent,
         marketCapInCents: newPrice * 1_000_000,
         priceHistory: newHistory,
+      });
+    }
+
+    // Recalculate leaderboard portfolio values for all players
+    // so the leaderboard reflects current market prices, not just trade-time prices
+    const allPlayers = await ctx.db.query("players").collect();
+    for (const player of allPlayers) {
+      await ctx.scheduler.runAfter(0, internal.leaderboards.updatePlayerScores, {
+        playerId: player._id,
       });
     }
   },

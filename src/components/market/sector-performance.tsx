@@ -126,24 +126,24 @@ export function SectorPerformance() {
 
                 {/* Name + arrow */}
                 <div className="flex-1 min-w-0">
-                  <p className="font-mono text-xs font-bold text-white">
+                  <p className="font-mono text-sm font-bold text-white">
                     {sector.name}
                     <span
-                      className="ml-1.5 text-white/20 text-[10px] transition-transform inline-block"
+                      className="ml-1.5 text-white/30 text-xs transition-transform inline-block"
                       style={{ transform: isExpanded ? "rotate(90deg)" : "rotate(0deg)" }}
                     >
                       ▸
                     </span>
                   </p>
                   {/* Tickers preview */}
-                  <p className="font-mono text-[9px] text-white/25 mt-0.5">
+                  <p className="font-mono text-[10px] text-white/40 mt-0.5">
                     {tickers.join(" · ")}
                   </p>
                 </div>
 
                 {/* Sim change */}
                 <div
-                  className="flex-shrink-0 font-mono text-xs font-bold px-2 py-1 min-w-[56px] text-center"
+                  className="flex-shrink-0 font-mono text-sm font-bold px-3 py-1 min-w-[64px] text-center"
                   style={{
                     color,
                     backgroundColor: `${color}10`,
@@ -159,13 +159,13 @@ export function SectorPerformance() {
                 <div className="pb-3 pl-3 pr-1">
                   {/* Real ETF comparison */}
                   {realEtf && (
-                    <div className="flex items-center gap-2 mb-2 p-2 bg-[#0e0e0e] border border-white/10">
-                      <span className="font-mono text-[10px] text-white/40">Real Market:</span>
-                      <span className="font-mono text-[10px] font-bold text-white/60">
+                    <div className="flex items-center gap-2 mb-3 p-3 bg-[#0e0e0e] border border-white/10">
+                      <span className="font-mono text-xs text-white/50">Real Market:</span>
+                      <span className="font-mono text-xs font-bold text-white/70">
                         {ETF_NAMES[sector.realEtf!] ?? sector.realEtf}
                       </span>
                       <span
-                        className="font-mono text-[10px] font-bold ml-auto"
+                        className="font-mono text-xs font-bold ml-auto"
                         style={{ color: realEtf.changePercent >= 0 ? "#22c55e" : "#ef4444" }}
                       >
                         {realEtf.changePercent >= 0 ? "+" : ""}{realEtf.changePercent.toFixed(2)}%
@@ -174,7 +174,7 @@ export function SectorPerformance() {
                   )}
 
                   {/* Explanation */}
-                  <p className="font-mono text-[11px] text-white/50 leading-relaxed">
+                  <p className="font-mono text-xs text-white/60 leading-relaxed">
                     {SECTOR_EXPLANATIONS[sector.id] ?? ""}
                   </p>
                 </div>
