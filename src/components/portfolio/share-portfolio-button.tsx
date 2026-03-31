@@ -28,7 +28,16 @@ export function SharePortfolioButton({
   const changePrefix = dayPnlPercent >= 0 ? "+" : "";
   const changeStr = `${changePrefix}${dayPnlPercent.toFixed(2)}%`;
 
-  const shareText = `My BLK Exchange portfolio: ${portfolioValue} (${changeStr}). ${holdingsCount} holdings across ${sectorCount} sectors.\n\nhttps://blkexchange.com #BLKExchange #FinancialLiteracy`;
+  // Build share URL that serves the dynamic OG card
+  const shareParams = new URLSearchParams({
+    value: portfolioValue,
+    change: changeStr,
+    holdings: String(holdingsCount),
+    sectors: String(sectorCount),
+  });
+  const shareUrl = `https://blkexchange.com/share/portfolio?${shareParams.toString()}`;
+
+  const shareText = `My BLK Exchange portfolio: ${portfolioValue} (${changeStr}). ${holdingsCount} holdings across ${sectorCount} sectors.\n\n${shareUrl} #BLKExchange #FinancialLiteracy`;
 
   const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
 

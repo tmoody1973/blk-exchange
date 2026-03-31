@@ -58,9 +58,9 @@ export const metadata: Metadata = {
     siteName: "BLK Exchange",
     images: [
       {
-        url: "/blk-exchange-social-card.png",
-        width: 1392,
-        height: 752,
+        url: "/blk-exchange-social-card.png?v=2",
+        width: 1200,
+        height: 630,
         alt: "BLK Exchange — Learn to Invest. Trade the Culture.",
       },
     ],
@@ -72,7 +72,7 @@ export const metadata: Metadata = {
     title: "BLK Exchange — Learn to Invest. Trade the Culture.",
     description:
       "Trade 36 Black-economy companies. Real cultural news moves the market. AI teaches you why.",
-    images: ["/blk-exchange-social-card.png"],
+    images: ["/blk-exchange-social-card.png?v=2"],
   },
 };
 

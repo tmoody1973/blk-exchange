@@ -95,6 +95,35 @@ export const markProcessed = internalMutation({
   },
 });
 
+// One-time cleanup: delete articles with fake/hallucinated URLs
+export const cleanupBadUrls = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const allArticles = await ctx.db.query("articles").collect();
+    let deleted = 0;
+
+    for (const article of allArticles) {
+      try {
+        const u = new URL(article.url);
+        if (
+          u.hostname === "example.com" ||
+          u.hostname === "localhost" ||
+          u.hostname.endsWith(".test") ||
+          !u.hostname.includes(".")
+        ) {
+          await ctx.db.delete(article._id);
+          deleted++;
+        }
+      } catch {
+        await ctx.db.delete(article._id);
+        deleted++;
+      }
+    }
+
+    return { deleted, total: allArticles.length };
+  },
+});
+
 // One-time cleanup: delete junk articles (nav links, browser warnings, donation forms)
 export const cleanupJunkArticles = internalMutation({
   args: {},
