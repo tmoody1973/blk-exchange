@@ -85,10 +85,37 @@ Unlike other simulators where learning is incidental, BLK Exchange embeds a 23-c
 - **Shareable concept cards** with OG image generation
 
 ### News Pipeline
-- **Firecrawl** scrapes curated Black media publications every 15 minutes
-- **Perplexity** researches broader cultural and economic trends
-- **Groq** generates fictional company lifecycle events 3x daily
-- All articles are classified to map to specific tickers and investing concepts
+- **Perplexity Search API** discovers news across 16 Black media publications (AfroTech, Essence, Black Enterprise, The Root, Blavity, Capital B, POCIT, HBCUBuzz, and more) with 15 queries every 15 minutes
+- **Firecrawl** scrapes publication homepages 3x daily for headline extraction
+- **Groq** generates fictional company lifecycle events 3x daily with forced 40% negative sentiment balance
+- All articles classified to specific tickers and investing concepts
+- Full news page at `/news` with filters, publication badges, and article images
+
+### Market Simulation Engine
+- **Background noise** every 30 minutes: small random fluctuations make prices feel alive between events
+- **Sector rotation**: hot sectors cool down, cold sectors get upward pressure
+- **Mean reversion**: stocks drift back toward seed prices to prevent runaway inflation
+- **Stock-specific volatility**: lower-priced stocks swing harder, like real markets
+- **Negative event forcing**: when the market is too positive, Groq generates earnings misses, exec departures, and regulatory setbacks
+
+### Sector Performance with Real ETF Comparison
+- **12 sectors mapped to real ETFs**: XLF, XLC, XLY, XLP, VNQ, HERO, MUSQ, NERD, PEJ, KLXY, BETZ
+- **Live ETF data from Finnhub** updated 4x daily
+- **Sector dropdown**: tap any sector to see individual stocks, real ETF price, visual comparison bar, top holdings, and educational explanation
+- **"What is this?" guide** explains sectors, ETFs, diversification, and correlation in plain language
+
+### Shareable Cards
+- **Dynamic OG images** for concept unlocks and portfolio milestones
+- **Share pages** (`/share/concept/`, `/share/portfolio/`) with proper meta tags for X/LinkedIn
+- **Nano Banana 2** AI-generated card backgrounds
+- **"Post to X"** button on concept cards and portfolio page
+
+### Parents & Educators Guide
+- **3-tab page** at `/guide`: Parents, Educators, Community Leaders
+- **Curriculum alignment**: Jump$tart, CEE, Common Core, Social Studies
+- **4-week unit plan**, semester companion, 3-day workshop model
+- **Assessment ideas**: portfolio presentation, market event response, vault journal
+- **Discussion questions** on the market, companies, and the wealth gap
 
 ### Progressive Web App
 - **Installable** on mobile home screens (Android + iOS)
@@ -132,7 +159,8 @@ Unlike other simulators where learning is incidental, BLK Exchange embeds a 23-c
 | AI (Deep) | Claude Sonnet 4.6 --- coaching, debriefs, Q&A |
 | AI (Fast) | Groq llama-3.3-70b --- events, classification, commentary |
 | TTS | ElevenLabs Flash v2.5 --- voice narration |
-| News | Firecrawl + Perplexity |
+| News | Perplexity Search API + Firecrawl |
+| Sector Data | Finnhub (real S&P 500 sector ETFs) |
 | Hosting | Vercel + Convex Cloud |
 | Design | Neobrutalism dark theme (`Courier New`, hard corners, #7F77DD purple) |
 
@@ -178,6 +206,9 @@ npx convex env set GROQ_API_KEY <key>
 npx convex env set ANTHROPIC_API_KEY <key>
 npx convex env set ELEVENLABS_API_KEY <key>
 npx convex env set FIRECRAWL_API_KEY <key>
+npx convex env set PERPLEXITY_API_KEY <key>
+npx convex env set FINNHUB_API_KEY <key>
+npx convex env set FMP_API_KEY <key>          # For Real Exchange (future)
 ```
 
 ### Deploy
@@ -194,20 +225,22 @@ npx vercel --prod           # Frontend
 ```
 blk-exchange/
 ├── convex/                    # Backend (Convex)
-│   ├── schema.ts              # 17-table database schema
-│   ├── market.ts              # Price engine
+│   ├── schema.ts              # 18-table database schema
+│   ├── market.ts              # Price queries + daily reset
+│   ├── marketEngine.ts        # Background simulation (noise, rotation, reversion)
 │   ├── trades.ts              # Atomic trade execution
 │   ├── vault.ts               # Knowledge Vault + concept unlocking
 │   ├── eventScheduler.ts      # Event firing logic
+│   ├── sectorData.ts          # Sim + real sector ETF performance
 │   ├── curriculumDebt.ts      # Curriculum gap tracking
-│   ├── crons.ts               # Scheduled jobs (events, news, resets)
+│   ├── crons.ts               # 7 scheduled jobs
 │   ├── claude/                # Claude AI actions
 │   ├── groq/                  # Groq AI actions
-│   └── news/                  # Firecrawl + Perplexity pipeline
+│   └── news/                  # Perplexity Search API + Firecrawl pipeline
 ├── src/
 │   ├── app/                   # Next.js App Router
-│   │   ├── (app)/             # Authenticated: market, portfolio, vault, profile, news, guide
-│   │   ├── (landing)/         # Public: landing page, judges view
+│   │   ├── (app)/             # Authenticated: market, portfolio, vault, boards, news, guide, profile
+│   │   ├── (landing)/         # Public: landing, judges, privacy, terms
 │   │   ├── share/             # Public share pages with OG meta for social crawlers
 │   │   └── api/               # OG image cards, TTS endpoint
 │   ├── components/            # UI organized by feature domain
@@ -238,7 +271,8 @@ BLK Exchange was built entirely with AI coding assistance. Full transparency on 
 | Research paper | Claude (Anthropic) | AI assisted with research discovery, source synthesis, and drafting. All 28 citations are real, verified sources. Arguments and analysis are the author's own. |
 | AI coaching (in-app) | Claude Sonnet 4.6 | Portfolio grading, session debriefs, and Q&A during gameplay |
 | Event generation (in-app) | Groq llama-3.3-70b | Market event creation, article classification, real-time commentary |
-| News discovery (in-app) | Perplexity Sonar | AI-powered news search across Black media publications |
+| News discovery (in-app) | Perplexity Search API | Structured news search across 16 Black media publications |
+| Sector ETF data (in-app) | Finnhub | Real-time S&P 500 sector ETF quotes for educational comparison |
 | Voice narration (in-app) | ElevenLabs Flash v2.5 | Text-to-speech for market alerts |
 | Demo video voiceover | ElevenLabs | Voiceover for the hackathon demo video |
 | Share card backgrounds | Gemini 3.1 Flash Image (Nano Banana 2) | AI-generated card template backgrounds |
