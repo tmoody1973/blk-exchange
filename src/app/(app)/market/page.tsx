@@ -4,6 +4,7 @@ import { useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { TickerTable } from "@/components/market/ticker-table";
 import { NewsFeed } from "@/components/market/news-feed";
+import { SupportButton } from "@/components/support-button";
 
 function formatCents(cents: number): string {
   return `$${(cents / 100).toFixed(2)}`;
@@ -25,14 +26,7 @@ export default function MarketPage() {
           <h1 className="font-mono font-bold text-2xl text-white tracking-widest uppercase">
             BLK EXCHANGE
           </h1>
-          <a
-            href="https://buymeacoffee.com/tarikmoody"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-mono text-xs font-bold text-[#FDE047] border border-[#FDE047] px-3 py-1 hover:bg-[#FDE047] hover:text-[#0e0e0e] transition-colors uppercase tracking-wider"
-          >
-            Support
-          </a>
+          <SupportButton />
         </div>
         {blkIndex !== undefined ? (
           <div className="mt-1 flex items-center gap-3 font-mono text-sm">
