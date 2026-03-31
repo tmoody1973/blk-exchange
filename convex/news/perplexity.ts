@@ -52,10 +52,11 @@ export const discover = internalAction({
           ],
         });
 
-        // Extract images from Perplexity response
+        // Extract images and citations from Perplexity response
         const imageMap = new Map<string, string>();
         const rawResponse = response as unknown as {
           images?: Array<{ image_url: string; origin_url: string }>;
+          citations?: string[];
         };
         if (rawResponse.images) {
           for (const img of rawResponse.images) {
@@ -64,6 +65,9 @@ export const discover = internalAction({
             }
           }
         }
+
+        // Real URLs come from citations, not the generated text
+        const citations = rawResponse.citations ?? [];
 
         const content = response.choices[0]?.message?.content;
         if (!content) return 0;
@@ -89,9 +93,39 @@ export const discover = internalAction({
 
         let discovered = 0;
         for (const article of articles.slice(0, 5)) {
-          if (!article.title || !article.url) continue;
+          if (!article.title) continue;
 
-          const urlHash = simpleHash(article.url);
+          // Perplexity often hallucinates URLs in the text.
+          // Use the citation URL if available, otherwise validate the generated URL.
+          let articleUrl = article.url;
+
+          // Try to find a matching citation URL
+          if (citations.length > 0) {
+            // Match by checking if any citation contains keywords from the title
+            const titleWords = article.title.toLowerCase().split(/\s+/).filter(w => w.length > 4);
+            const matchingCitation = citations.find(c => {
+              const cLower = c.toLowerCase();
+              return titleWords.some(w => cLower.includes(w));
+            });
+            if (matchingCitation) {
+              articleUrl = matchingCitation;
+            }
+          }
+
+          // Skip if URL is still fake/invalid
+          try {
+            const parsedUrl = new URL(articleUrl);
+            if (
+              parsedUrl.hostname === "example.com" ||
+              parsedUrl.hostname === "localhost" ||
+              parsedUrl.hostname.endsWith(".test") ||
+              !parsedUrl.hostname.includes(".")
+            ) continue;
+          } catch {
+            continue;
+          }
+
+          const urlHash = simpleHash(articleUrl);
           const existing = await ctx.runQuery(
             internal.articles.getByUrlHash,
             { urlHash }
@@ -100,19 +134,19 @@ export const discover = internalAction({
 
           let hostname: string;
           try {
-            hostname = new URL(article.url).hostname;
+            hostname = new URL(articleUrl).hostname;
           } catch {
             hostname = article.source || "unknown";
           }
 
           // Try to find an image for this article
-          const articleImage = imageMap.get(article.url) ?? undefined;
+          const articleImage = imageMap.get(articleUrl) ?? imageMap.get(article.url) ?? undefined;
 
           const articleId = await ctx.runMutation(
             internal.articles.insertArticle,
             {
               urlHash,
-              url: article.url,
+              url: articleUrl,
               title: article.title,
               publication: article.source || hostname,
               summary: article.summary?.slice(0, 500),
