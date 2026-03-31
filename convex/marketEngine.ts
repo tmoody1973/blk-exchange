@@ -94,22 +94,25 @@ export const simulateMarket = internalMutation({
       const seedPrice = SEED_PRICES[stock.symbol];
       if (!sector || !seedPrice) continue;
 
-      // Layer 1: Random noise (-0.3% to +0.3%)
-      const noise = (random() - 0.5) * 0.6;
+      // Layer 1: Random noise with stock-specific volatility
+      // Higher-priced stocks are more stable, lower-priced are more volatile
+      // This mimics real markets where penny stocks swing harder than blue chips
+      const volatility = seedPrice < 3000 ? 1.2 : seedPrice < 6000 ? 0.8 : 0.5;
+      const noise = (random() - 0.5) * volatility;
 
       // Layer 2: Sector rotation pressure
       const sectorPressure = sectorDrift.get(sector) ?? 0;
 
       // Layer 3: Mean reversion (pull toward seed price)
-      // Stronger pull when price is far from seed
+      // Aggressive pull when price drifts far from seed
       const deviation = (stock.priceInCents - seedPrice) / seedPrice;
-      // If 20% above seed, pull down ~0.2%. If 20% below, pull up ~0.2%.
-      const meanReversion = -deviation * 0.5;
-      // Cap mean reversion to ±0.5% per tick
-      const clampedReversion = Math.max(-0.5, Math.min(0.5, meanReversion));
+      // If 20% above seed, pull down ~0.6%. If 50% above, pull down ~1.5%.
+      const meanReversion = -deviation * 3;
+      // Cap mean reversion to ±1.5% per tick
+      const clampedReversion = Math.max(-1.5, Math.min(1.5, meanReversion));
 
-      // Layer 4: Slight negative bias (-0.05%) to counteract AI positive news bias
-      const negativeBias = -0.05;
+      // Layer 4: Negative bias (-0.1%) to counteract AI positive news tendency
+      const negativeBias = -0.1;
 
       // Combine all layers
       const totalPctChange = noise + sectorPressure + clampedReversion + negativeBias;
