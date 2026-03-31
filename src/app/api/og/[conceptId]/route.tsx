@@ -120,12 +120,14 @@ export async function GET(
           width: "1200px",
           height: "630px",
           backgroundColor: "#0e0e0e",
+          backgroundImage: "url(https://blkexchange.com/cards/concept-bg.png)",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
           display: "flex",
           flexDirection: "column",
           justifyContent: "space-between",
           padding: "60px",
           fontFamily: "'Courier New', Courier, monospace",
-          border: "4px solid #ffffff",
           boxSizing: "border-box",
         }}
       >
