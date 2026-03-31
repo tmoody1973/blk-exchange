@@ -25,14 +25,13 @@ export function SupportButton() {
           {/* Modal */}
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
             <div
-              className="w-full max-w-md border-2 border-white bg-[#1a1a1a] p-6"
+              className="w-full max-w-md border-2 border-white bg-[#1a1a1a] p-6 relative"
               style={{ boxShadow: "6px 6px 0px 0px #7F77DD", fontFamily: "'Courier New', monospace" }}
             >
               {/* Close */}
               <button
                 onClick={() => setShowModal(false)}
                 className="absolute top-4 right-4 text-white/40 hover:text-white text-lg"
-                style={{ position: "absolute", top: 16, right: 16 }}
               >
                 x
               </button>

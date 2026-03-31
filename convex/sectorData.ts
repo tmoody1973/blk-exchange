@@ -126,7 +126,7 @@ export const upsertRealSectorEtf = internalMutation({
   handler: async (ctx, args) => {
     const existing = await ctx.db
       .query("realSectorEtfs")
-      .filter((q) => q.eq(q.field("symbol"), args.symbol))
+      .withIndex("by_symbol", (q) => q.eq("symbol", args.symbol))
       .first();
 
     if (existing) {

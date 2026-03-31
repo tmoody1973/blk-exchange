@@ -246,7 +246,7 @@ export default defineSchema({
     price: v.number(),
     changePercent: v.number(),
     lastUpdated: v.number(),
-  }),
+  }).index("by_symbol", ["symbol"]),
 
   onboardingStatus: defineTable({
     playerId: v.id("players"),
