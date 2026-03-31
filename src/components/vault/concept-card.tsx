@@ -46,17 +46,24 @@ function formatDate(ts: number): string {
   });
 }
 
+function buildShareUrl(conceptId: string): string {
+  return `https://blkexchange.com/share/concept/${conceptId}`;
+}
+
 function buildShareText(
+  conceptId: string,
   conceptName: string,
   portfolioValueAtUnlock: number,
   definition: string
 ): string {
   const oneLiner = definition.split(".")[0].trim() + ".";
   const portfolioFormatted = formatCents(portfolioValueAtUnlock);
-  return `I just learned about ${conceptName} on BLK Exchange! My portfolio was at ${portfolioFormatted} when I unlocked it. ${oneLiner}\n\nblkexchange.com #BLKExchange #FinancialLiteracy`;
+  const shareUrl = buildShareUrl(conceptId);
+  return `I just learned about ${conceptName} on BLK Exchange! My portfolio was at ${portfolioFormatted} when I unlocked it. ${oneLiner}\n\n${shareUrl} #BLKExchange #FinancialLiteracy`;
 }
 
 export function ConceptCard({
+  conceptId,
   conceptName,
   tier,
   definition,
@@ -82,7 +89,7 @@ export function ConceptCard({
 
   async function handleShare(e: React.MouseEvent) {
     e.stopPropagation();
-    const shareText = buildShareText(conceptName, portfolioValueAtUnlock, definition);
+    const shareText = buildShareText(conceptId, conceptName, portfolioValueAtUnlock, definition);
 
     let didAct = false;
 
@@ -225,7 +232,7 @@ export function ConceptCard({
             </button>
             <a
               href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
-                buildShareText(conceptName, portfolioValueAtUnlock, definition)
+                buildShareText(conceptId, conceptName, portfolioValueAtUnlock, definition)
               )}`}
               target="_blank"
               rel="noopener noreferrer"

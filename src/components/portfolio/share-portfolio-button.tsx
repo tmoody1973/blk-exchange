@@ -28,7 +28,7 @@ export function SharePortfolioButton({
   const changePrefix = dayPnlPercent >= 0 ? "+" : "";
   const changeStr = `${changePrefix}${dayPnlPercent.toFixed(2)}%`;
 
-  const shareText = `My BLK Exchange portfolio: ${portfolioValue} (${changeStr}). ${holdingsCount} holdings across ${sectorCount} sectors.\n\nblkexchange.com #BLKExchange #FinancialLiteracy`;
+  const shareText = `My BLK Exchange portfolio: ${portfolioValue} (${changeStr}). ${holdingsCount} holdings across ${sectorCount} sectors.\n\nhttps://blkexchange.com #BLKExchange #FinancialLiteracy`;
 
   const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
 
