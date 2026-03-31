@@ -1,158 +1,160 @@
 import { internalAction } from "../_generated/server";
 import { internal } from "../_generated/api";
-import OpenAI from "openai";
 
 /**
- * Layer 2: Perplexity Sonar — AI-powered news discovery.
- * Replaces both Exa (semantic search) and Tavily (fallback search).
- * Uses OpenAI-compatible API with model "sonar".
+ * Perplexity Search API — structured news discovery.
  *
- * Perplexity searches the web, synthesizes results with citations,
- * and returns sourced summaries in a single API call.
+ * Uses the /search endpoint instead of chat completions.
+ * Returns real URLs (no hallucination), structured results,
+ * domain filtering, and batch queries (5 per call).
  */
 export const discover = internalAction({
   handler: async (ctx) => {
     const apiKey = process.env.PERPLEXITY_API_KEY;
     if (!apiKey) return { discovered: 0 };
 
-    const client = new OpenAI({
-      baseURL: "https://api.perplexity.ai",
-      apiKey,
-    });
-
-    const queries = [
-      "Latest Black-owned business news, funding announcements, and startup launches from the past 24 hours",
-      "Recent HBCU news, investments, endowments, and Black education finance from the past 48 hours",
-      "Black entertainment, music, streaming, and media industry deals and launches this week",
-      "African American tech startups, fintech, digital media, and venture capital news today",
-      "Black real estate development, community banking, CDFI lending, and wealth building news this week",
-      "Black fashion brands, beauty companies, hair care, skincare launches and partnerships recently",
-      "Black sports business, athlete ventures, esports, and sports media deals this week",
-      "Latest news from AfroTech, Blavity, Black Enterprise, Essence, The Root, and Capital B News about Black business and culture",
-      "Black-owned public companies stock news: Urban One UONE, Carver Bancorp CARV, Broadway Financial BYFC, Direct Digital DRCT",
-      "Recent Black Wall Street, financial literacy, investing education, and economic empowerment news",
+    // Two batched calls of 5 queries each
+    const TARGETED_PUBLICATIONS = [
+      "afrotech.com",
+      "essence.com",
+      "blackenterprise.com",
+      "thegrio.com",
+      "theroot.com",
+      "blavity.com",
+      "capitalbnews.org",
+      "nbcnews.com",
+      "andscape.com",
+      "hbcubuzz.com",
+      "hbcuweeknow.com",
+      "shadowandact.com",
+      "peopleofcolorintech.com",
+      "rollingout.com",
+      "eurweb.com",
+      "vibe.com",
     ];
 
-    const results = await Promise.allSettled(
-      queries.map(async (query) => {
-        const response = await client.chat.completions.create({
-          model: "sonar",
-          // @ts-expect-error - return_images is a Perplexity extension not in OpenAI types
-          return_images: true,
-          messages: [
-            {
-              role: "system",
-              content:
-                "You are a news aggregator focused on Black business, culture, and economic news. Return exactly 3-5 recent news items as a JSON array. Each item must have: title (string), url (string), summary (1-2 sentence string), source (publication name string). CRITICAL: Only include news published within the last 48 hours. Do NOT include old news, historical events, or articles older than 2 days. Return ONLY the JSON array, no other text.",
-            },
-            {
-              role: "user",
-              content: query,
-            },
-          ],
+    const batch1 = {
+      query: [
+        "Black business funding startup news today",
+        "HBCU investment endowment education finance news",
+        "Black entertainment music media streaming deals this week",
+        "Black tech fintech venture capital startup news",
+        "Black real estate banking community development wealth news",
+      ],
+      search_domain_filter: TARGETED_PUBLICATIONS,
+      max_results: 15,
+    };
+
+    const batch2 = {
+      query: [
+        "Black fashion beauty skincare hair care brand launch partnership",
+        "Black sports athlete business esports media deals",
+        "Urban One Carver Bancorp Broadway Financial Direct Digital stock news",
+        "Black financial literacy investing education economic empowerment",
+        "Black owned public company stock market minority business news",
+      ],
+      max_results: 20,
+      search_domain_filter: ["-youtube.com"],
+    };
+
+    const batch3 = {
+      query: [
+        "Black gaming esports game studio indie developer news",
+        "Black sportswear athletic footwear sneaker brand news",
+        "Black publishing book author literary magazine news",
+        "Black film production studio movie TV show entertainment news",
+        "Black podcast creator digital content newsletter media news",
+      ],
+      max_results: 15,
+      search_domain_filter: ["-youtube.com"],
+    };
+
+    const batches = [batch1, batch2, batch3];
+    let totalDiscovered = 0;
+
+    for (const batch of batches) {
+      try {
+        const response = await fetch("https://api.perplexity.ai/search", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(batch),
         });
 
-        // Extract images and citations from Perplexity response
-        const imageMap = new Map<string, string>();
-        const rawResponse = response as unknown as {
-          images?: Array<{ image_url: string; origin_url: string }>;
-          citations?: string[];
+        if (!response.ok) {
+          console.error(
+            `Perplexity Search API error (${response.status}):`,
+            await response.text()
+          );
+          continue;
+        }
+
+        const data = (await response.json()) as {
+          results?: Array<{
+            title: string;
+            url: string;
+            snippet: string;
+            date?: string;
+            last_updated?: string;
+          }>;
         };
-        if (rawResponse.images) {
-          for (const img of rawResponse.images) {
-            if (img.origin_url && img.image_url) {
-              imageMap.set(img.origin_url, img.image_url);
-            }
-          }
-        }
 
-        // Real URLs come from citations, not the generated text
-        const citations = rawResponse.citations ?? [];
+        if (!data.results || !Array.isArray(data.results)) continue;
 
-        const content = response.choices[0]?.message?.content;
-        if (!content) return 0;
+        for (const result of data.results) {
+          if (!result.title || !result.url) continue;
 
-        // Parse the JSON array from the response
-        let articles: Array<{
-          title: string;
-          url: string;
-          summary: string;
-          source: string;
-        }>;
-
-        try {
-          // Try to extract JSON from the response (may be wrapped in markdown code blocks)
-          const jsonMatch = content.match(/\[[\s\S]*\]/);
-          if (!jsonMatch) return 0;
-          articles = JSON.parse(jsonMatch[0]);
-        } catch {
-          return 0;
-        }
-
-        if (!Array.isArray(articles)) return 0;
-
-        let discovered = 0;
-        for (const article of articles.slice(0, 5)) {
-          if (!article.title) continue;
-
-          // Perplexity often hallucinates URLs in the text.
-          // Use the citation URL if available, otherwise validate the generated URL.
-          let articleUrl = article.url;
-
-          // Try to find a matching citation URL
-          if (citations.length > 0) {
-            // Match by checking if any citation contains keywords from the title
-            // Require 3+ matching title words to avoid false positives
-            const titleWords = article.title.toLowerCase().split(/\s+/).filter(w => w.length > 4);
-            const matchingCitation = citations.find(c => {
-              const cLower = c.toLowerCase();
-              const matchCount = titleWords.filter(w => cLower.includes(w)).length;
-              return matchCount >= 3;
-            });
-            if (matchingCitation) {
-              articleUrl = matchingCitation;
-            }
-          }
-
-          // Skip if URL is still fake/invalid
+          // Validate URL
+          let hostname: string;
           try {
-            const parsedUrl = new URL(articleUrl);
+            const parsed = new URL(result.url);
+            hostname = parsed.hostname;
             if (
-              parsedUrl.hostname === "example.com" ||
-              parsedUrl.hostname === "localhost" ||
-              parsedUrl.hostname.endsWith(".test") ||
-              !parsedUrl.hostname.includes(".")
+              hostname === "example.com" ||
+              hostname === "localhost" ||
+              hostname === "youtube.com" ||
+              hostname === "www.youtube.com" ||
+              hostname.endsWith(".test") ||
+              !hostname.includes(".")
             ) continue;
           } catch {
             continue;
           }
 
-          const urlHash = simpleHash(articleUrl);
+          // Skip articles older than 7 days if date is available
+          if (result.date) {
+            const articleDate = new Date(result.date).getTime();
+            const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+            if (articleDate < sevenDaysAgo) continue;
+          }
+
+          // Dedup
+          const urlHash = simpleHash(result.url);
           const existing = await ctx.runQuery(
             internal.articles.getByUrlHash,
             { urlHash }
           );
           if (existing) continue;
 
-          let hostname: string;
-          try {
-            hostname = new URL(articleUrl).hostname;
-          } catch {
-            hostname = article.source || "unknown";
-          }
-
-          // Try to find an image for this article
-          const articleImage = imageMap.get(articleUrl) ?? imageMap.get(article.url) ?? undefined;
+          // Extract publication name from hostname
+          const publication = hostname
+            .replace("www.", "")
+            .replace(".com", "")
+            .replace(".org", "")
+            .split(".")
+            .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+            .join(" ");
 
           const articleId = await ctx.runMutation(
             internal.articles.insertArticle,
             {
               urlHash,
-              url: articleUrl,
-              title: article.title,
-              publication: article.source || hostname,
-              summary: article.summary?.slice(0, 500),
-              imageUrl: articleImage,
+              url: result.url,
+              title: result.title,
+              publication,
+              summary: result.snippet?.slice(0, 500),
               significance: 0,
               classifiedTickers: [],
               sourceLayer: "perplexity",
@@ -166,25 +168,17 @@ export const discover = internalAction({
             internal.groq.classifyArticle.classify,
             {
               articleId,
-              title: article.title,
-              summary: article.summary?.slice(0, 500),
-              publication: article.source || hostname,
-              url: article.url,
+              title: result.title,
+              summary: result.snippet?.slice(0, 500),
+              publication,
+              url: result.url,
             }
           );
 
-          discovered++;
+          totalDiscovered++;
         }
-        return discovered;
-      })
-    );
-
-    let totalDiscovered = 0;
-    for (const result of results) {
-      if (result.status === "fulfilled") {
-        totalDiscovered += result.value;
-      } else {
-        console.error("Perplexity query failed:", result.reason);
+      } catch (err) {
+        console.error("Perplexity Search batch failed:", err);
       }
     }
 
