@@ -158,7 +158,7 @@ export function SectorPerformance() {
               {isExpanded && (
                 <SectorDetail
                   sectorId={sector.id}
-                  realEtf={realEtf}
+                  realEtf={realEtf ?? null}
                   realEtfSymbol={sector.realEtf}
                 />
               )}
