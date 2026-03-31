@@ -91,7 +91,7 @@ export const discover = internalAction({
             `Perplexity Search API error (${response.status}):`,
             await response.text()
           );
-          continue;
+          return 0;
         }
 
         const data = (await response.json()) as {
@@ -104,7 +104,7 @@ export const discover = internalAction({
           }>;
         };
 
-        if (!data.results || !Array.isArray(data.results)) continue;
+        if (!data.results || !Array.isArray(data.results)) return 0;
 
         for (const result of data.results) {
           if (!result.title || !result.url) continue;
