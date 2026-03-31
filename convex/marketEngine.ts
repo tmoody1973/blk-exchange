@@ -105,16 +105,18 @@ export const simulateMarket = internalMutation({
       const sectorPressure = sectorDrift.get(sector) ?? 0;
 
       // Layer 3: Mean reversion (pull toward seed price)
-      // Aggressive pull when price drifts far from seed
+      // Only activates meaningfully when price is >10% from seed
       const deviation = (stock.priceInCents - seedPrice) / seedPrice;
-      // If 20% above seed, pull down ~0.6%. If 50% above, pull down ~1.5%.
-      const meanReversion = -deviation * 3;
-      // Cap mean reversion to ±1.5% per tick
-      const clampedReversion = Math.max(-1.5, Math.min(1.5, meanReversion));
+      // Gentle below 10% deviation, stronger above
+      const absDeviation = Math.abs(deviation);
+      const reversionStrength = absDeviation > 0.2 ? 2 : absDeviation > 0.1 ? 1 : 0.3;
+      const meanReversion = -deviation * reversionStrength;
+      // Cap mean reversion to ±1% per tick
+      const clampedReversion = Math.max(-1, Math.min(1, meanReversion));
 
-      // Layer 4: Slight negative bias to counteract AI positive news tendency
-      // -0.03% per 30min tick = ~1.4%/day downward drift, offset by positive events
-      const negativeBias = -0.03;
+      // Layer 4: No artificial bias. Groq's forced 40% negative events handle
+      // sentiment balance. The market engine stays neutral between events.
+      const negativeBias = 0;
 
       // Combine all layers
       const totalPctChange = noise + sectorPressure + clampedReversion + negativeBias;
