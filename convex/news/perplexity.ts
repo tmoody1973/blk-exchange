@@ -13,7 +13,7 @@ export const discover = internalAction({
     const apiKey = process.env.PERPLEXITY_API_KEY;
     if (!apiKey) return { discovered: 0 };
 
-    // Two batched calls of 5 queries each
+    // Three batched calls of 5 queries each, covering all 12 BLK Exchange sectors
     const TARGETED_PUBLICATIONS = [
       "afrotech.com",
       "essence.com",
@@ -72,8 +72,11 @@ export const discover = internalAction({
     const batches = [batch1, batch2, batch3];
     let totalDiscovered = 0;
 
-    for (const batch of batches) {
-      try {
+    // Process batches in parallel for faster discovery
+    const batchResults = await Promise.allSettled(
+      batches.map(async (batch) => {
+        let discovered = 0;
+        try {
         const response = await fetch("https://api.perplexity.ai/search", {
           method: "POST",
           headers: {
@@ -119,6 +122,16 @@ export const discover = internalAction({
               hostname.endsWith(".test") ||
               !hostname.includes(".")
             ) continue;
+            // Skip category/landing pages (not real articles)
+            const path = parsed.pathname;
+            if (
+              path === "/" ||
+              path.endsWith("-channel/") ||
+              path.startsWith("/category/") ||
+              path.startsWith("/tag/") ||
+              path.startsWith("/topics/") ||
+              path.split("/").filter(Boolean).length < 2
+            ) continue;
           } catch {
             continue;
           }
@@ -138,14 +151,44 @@ export const discover = internalAction({
           );
           if (existing) continue;
 
-          // Extract publication name from hostname
-          const publication = hostname
-            .replace("www.", "")
-            .replace(".com", "")
-            .replace(".org", "")
-            .split(".")
-            .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
-            .join(" ");
+          // Map hostname to human-readable publication name
+          const PUBLICATION_NAMES: Record<string, string> = {
+            "afrotech.com": "AfroTech",
+            "www.afrotech.com": "AfroTech",
+            "essence.com": "Essence",
+            "www.essence.com": "Essence",
+            "blackenterprise.com": "Black Enterprise",
+            "www.blackenterprise.com": "Black Enterprise",
+            "thegrio.com": "TheGrio",
+            "www.thegrio.com": "TheGrio",
+            "theroot.com": "The Root",
+            "www.theroot.com": "The Root",
+            "blavity.com": "Blavity",
+            "www.blavity.com": "Blavity",
+            "capitalbnews.org": "Capital B News",
+            "www.capitalbnews.org": "Capital B News",
+            "nbcnews.com": "NBC BLK",
+            "www.nbcnews.com": "NBC BLK",
+            "andscape.com": "Andscape",
+            "www.andscape.com": "Andscape",
+            "hbcubuzz.com": "HBCUBuzz",
+            "www.hbcubuzz.com": "HBCUBuzz",
+            "hbcuweeknow.com": "HBCU We Know",
+            "www.hbcuweeknow.com": "HBCU We Know",
+            "shadowandact.com": "Shadow and Act",
+            "www.shadowandact.com": "Shadow and Act",
+            "peopleofcolorintech.com": "POCIT",
+            "www.peopleofcolorintech.com": "POCIT",
+            "rollingout.com": "Rolling Out",
+            "www.rollingout.com": "Rolling Out",
+            "eurweb.com": "EURweb",
+            "www.eurweb.com": "EURweb",
+            "vibe.com": "Vibe",
+            "www.vibe.com": "Vibe",
+          };
+          const publication = PUBLICATION_NAMES[hostname] ??
+            hostname.replace("www.", "").split(".")[0].charAt(0).toUpperCase() +
+            hostname.replace("www.", "").split(".")[0].slice(1);
 
           const articleId = await ctx.runMutation(
             internal.articles.insertArticle,
@@ -175,10 +218,19 @@ export const discover = internalAction({
             }
           );
 
-          totalDiscovered++;
+          discovered++;
         }
+        return discovered;
       } catch (err) {
         console.error("Perplexity Search batch failed:", err);
+        return 0;
+      }
+      })
+    );
+
+    for (const result of batchResults) {
+      if (result.status === "fulfilled") {
+        totalDiscovered += result.value;
       }
     }
 
