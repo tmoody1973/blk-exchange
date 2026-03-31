@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { ShareCardRenderer } from "@/components/share-card-renderer";
 
 interface SharePortfolioButtonProps {
   totalValueInCents: number;
@@ -39,7 +40,7 @@ export function SharePortfolioButton({
 
   const shareText = `My BLK Exchange portfolio: ${portfolioValue} (${changeStr}). ${holdingsCount} holdings across ${sectorCount} sectors.\n\n${shareUrl} #BLKExchange #FinancialLiteracy`;
 
-  const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
+  // twitterUrl removed — sharing now handled by ShareCardRenderer
 
   const handleCopy = useCallback(async () => {
     if (navigator.clipboard) {
@@ -51,6 +52,28 @@ export function SharePortfolioButton({
 
   return (
     <div className="flex gap-2">
+      <ShareCardRenderer
+        type="portfolio"
+        data={{
+          value: portfolioValue,
+          change: changeStr,
+          holdings: String(holdingsCount),
+          sectors: String(sectorCount),
+          concepts: "0",
+          shareText,
+        }}
+      >
+        <button
+          className="flex-1 border-2 py-2 font-mono text-xs font-bold uppercase tracking-widest transition-all w-full"
+          style={{
+            borderColor: "#7F77DD",
+            color: "#7F77DD",
+            backgroundColor: "transparent",
+          }}
+        >
+          Share Card
+        </button>
+      </ShareCardRenderer>
       <button
         onClick={handleCopy}
         className="flex-1 border-2 py-2 font-mono text-xs font-bold uppercase tracking-widest transition-all"
@@ -61,21 +84,8 @@ export function SharePortfolioButton({
           boxShadow: copied ? "3px 3px 0px 0px #000000" : "none",
         }}
       >
-        {copied ? "Copied!" : "Share Portfolio"}
+        {copied ? "Copied!" : "Copy Link"}
       </button>
-      <a
-        href={twitterUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="border-2 py-2 px-4 font-mono text-xs font-bold uppercase tracking-widest transition-all"
-        style={{
-          borderColor: "#ffffff30",
-          color: "#ffffff80",
-          backgroundColor: "transparent",
-        }}
-      >
-        Post to X
-      </a>
     </div>
   );
 }

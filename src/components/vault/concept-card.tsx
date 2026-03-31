@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { ConceptTier } from "@/lib/constants/concepts";
+import { ShareCardRenderer } from "@/components/share-card-renderer";
 
 type ShareState = "idle" | "copied" | "shared";
 
@@ -214,6 +215,29 @@ export function ConceptCard({
 
           {/* Share buttons */}
           <div className="flex gap-2">
+            <ShareCardRenderer
+              type="concept"
+              data={{
+                conceptName,
+                tier: tierLabel,
+                definition,
+                playerName: "",
+                unlocked: "",
+                shareText: buildShareText(conceptId, conceptName, portfolioValueAtUnlock, definition),
+              }}
+            >
+              <button
+                className="flex-1 border-2 py-2 font-mono text-xs font-bold uppercase tracking-widest transition-all w-full"
+                style={{
+                  borderColor: "#7F77DD",
+                  color: "#7F77DD",
+                  backgroundColor: "transparent",
+                }}
+                onClick={(e) => e.stopPropagation()}
+              >
+                Share Card
+              </button>
+            </ShareCardRenderer>
             <button
               className="flex-1 border-2 py-2 font-mono text-xs font-bold uppercase tracking-widest transition-all"
               style={{
@@ -228,24 +252,8 @@ export function ConceptCard({
                 ? "Copied!"
                 : shareState === "shared"
                 ? "Shared!"
-                : "Share Knowledge"}
+                : "Copy Link"}
             </button>
-            <a
-              href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
-                buildShareText(conceptId, conceptName, portfolioValueAtUnlock, definition)
-              )}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="border-2 py-2 px-4 font-mono text-xs font-bold uppercase tracking-widest transition-all"
-              style={{
-                borderColor: "#ffffff30",
-                color: "#ffffff80",
-                backgroundColor: "transparent",
-              }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              Post to X
-            </a>
           </div>
         </div>
       )}

@@ -122,7 +122,7 @@ export const discover = internalAction({
               hostname.endsWith(".test") ||
               !hostname.includes(".")
             ) continue;
-            // Skip category/landing pages (not real articles)
+            // Skip obvious non-article pages (homepages, category indexes)
             const path = parsed.pathname;
             if (
               path === "/" ||
@@ -130,7 +130,8 @@ export const discover = internalAction({
               path.startsWith("/category/") ||
               path.startsWith("/tag/") ||
               path.startsWith("/topics/") ||
-              path.split("/").filter(Boolean).length < 2
+              path === "/latest" ||
+              path === "/news"
             ) continue;
           } catch {
             continue;
