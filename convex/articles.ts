@@ -56,7 +56,8 @@ export const updateClassification = internalMutation({
 export const countRecentArticles = internalQuery({
   args: { sinceTimestamp: v.number() },
   handler: async (ctx, args) => {
-    const articles = await ctx.db.query("articles").collect();
+    // Safety cap to avoid collecting unbounded data
+    const articles = await ctx.db.query("articles").order("desc").take(1000);
     return articles.filter((a) => a.createdAt > args.sinceTimestamp).length;
   },
 });
@@ -65,10 +66,13 @@ export const countRecentArticles = internalQuery({
 export const getArticlesByTicker = query({
   args: { symbol: v.string() },
   handler: async (ctx, args) => {
+    // No array-contains index in Convex, so scan recent articles and filter in JS.
+    // Increased to 500 to catch classified articles for niche tickers.
+    // TODO: Consider articleTickers join table with symbol index for scale.
     const allArticles = await ctx.db
       .query("articles")
       .order("desc")
-      .take(200);
+      .take(500);
 
     return allArticles
       .filter((a) => a.classifiedTickers.includes(args.symbol))

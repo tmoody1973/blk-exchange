@@ -102,10 +102,12 @@ export const discover = internalAction({
           // Try to find a matching citation URL
           if (citations.length > 0) {
             // Match by checking if any citation contains keywords from the title
+            // Require 3+ matching title words to avoid false positives
             const titleWords = article.title.toLowerCase().split(/\s+/).filter(w => w.length > 4);
             const matchingCitation = citations.find(c => {
               const cLower = c.toLowerCase();
-              return titleWords.some(w => cLower.includes(w));
+              const matchCount = titleWords.filter(w => cLower.includes(w)).length;
+              return matchCount >= 3;
             });
             if (matchingCitation) {
               articleUrl = matchingCitation;
