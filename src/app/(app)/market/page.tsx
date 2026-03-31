@@ -5,6 +5,7 @@ import { api } from "../../../../convex/_generated/api";
 import { TickerTable } from "@/components/market/ticker-table";
 import { NewsFeed } from "@/components/market/news-feed";
 import { SupportButton } from "@/components/support-button";
+import { SectorPerformance } from "@/components/market/sector-performance";
 
 function formatCents(cents: number): string {
   return `$${(cents / 100).toFixed(2)}`;
@@ -53,8 +54,9 @@ export default function MarketPage() {
           <TickerTable />
         </div>
 
-        {/* News feed — 35% on desktop, below table on mobile */}
-        <div className="w-full lg:w-[35%]">
+        {/* Right column — 35% on desktop */}
+        <div className="w-full lg:w-[35%] space-y-6">
+          <SectorPerformance />
           <NewsFeed />
         </div>
       </div>

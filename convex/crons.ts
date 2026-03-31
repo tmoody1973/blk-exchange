@@ -3,6 +3,13 @@ import { internal } from "./_generated/api";
 
 const crons = cronJobs();
 
+// Real sector ETF data from Finnhub (5 ETFs, 4x/day = 20 calls)
+crons.interval(
+  "fetch real sector data",
+  { hours: 6 },
+  internal.sectorData.fetchRealSectorData
+);
+
 // Fire events every 5 minutes
 crons.interval(
   "fire events",

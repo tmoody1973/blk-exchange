@@ -240,6 +240,14 @@ export default defineSchema({
     .index("by_player", ["playerId"])
     .index("by_player_term", ["playerId", "termId"]),
 
+  realSectorEtfs: defineTable({
+    symbol: v.string(),
+    name: v.string(),
+    price: v.number(),
+    changePercent: v.number(),
+    lastUpdated: v.number(),
+  }),
+
   onboardingStatus: defineTable({
     playerId: v.id("players"),
     state: v.union(
