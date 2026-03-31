@@ -103,11 +103,15 @@ export const generate = internalAction({
     const recentNegative = recentEvents.filter(e =>
       e.affectedStocks.length > 0 && e.affectedStocks[0].changePercent < 0
     ).length;
+    // Events with changePercent === 0 are intentionally excluded from ratio
     const total = recentPositive + recentNegative;
     const positiveRatio = total > 0 ? recentPositive / total : 0.5;
 
     let sentimentInstruction: string;
-    if (positiveRatio > 0.7) {
+    // Only apply forced sentiment when we have enough data (5+ events)
+    if (total < 5) {
+      sentimentInstruction = `\n\nSENTIMENT: Generate a realistic mix of positive and negative events. About 60% should be good news (partnerships, revenue beats, launches) and 40% bad news (misses, delays, departures).`;
+    } else if (positiveRatio > 0.7) {
       // Too positive — force a negative event
       sentimentInstruction = `\n\nCRITICAL: The market has been too positive lately (${recentPositive} positive vs ${recentNegative} negative). You MUST generate a NEGATIVE event. Earnings miss, product recall, executive departure, or competitive loss. The primary stock MUST go DOWN (changePercent between -2 and -8).`;
     } else if (positiveRatio < 0.4) {

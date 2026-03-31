@@ -114,12 +114,9 @@ export const simulateMarket = internalMutation({
       // Cap mean reversion to ±1% per tick
       const clampedReversion = Math.max(-1, Math.min(1, meanReversion));
 
-      // Layer 4: No artificial bias. Groq's forced 40% negative events handle
-      // sentiment balance. The market engine stays neutral between events.
-      const negativeBias = 0;
-
-      // Combine all layers
-      const totalPctChange = noise + sectorPressure + clampedReversion + negativeBias;
+      // No artificial bias. Groq's bidirectional sentiment balancer handles
+      // the positive/negative event ratio. The market engine stays neutral.
+      const totalPctChange = noise + sectorPressure + clampedReversion;
 
       // Apply change
       const changeFraction = totalPctChange / 100;
