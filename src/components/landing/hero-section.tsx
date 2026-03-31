@@ -106,6 +106,14 @@ export function HeroSection() {
             >
               Watch Demo ↓
             </a>
+            <a
+              href="https://buymeacoffee.com/tarikmoody"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center justify-center border-2 border-[#FDE047] bg-transparent px-8 py-3 text-sm font-bold text-[#FDE047] transition-all hover:bg-[#FDE047] hover:text-[#0e0e0e]"
+            >
+              Support the Project
+            </a>
           </div>
         </div>
       </div>
