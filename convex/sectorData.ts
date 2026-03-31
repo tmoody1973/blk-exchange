@@ -58,7 +58,7 @@ const SECTOR_TO_ETF: Record<string, string> = {
   beauty: "XLP",
   finance: "XLF",
   realestate: "VNQ",
-  sports: "FANZ",
+  sports: "BETZ",
   entertainment: "PEJ",
 };
 
@@ -157,7 +157,7 @@ export const fetchRealSectorData = internalAction({
       { symbol: "NERD", name: "Streaming & Digital" },
       { symbol: "PEJ", name: "Leisure & Entertainment" },
       { symbol: "KLXY", name: "Global Luxury" },
-      { symbol: "FANZ", name: "Pro Sports" },
+      { symbol: "BETZ", name: "Sports Betting & iGaming" },
     ];
 
     for (const etf of etfs) {

@@ -65,11 +65,11 @@ const ETF_INFO: Record<string, { name: string; fullName: string; description: st
     description: "This ETF holds luxury fashion and lifestyle brands. Your sim tickers DRIP, RARE, and THREAD represent Black streetwear and fashion in the same market space.",
     topHoldings: ["LVMH", "Hermes", "Richemont", "Kering", "Ferrari"],
   },
-  FANZ: {
-    name: "FANZ",
-    fullName: "ProSports Sponsors ETF",
-    description: "This ETF holds the official corporate sponsors of major American sports leagues. Your sim tickers DRAFT, ARENA, and STATS represent the business side of sports.",
-    topHoldings: ["Nike", "PepsiCo", "Anheuser-Busch", "Toyota", "AT&T"],
+  BETZ: {
+    name: "BETZ",
+    fullName: "Roundhill Sports Betting & iGaming ETF",
+    description: "This ETF holds companies in sports betting, fantasy sports, and iGaming. DraftKings, Flutter (FanDuel), and the major sportsbooks. Your sim tickers DRAFT, ARENA, and STATS represent the business infrastructure of sports that these companies depend on.",
+    topHoldings: ["DraftKings", "Flutter (FanDuel)", "Lottery Corp", "Entain", "Penn Entertainment"],
   },
 };
 
