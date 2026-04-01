@@ -143,7 +143,7 @@ export function PortfolioChart({ playerId, currentValueInCents }: PortfolioChart
               fontSize: 12,
               color: "#ffffff",
             }}
-            formatter={(value: number) => [`$${value.toLocaleString("en-US", { minimumFractionDigits: 2 })}`, "Value"]}
+            formatter={(value) => [`$${Number(value).toLocaleString("en-US", { minimumFractionDigits: 2 })}`, "Value"]}
           />
           <ReferenceLine
             y={startValue}

@@ -111,10 +111,10 @@ export function ProfessorMode({
             <div className="max-h-72 overflow-y-auto divide-y divide-white/10">
               {history.map((entry, i) => (
                 <div key={i} className="px-4 py-3 space-y-2">
-                  <p className="font-mono text-xs font-bold text-[#FDE047]">
+                  <p className="font-mono text-sm font-bold text-[#FDE047]">
                     Q: {entry.question}
                   </p>
-                  <p className="font-mono text-xs text-white/75 leading-relaxed whitespace-pre-line">
+                  <p className="font-mono text-sm text-white/75 leading-relaxed whitespace-pre-line">
                     {entry.answer}
                   </p>
                 </div>
@@ -151,7 +151,7 @@ export function ProfessorMode({
               onChange={(e) => setQuestion(e.target.value)}
               placeholder={inputPlaceholder}
               disabled={loading}
-              className="flex-1 bg-transparent border-b-2 border-white/20 focus:border-[#7F77DD] outline-none font-mono text-xs text-white placeholder:text-white/30 py-1 transition-colors disabled:opacity-50"
+              className="flex-1 bg-transparent border-b-2 border-white/20 focus:border-[#7F77DD] outline-none font-mono text-sm text-white placeholder:text-white/30 py-1 transition-colors disabled:opacity-50"
               maxLength={300}
             />
             <button
