@@ -185,59 +185,54 @@ function PortfolioCard({ data }: { data: Record<string, string> }) {
 
   return (
     <div style={{ width: 1080, height: 1080, backgroundColor: "#0A0A0A", position: "relative", overflow: "hidden" }}>
-      {/* Green/red accent bar top based on performance */}
-      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 6, backgroundColor: changeColor }} />
-      {/* White border */}
-      <div style={{ position: "absolute", inset: 40, border: "2px solid #ffffff20" }} />
-      {/* Decorative lines (ticker tape feel) */}
-      <div style={{ position: "absolute", top: 60, left: 60, right: 60, height: 40, display: "flex", gap: 8, opacity: 0.15 }}>
-        {Array.from({ length: 20 }).map((_, i) => (
-          <div key={i} style={{ width: 3, height: Math.random() * 30 + 10, backgroundColor: i % 3 === 0 ? "#ef4444" : "#22c55e", alignSelf: "flex-end" }} />
-        ))}
+      {/* Accent bar top */}
+      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 8, backgroundColor: changeColor }} />
+      {/* Border */}
+      <div style={{ position: "absolute", inset: 30, border: "3px solid #ffffff30" }} />
+
+      {/* BLKX logo top-left */}
+      <div style={{ position: "absolute", top: 50, left: 60, display: "flex", alignItems: "center", gap: 8 }}>
+        <span style={{ fontSize: 40, fontWeight: 900, color: "#FFFFFF" }}>BLK</span>
+        <span style={{ fontSize: 40, fontWeight: 900, color: "#7F77DD" }}>X</span>
       </div>
 
       {/* Content */}
-      <div style={{ position: "absolute", top: 160, left: 80, right: 80 }}>
-        <p style={{ fontSize: 18, color: "#7F77DD", letterSpacing: 6, textTransform: "uppercase", fontWeight: 700 }}>
+      <div style={{ position: "absolute", top: 140, left: 80, right: 80 }}>
+        <p style={{ fontSize: 26, color: "#7F77DD", letterSpacing: 6, textTransform: "uppercase", fontWeight: 700, marginBottom: 20 }}>
           My Portfolio
         </p>
-        <p style={{ fontSize: 96, fontWeight: 900, color: "#FFFFFF", lineHeight: 1, marginTop: 16 }}>
+        <p style={{ fontSize: 120, fontWeight: 900, color: "#FFFFFF", lineHeight: 1 }}>
           {data.value ?? "$10,000.00"}
         </p>
-        <p style={{ fontSize: 48, fontWeight: 900, color: changeColor, marginTop: 8 }}>
+        <p style={{ fontSize: 60, fontWeight: 900, color: changeColor, marginTop: 12 }}>
           {data.change ?? "+0.00%"}
         </p>
 
-        {/* Stats row */}
-        <div style={{ display: "flex", gap: 60, marginTop: 60 }}>
-          <div style={{ borderLeft: "3px solid #ffffff20", paddingLeft: 20 }}>
-            <p style={{ fontSize: 14, color: "#ffffff40", textTransform: "uppercase", letterSpacing: 3 }}>Holdings</p>
-            <p style={{ fontSize: 42, fontWeight: 900, color: "#FFFFFF" }}>{data.holdings ?? "0"}</p>
+        {/* Stats */}
+        <div style={{ display: "flex", gap: 80, marginTop: 80 }}>
+          <div style={{ borderLeft: "4px solid #ffffff40", paddingLeft: 28 }}>
+            <p style={{ fontSize: 20, color: "#ffffff80", textTransform: "uppercase", letterSpacing: 4, marginBottom: 8 }}>Holdings</p>
+            <p style={{ fontSize: 60, fontWeight: 900, color: "#FFFFFF" }}>{data.holdings ?? "0"}</p>
           </div>
-          <div style={{ borderLeft: "3px solid #ffffff20", paddingLeft: 20 }}>
-            <p style={{ fontSize: 14, color: "#ffffff40", textTransform: "uppercase", letterSpacing: 3 }}>Sectors</p>
-            <p style={{ fontSize: 42, fontWeight: 900, color: "#FFFFFF" }}>{data.sectors ?? "0"}</p>
+          <div style={{ borderLeft: "4px solid #ffffff40", paddingLeft: 28 }}>
+            <p style={{ fontSize: 20, color: "#ffffff80", textTransform: "uppercase", letterSpacing: 4, marginBottom: 8 }}>Sectors</p>
+            <p style={{ fontSize: 60, fontWeight: 900, color: "#FFFFFF" }}>{data.sectors ?? "0"}</p>
           </div>
-          <div style={{ borderLeft: "3px solid #FDE04740", paddingLeft: 20 }}>
-            <p style={{ fontSize: 14, color: "#ffffff40", textTransform: "uppercase", letterSpacing: 3 }}>Concepts</p>
-            <p style={{ fontSize: 42, fontWeight: 900, color: "#FDE047" }}>{data.concepts ?? "0"}/23</p>
+          <div style={{ borderLeft: "4px solid #FDE04760", paddingLeft: 28 }}>
+            <p style={{ fontSize: 20, color: "#ffffff80", textTransform: "uppercase", letterSpacing: 4, marginBottom: 8 }}>Concepts</p>
+            <p style={{ fontSize: 60, fontWeight: 900, color: "#FDE047" }}>{data.concepts ?? "0"}/23</p>
           </div>
         </div>
       </div>
 
-      {/* Divider */}
-      <div style={{ position: "absolute", bottom: 120, left: 80, right: 80, height: 2, backgroundColor: "#ffffff15" }} />
-
       {/* Footer */}
-      <div style={{ position: "absolute", bottom: 40, left: 80, right: 80, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <p style={{ fontSize: 16, color: "#ffffff40" }}>
-          {data.playerName || "Learn to Invest. Trade the Culture."}
+      <div style={{ position: "absolute", bottom: 50, left: 80, right: 80, borderTop: "2px solid #ffffff20", paddingTop: 20, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <p style={{ fontSize: 22, color: "#ffffff70" }}>
+          Learn to Invest. Trade the Culture.
         </p>
-        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ fontSize: 24, fontWeight: 900, color: "#FFFFFF" }}>BLK</span>
-          <span style={{ fontSize: 24, fontWeight: 900, color: "#7F77DD" }}>X</span>
-          <span style={{ fontSize: 14, color: "#ffffff40", marginLeft: 12 }}>blkexchange.com</span>
-        </div>
+        <p style={{ fontSize: 24, color: "#7F77DD", fontWeight: 700 }}>
+          blkexchange.com
+        </p>
       </div>
     </div>
   );
