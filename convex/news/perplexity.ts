@@ -105,23 +105,23 @@ const QUERY_VARIATIONS = {
   ],
 };
 
-function getRotatedQueries(date: string): string[][] {
-  // Use the date + hour as a seed to rotate which variation we use
+function getRotatedQueries(date: string): string[] {
+  // Use the date + hour + minute as seeds to rotate which variations we use
+  // Each 15-min run gets a different set of queries
   const hour = new Date().getUTCHours();
-  const categories = Object.values(QUERY_VARIATIONS);
+  const quarter = Math.floor(new Date().getUTCMinutes() / 15);
+  const seed = hour * 4 + quarter; // 0-95, changes every 15 min
 
-  // Pick 5 queries per batch, rotating through categories and variations
-  const batches: string[][] = [];
-  for (let b = 0; b < 3; b++) {
-    const batch: string[] = [];
-    for (let i = 0; i < 5; i++) {
-      const catIndex = (b * 5 + i) % categories.length;
-      const varIndex = (hour + b + i) % categories[catIndex].length;
-      batch.push(`${categories[catIndex][varIndex]} ${date}`);
-    }
-    batches.push(batch);
+  const categories = Object.entries(QUERY_VARIATIONS);
+  const queries: string[] = [];
+
+  // Pick one query from each category, rotating the variation
+  for (const [, variations] of categories) {
+    const varIndex = seed % variations.length;
+    queries.push(`${variations[varIndex]} ${date}`);
   }
-  return batches;
+
+  return queries; // 13 individual queries (one per category)
 }
 
 // ─── Main discover function (runs every 15 min) ─────────────────────────────
@@ -132,45 +132,45 @@ export const discover = internalAction({
     if (!apiKey) return { discovered: 0 };
 
     const today = new Date().toISOString().slice(0, 10);
-    const batches = getRotatedQueries(today);
+    const queries = getRotatedQueries(today);
 
     let totalDiscovered = 0;
 
-    const batchConfigs = [
-      { queries: batches[0], domainFilter: TARGETED_PUBLICATIONS, maxResults: 15 },
-      { queries: batches[1], domainFilter: ["-youtube.com"], maxResults: 20 },
-      { queries: batches[2], domainFilter: ["-youtube.com"], maxResults: 15 },
-    ];
+    // Run queries in parallel batches of 5
+    for (let i = 0; i < queries.length; i += 5) {
+      const batch = queries.slice(i, i + 5);
 
-    const results = await Promise.allSettled(
-      batchConfigs.map(async (config) => {
-        let discovered = 0;
-        try {
-          const response = await fetch("https://api.perplexity.ai/search", {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${apiKey}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              query: config.queries,
-              search_domain_filter: config.domainFilter,
-              max_results: config.maxResults,
-            }),
-          });
+      const results = await Promise.allSettled(
+        batch.map(async (query) => {
+          let discovered = 0;
+          try {
+            // Alternate: half targeted publications, half broad
+            const isTargeted = Math.random() > 0.5;
+            const response = await fetch("https://api.perplexity.ai/search", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${apiKey}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                query,
+                search_domain_filter: isTargeted ? TARGETED_PUBLICATIONS : ["-youtube.com"],
+                max_results: 20,
+              }),
+            });
 
-          if (!response.ok) return 0;
+            if (!response.ok) return 0;
 
-          const data = (await response.json()) as {
-            results?: Array<{
-              title: string;
-              url: string;
-              snippet: string;
-              date?: string;
-            }>;
-          };
+            const data = (await response.json()) as {
+              results?: Array<{
+                title: string;
+                url: string;
+                snippet: string;
+                date?: string;
+              }>;
+            };
 
-          if (!data.results || !Array.isArray(data.results)) return 0;
+            if (!data.results || !Array.isArray(data.results)) return 0;
 
           for (const result of data.results) {
             if (!result.title || !result.url) continue;
@@ -255,14 +255,15 @@ export const discover = internalAction({
           }
           return discovered;
         } catch (err) {
-          console.error("Perplexity Search batch failed:", err);
+          console.error("Perplexity Search query failed:", err);
           return 0;
         }
-      })
-    );
+        })
+      );
 
-    for (const result of results) {
-      if (result.status === "fulfilled") totalDiscovered += result.value;
+      for (const r of results) {
+        if (r.status === "fulfilled") totalDiscovered += r.value;
+      }
     }
 
     // Drip feed: if no fresh articles found, publish 2 from the backlog
