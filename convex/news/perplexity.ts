@@ -281,93 +281,155 @@ export const backfill = internalAction({
     const apiKey = process.env.PERPLEXITY_API_KEY;
     if (!apiKey) return { discovered: 0 };
 
-    // Search for articles from the past 7 days with broad queries
+    const today = new Date().toISOString().slice(0, 10);
+
+    // Run MANY individual queries with max_results: 20 each
+    // Each query is different to maximize unique results
     const queries = [
-      "Black business startup funding news this week",
-      "HBCU college university investment news this week",
-      "Black entertainment film music streaming news this week",
-      "Black tech fintech startup raise investment news this week",
-      "African American real estate development banking news this week",
-      "Black fashion beauty brand launch partnership this week",
-      "Black sports athlete business deal news this week",
-      "Black gaming esports film production news this week",
-      "Black financial literacy education wealth building this week",
-      "Black owned company stock market news this week",
+      // Business & funding
+      `Black business startup funding news ${today}`,
+      "African American entrepreneur venture capital raise 2026",
+      "Black owned company funding round announcement this week",
+      "minority business grant award partnership deal",
+      // HBCU
+      `HBCU investment endowment news ${today}`,
+      "historically Black college university campus expansion 2026",
+      "HBCU research grant partnership announcement",
+      // Entertainment & media
+      `Black entertainment film music news ${today}`,
+      "African American TV show movie production deal 2026",
+      "Black streaming platform content deal announcement",
+      "Black podcast media company news this week",
+      // Tech
+      `Black tech fintech startup news ${today}`,
+      "African American technology AI startup funding 2026",
+      "Black founder tech company launch product",
+      // Finance & real estate
+      `Black banking community development finance news ${today}`,
+      "African American real estate REIT development project 2026",
+      "Black Wall Street economic empowerment investing news",
+      // Fashion & beauty
+      `Black fashion beauty brand news ${today}`,
+      "African American designer skincare hair care launch 2026",
+      "Black owned luxury streetwear brand collaboration",
+      // Sports & gaming
+      `Black athlete business venture sports news ${today}`,
+      "African American esports gaming studio news 2026",
+      "Black sports media deal franchise ownership",
+      // Real companies & ETFs
+      "Urban One UONE earnings revenue news 2026",
+      "Carver Bancorp CARV Broadway Financial BYFC stock news",
+      "Nike DraftKings Spotify Netflix stock sector news today",
+      "JPMorgan Goldman Sachs financial sector earnings news",
+      // Publishing & culture
+      "Black author book deal publishing news 2026",
+      "African American literary magazine cultural platform",
+      // General
+      "Black economic news wealth gap financial literacy 2026",
+      "African American community business growth investment",
     ];
 
     let totalDiscovered = 0;
 
-    for (const query of queries) {
-      try {
-        const response = await fetch("https://api.perplexity.ai/search", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${apiKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            query,
-            max_results: 20,
-            search_domain_filter: ["-youtube.com"],
-          }),
-        });
+    // Run each query individually with max_results: 20
+    // Process in parallel batches of 5 to respect rate limits
+    for (let i = 0; i < queries.length; i += 5) {
+      const batch = queries.slice(i, i + 5);
 
-        if (!response.ok) continue;
-
-        const data = (await response.json()) as {
-          results?: Array<{ title: string; url: string; snippet: string; date?: string }>;
-        };
-
-        if (!data.results) continue;
-
-        for (const result of data.results) {
-          if (!result.title || !result.url) continue;
-
+      const results = await Promise.allSettled(
+        batch.map(async (query) => {
+          let found = 0;
           try {
-            const parsed = new URL(result.url);
-            const h = parsed.hostname;
-            if (h === "example.com" || h === "youtube.com" || h === "www.youtube.com") continue;
-            if (parsed.pathname === "/" || parsed.pathname.startsWith("/category/") || parsed.pathname.startsWith("/tag/")) continue;
-          } catch { continue; }
+            const response = await fetch("https://api.perplexity.ai/search", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${apiKey}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                query,
+                max_results: 20,
+                search_domain_filter: ["-youtube.com"],
+              }),
+            });
 
-          if (result.date) {
-            const d = new Date(result.date).getTime();
-            if (d < Date.now() - 7 * 24 * 60 * 60 * 1000) continue;
+            if (!response.ok) return 0;
+
+            const data = (await response.json()) as {
+              results?: Array<{ title: string; url: string; snippet: string; date?: string }>;
+            };
+
+            if (!data.results) return 0;
+
+            for (const result of data.results) {
+              if (!result.title || !result.url) continue;
+
+              try {
+                const parsed = new URL(result.url);
+                const h = parsed.hostname;
+                if (h === "example.com" || h === "youtube.com" || h === "www.youtube.com") continue;
+                if (parsed.pathname === "/" || parsed.pathname.startsWith("/category/") || parsed.pathname.startsWith("/tag/")) continue;
+              } catch { continue; }
+
+              if (result.date) {
+                const d = new Date(result.date).getTime();
+                if (d < Date.now() - 7 * 24 * 60 * 60 * 1000) continue;
+              }
+
+              const urlHash = simpleHash(result.url);
+              const existing = await ctx.runQuery(internal.articles.getByUrlHash, { urlHash });
+              if (existing) continue;
+
+              let hostname: string;
+              try { hostname = new URL(result.url).hostname; } catch { continue; }
+
+              const PUBLICATION_NAMES: Record<string, string> = {
+                "afrotech.com": "AfroTech", "www.afrotech.com": "AfroTech",
+                "essence.com": "Essence", "www.essence.com": "Essence",
+                "blackenterprise.com": "Black Enterprise", "www.blackenterprise.com": "Black Enterprise",
+                "thegrio.com": "TheGrio", "www.thegrio.com": "TheGrio",
+                "theroot.com": "The Root", "www.theroot.com": "The Root",
+                "blavity.com": "Blavity", "www.blavity.com": "Blavity",
+                "businessinsider.com": "Business Insider", "www.businessinsider.com": "Business Insider",
+                "fastcompany.com": "Fast Company", "www.fastcompany.com": "Fast Company",
+                "wired.com": "Wired", "www.wired.com": "Wired",
+              };
+              const pubName = PUBLICATION_NAMES[hostname] ??
+                hostname.replace("www.", "").split(".")[0].charAt(0).toUpperCase() +
+                hostname.replace("www.", "").split(".")[0].slice(1);
+
+              const articleId = await ctx.runMutation(internal.articles.insertArticle, {
+                urlHash,
+                url: result.url,
+                title: result.title,
+                publication: pubName,
+                summary: result.snippet?.slice(0, 500),
+                significance: 0,
+                classifiedTickers: [],
+                sourceLayer: "perplexity",
+                processedAsEvent: false,
+              });
+
+              // Schedule Groq classification
+              await ctx.scheduler.runAfter(0, internal.groq.classifyArticle.classify, {
+                articleId,
+                title: result.title,
+                summary: result.snippet?.slice(0, 500),
+                publication: pubName,
+                url: result.url,
+              });
+
+              found++;
+            }
+          } catch (err) {
+            console.error("Backfill query failed:", err);
           }
+          return found;
+        })
+      );
 
-          const urlHash = simpleHash(result.url);
-          const existing = await ctx.runQuery(internal.articles.getByUrlHash, { urlHash });
-          if (existing) continue;
-
-          let hostname: string;
-          try { hostname = new URL(result.url).hostname; } catch { continue; }
-          const publication = hostname.replace("www.", "").split(".")[0];
-          const pubName = publication.charAt(0).toUpperCase() + publication.slice(1);
-
-          await ctx.runMutation(internal.articles.insertArticle, {
-            urlHash,
-            url: result.url,
-            title: result.title,
-            publication: pubName,
-            summary: result.snippet?.slice(0, 500),
-            significance: 0,
-            classifiedTickers: [],
-            sourceLayer: "perplexity",
-            processedAsEvent: false,
-          });
-
-          await ctx.scheduler.runAfter(0, internal.groq.classifyArticle.classify, {
-            articleId: undefined as never, // Will be set by insertArticle
-            title: result.title,
-            summary: result.snippet?.slice(0, 500),
-            publication: pubName,
-            url: result.url,
-          });
-
-          totalDiscovered++;
-        }
-      } catch (err) {
-        console.error("Backfill query failed:", err);
+      for (const r of results) {
+        if (r.status === "fulfilled") totalDiscovered += r.value;
       }
     }
 
