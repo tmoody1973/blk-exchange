@@ -16,6 +16,11 @@ import { PortfolioCoach } from "@/components/education/portfolio-coach";
 import { ProfessorMode } from "@/components/education/professor-mode";
 import { SharePortfolioButton } from "@/components/portfolio/share-portfolio-button";
 
+const PortfolioChart = dynamic(
+  () => import("@/components/portfolio/portfolio-chart").then((m) => m.PortfolioChart),
+  { ssr: false }
+);
+
 export default function PortfolioPage() {
   const { user, isLoaded } = useUser();
 
@@ -82,6 +87,12 @@ export default function PortfolioPage() {
           dayPnlInCents={dayPnlInCents}
           dayPnlPercent={dayPnlPercent}
           cashInCents={player.cashInCents}
+        />
+
+        {/* Portfolio progress chart */}
+        <PortfolioChart
+          playerId={player._id}
+          currentValueInCents={totalValueInCents}
         />
 
         {/* Share portfolio button */}
