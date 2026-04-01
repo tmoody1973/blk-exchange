@@ -99,6 +99,38 @@ export const markProcessed = internalMutation({
   },
 });
 
+// Cleanup: delete articles older than 7 days based on title/URL patterns
+export const cleanupOldArticles = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const allArticles = await ctx.db.query("articles").collect();
+    let deleted = 0;
+    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+
+    for (const article of allArticles) {
+      // Delete articles created more than 14 days ago (stale backlog)
+      if (article.createdAt < sevenDaysAgo) {
+        await ctx.db.delete(article._id);
+        deleted++;
+        continue;
+      }
+
+      // Delete articles with year patterns in URL suggesting old content
+      const url = article.url.toLowerCase();
+      if (
+        url.includes("/2017/") || url.includes("/2018/") || url.includes("/2019/") ||
+        url.includes("/2020/") || url.includes("/2021/") || url.includes("/2022/") ||
+        url.includes("/2023/") || url.includes("/2024/")
+      ) {
+        await ctx.db.delete(article._id);
+        deleted++;
+      }
+    }
+
+    return { deleted, total: allArticles.length };
+  },
+});
+
 // One-time cleanup: delete articles with fake/hallucinated URLs
 export const cleanupBadUrls = internalMutation({
   args: {},

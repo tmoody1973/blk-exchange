@@ -188,12 +188,11 @@ export const discover = internalAction({
               if (path === "/" || path.startsWith("/category/") || path.startsWith("/tag/") || path === "/latest" || path === "/news") continue;
             } catch { continue; }
 
-            // Skip articles older than 7 days
-            if (result.date) {
-              const articleDate = new Date(result.date).getTime();
-              const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-              if (articleDate < sevenDaysAgo) continue;
-            }
+            // Skip articles older than 7 days or with no date (usually old)
+            if (!result.date) continue;
+            const articleDate = new Date(result.date).getTime();
+            const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+            if (articleDate < sevenDaysAgo) continue;
 
             const urlHash = simpleHash(result.url);
             const existing = await ctx.runQuery(internal.articles.getByUrlHash, { urlHash });
