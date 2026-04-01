@@ -144,8 +144,9 @@ export const discover = internalAction({
         batch.map(async (query) => {
           let discovered = 0;
           try {
-            // Alternate: half targeted publications, half broad
-            const isTargeted = Math.random() > 0.5;
+            // First 7 queries use targeted publications, rest search broadly
+            const queryIndex = queries.indexOf(query);
+            const isTargeted = queryIndex < 7;
             const response = await fetch("https://api.perplexity.ai/search", {
               method: "POST",
               headers: {
@@ -185,7 +186,16 @@ export const discover = internalAction({
                 hostname.endsWith(".test") || !hostname.includes(".")
               ) continue;
               const path = parsed.pathname;
-              if (path === "/" || path.startsWith("/category/") || path.startsWith("/tag/") || path === "/latest" || path === "/news") continue;
+              const pathSegments = path.split("/").filter(Boolean);
+              if (
+                path === "/" ||
+                path.startsWith("/category/") || path.startsWith("/tag/") ||
+                path.startsWith("/topics/") || path.startsWith("/style/") ||
+                path === "/latest" || path === "/news" || path === "/business" ||
+                path === "/entertainment" || path === "/music" ||
+                // Single-segment paths without hyphens are usually section pages
+                (pathSegments.length === 1 && !pathSegments[0].includes("-"))
+              ) continue;
             } catch { continue; }
 
             // Skip articles older than 7 days or with no date (usually old)
@@ -368,7 +378,14 @@ export const backfill = internalAction({
                 const parsed = new URL(result.url);
                 const h = parsed.hostname;
                 if (h === "example.com" || h === "youtube.com" || h === "www.youtube.com") continue;
-                if (parsed.pathname === "/" || parsed.pathname.startsWith("/category/") || parsed.pathname.startsWith("/tag/")) continue;
+                const bPath = parsed.pathname;
+                const bSegments = bPath.split("/").filter(Boolean);
+                if (
+                  bPath === "/" || bPath.startsWith("/category/") || bPath.startsWith("/tag/") ||
+                  bPath.startsWith("/topics/") || bPath.startsWith("/style/") ||
+                  bPath === "/latest" || bPath === "/news" || bPath === "/business" ||
+                  (bSegments.length === 1 && !bSegments[0].includes("-"))
+                ) continue;
               } catch { continue; }
 
               if (result.date) {
