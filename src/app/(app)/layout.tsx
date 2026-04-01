@@ -171,15 +171,14 @@ function AppLayoutInner({ children }: { children: React.ReactNode }) {
         />
       )}
 
+      {/* Sticky header: marquee + nav always visible on scroll */}
       <div className="sticky top-0 z-40">
         <SectorMarquee />
-      </div>
-
-      <DesktopNav />
-
-      <div className="flex items-center gap-4 border-b-2 border-white bg-[#0e0e0e] px-4 py-2 lg:hidden">
-        <span className="text-sm font-bold" style={{ color: "#7F77DD" }}>BLK</span>
-        <BLKIndex />
+        <DesktopNav />
+        <div className="flex items-center gap-4 border-b-2 border-white bg-[#0e0e0e] px-4 py-2 lg:hidden">
+          <span className="text-sm font-bold" style={{ color: "#7F77DD" }}>BLK</span>
+          <BLKIndex />
+        </div>
       </div>
 
       {/* Game status bar */}

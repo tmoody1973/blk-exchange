@@ -20,6 +20,7 @@ const TARGETED_PUBLICATIONS = [
   "peopleofcolorintech.com", "rollingout.com", "eurweb.com", "vibe.com",
   "blackfilm.com", "amsterdamnews.com", "washingtoninformer.com",
   "chicagodefender.com", "philadelphiatribune.com",
+  "businessinsider.com", "fastcompany.com", "wired.com",
 ];
 
 // Rotate query phrasings so each run gets different results
