@@ -13,7 +13,9 @@ export const discover = internalAction({
     const apiKey = process.env.PERPLEXITY_API_KEY;
     if (!apiKey) return { discovered: 0 };
 
-    // Three batched calls of 5 queries each, covering all 12 BLK Exchange sectors
+    // Add today's date to queries to force fresh results
+    const today = new Date().toISOString().slice(0, 10);
+
     const TARGETED_PUBLICATIONS = [
       "afrotech.com",
       "essence.com",
@@ -35,11 +37,11 @@ export const discover = internalAction({
 
     const batch1 = {
       query: [
-        "Black business funding startup news today",
-        "HBCU investment endowment education finance news",
-        "Black entertainment music media streaming deals this week",
-        "Black tech fintech venture capital startup news",
-        "Black real estate banking community development wealth news",
+        `Black business funding startup news ${today}`,
+        `HBCU investment endowment education finance news ${today}`,
+        `Black entertainment music media streaming deals ${today}`,
+        `Black tech fintech venture capital startup news ${today}`,
+        `Black real estate banking community development wealth ${today}`,
       ],
       search_domain_filter: TARGETED_PUBLICATIONS,
       max_results: 15,
@@ -47,11 +49,11 @@ export const discover = internalAction({
 
     const batch2 = {
       query: [
-        "Black fashion beauty skincare hair care brand launch partnership",
-        "Black sports athlete business esports media deals",
-        "Urban One Carver Bancorp Broadway Financial Direct Digital stock news",
-        "Black financial literacy investing education economic empowerment",
-        "Black owned public company stock market minority business news",
+        `Black fashion beauty skincare hair care brand launch ${today}`,
+        `Black sports athlete business esports media deals ${today}`,
+        `Urban One Carver Bancorp Broadway Financial Direct Digital stock ${today}`,
+        `Black financial literacy investing education economic empowerment ${today}`,
+        `Black owned public company stock market minority business news ${today}`,
       ],
       max_results: 20,
       search_domain_filter: ["-youtube.com"],
@@ -59,11 +61,11 @@ export const discover = internalAction({
 
     const batch3 = {
       query: [
-        "Black gaming esports game studio indie developer news",
-        "Black sportswear athletic footwear sneaker brand news",
-        "Black publishing book author literary magazine news",
-        "Black film production studio movie TV show entertainment news",
-        "Black podcast creator digital content newsletter media news",
+        `Black gaming esports game studio indie developer news ${today}`,
+        `Black sportswear athletic footwear sneaker brand news ${today}`,
+        `Black publishing book author literary magazine news ${today}`,
+        `Black film production studio movie TV show entertainment news ${today}`,
+        `Black podcast creator digital content newsletter media news ${today}`,
       ],
       max_results: 15,
       search_domain_filter: ["-youtube.com"],
