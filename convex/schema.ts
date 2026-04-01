@@ -101,9 +101,13 @@ export default defineSchema({
     ),
     createdAt: v.number(),
     processedAsEvent: v.boolean(),
+    // News queue: articles are stored first, then drip-fed to the feed
+    publishedToFeed: v.optional(v.boolean()),
+    publishedAt: v.optional(v.number()),
   })
     .index("by_urlHash", ["urlHash"])
-    .index("by_publication", ["publication"]),
+    .index("by_publication", ["publication"])
+    .index("by_published", ["publishedToFeed"]),
 
   companyStates: defineTable({
     symbol: v.string(),
