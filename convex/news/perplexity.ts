@@ -2,6 +2,78 @@ import { internalAction, internalMutation } from "../_generated/server";
 import { internal } from "../_generated/api";
 import { v } from "convex/values";
 
+// ─── Shared constants ───────────────────────────────────────────────────────
+
+const PUBLICATION_NAMES: Record<string, string> = {
+  "afrotech.com": "AfroTech", "www.afrotech.com": "AfroTech",
+  "essence.com": "Essence", "www.essence.com": "Essence",
+  "blackenterprise.com": "Black Enterprise", "www.blackenterprise.com": "Black Enterprise",
+  "thegrio.com": "TheGrio", "www.thegrio.com": "TheGrio",
+  "theroot.com": "The Root", "www.theroot.com": "The Root",
+  "blavity.com": "Blavity", "www.blavity.com": "Blavity",
+  "capitalbnews.org": "Capital B News", "www.capitalbnews.org": "Capital B News",
+  "nbcnews.com": "NBC BLK", "www.nbcnews.com": "NBC BLK",
+  "andscape.com": "Andscape", "www.andscape.com": "Andscape",
+  "hbcubuzz.com": "HBCUBuzz", "www.hbcubuzz.com": "HBCUBuzz",
+  "hbcuweeknow.com": "HBCU We Know", "www.hbcuweeknow.com": "HBCU We Know",
+  "shadowandact.com": "Shadow and Act", "www.shadowandact.com": "Shadow and Act",
+  "peopleofcolorintech.com": "POCIT", "www.peopleofcolorintech.com": "POCIT",
+  "rollingout.com": "Rolling Out", "www.rollingout.com": "Rolling Out",
+  "eurweb.com": "EURweb", "www.eurweb.com": "EURweb",
+  "vibe.com": "Vibe", "www.vibe.com": "Vibe",
+  "blackfilm.com": "Black Film", "www.blackfilm.com": "Black Film",
+  "businessinsider.com": "Business Insider", "www.businessinsider.com": "Business Insider",
+  "fastcompany.com": "Fast Company", "www.fastcompany.com": "Fast Company",
+  "wired.com": "Wired", "www.wired.com": "Wired",
+  "amsterdamnews.com": "Amsterdam News", "www.amsterdamnews.com": "Amsterdam News",
+  "washingtoninformer.com": "Washington Informer", "www.washingtoninformer.com": "Washington Informer",
+  "chicagodefender.com": "Chicago Defender", "www.chicagodefender.com": "Chicago Defender",
+  "philadelphiatribune.com": "Philadelphia Tribune", "www.philadelphiatribune.com": "Philadelphia Tribune",
+};
+
+const DENIED_EXACT_PATHS = ["/", "/latest", "/news", "/business", "/entertainment", "/music"];
+const DENIED_PATH_PREFIXES = ["/category/", "/tag/", "/topics/", "/style/"];
+
+function getPublicationName(hostname: string): string {
+  return PUBLICATION_NAMES[hostname] ??
+    hostname.replace("www.", "").split(".")[0].charAt(0).toUpperCase() +
+    hostname.replace("www.", "").split(".")[0].slice(1);
+}
+
+function isValidArticleUrl(url: string): { valid: boolean; hostname: string } {
+  try {
+    const parsed = new URL(url);
+    const hostname = parsed.hostname;
+
+    if (
+      hostname === "example.com" || hostname === "localhost" ||
+      hostname === "youtube.com" || hostname === "www.youtube.com" ||
+      hostname.endsWith(".test") || !hostname.includes(".")
+    ) return { valid: false, hostname };
+
+    const path = parsed.pathname;
+    const segments = path.split("/").filter(Boolean);
+
+    if (DENIED_EXACT_PATHS.includes(path)) return { valid: false, hostname };
+    for (const prefix of DENIED_PATH_PREFIXES) {
+      if (path.startsWith(prefix)) return { valid: false, hostname };
+    }
+    // Single-segment URLs without hyphens are usually section pages
+    if (segments.length === 1 && !segments[0].includes("-")) return { valid: false, hostname };
+
+    return { valid: true, hostname };
+  } catch {
+    return { valid: false, hostname: "" };
+  }
+}
+
+function isArticleFreshEnough(date: string | undefined): boolean {
+  if (!date) return false;
+  const articleDate = new Date(date).getTime();
+  const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+  return articleDate >= sevenDaysAgo;
+}
+
 /**
  * Smart news pipeline with backlog + drip feed.
  *
@@ -176,63 +248,18 @@ export const discover = internalAction({
           for (const result of data.results) {
             if (!result.title || !result.url) continue;
 
-            let hostname: string;
-            try {
-              const parsed = new URL(result.url);
-              hostname = parsed.hostname;
-              if (
-                hostname === "example.com" || hostname === "localhost" ||
-                hostname === "youtube.com" || hostname === "www.youtube.com" ||
-                hostname.endsWith(".test") || !hostname.includes(".")
-              ) continue;
-              const path = parsed.pathname;
-              const pathSegments = path.split("/").filter(Boolean);
-              if (
-                path === "/" ||
-                path.startsWith("/category/") || path.startsWith("/tag/") ||
-                path.startsWith("/topics/") || path.startsWith("/style/") ||
-                path === "/latest" || path === "/news" || path === "/business" ||
-                path === "/entertainment" || path === "/music" ||
-                // Single-segment paths without hyphens are usually section pages
-                (pathSegments.length === 1 && !pathSegments[0].includes("-"))
-              ) continue;
-            } catch { continue; }
-
-            // Skip articles older than 7 days or with no date (usually old)
-            if (!result.date) continue;
-            const articleDate = new Date(result.date).getTime();
-            const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
-            if (articleDate < sevenDaysAgo) continue;
+            const { valid, hostname } = isValidArticleUrl(result.url);
+            if (!valid) continue;
+            if (!isArticleFreshEnough(result.date)) continue;
 
             const urlHash = simpleHash(result.url);
             const existing = await ctx.runQuery(internal.articles.getByUrlHash, { urlHash });
             if (existing) continue;
 
-            const PUBLICATION_NAMES: Record<string, string> = {
-              "afrotech.com": "AfroTech", "www.afrotech.com": "AfroTech",
-              "essence.com": "Essence", "www.essence.com": "Essence",
-              "blackenterprise.com": "Black Enterprise", "www.blackenterprise.com": "Black Enterprise",
-              "thegrio.com": "TheGrio", "www.thegrio.com": "TheGrio",
-              "theroot.com": "The Root", "www.theroot.com": "The Root",
-              "blavity.com": "Blavity", "www.blavity.com": "Blavity",
-              "capitalbnews.org": "Capital B News", "www.capitalbnews.org": "Capital B News",
-              "nbcnews.com": "NBC BLK", "www.nbcnews.com": "NBC BLK",
-              "andscape.com": "Andscape", "www.andscape.com": "Andscape",
-              "hbcubuzz.com": "HBCUBuzz", "www.hbcubuzz.com": "HBCUBuzz",
-              "hbcuweeknow.com": "HBCU We Know", "www.hbcuweeknow.com": "HBCU We Know",
-              "shadowandact.com": "Shadow and Act", "www.shadowandact.com": "Shadow and Act",
-              "peopleofcolorintech.com": "POCIT", "www.peopleofcolorintech.com": "POCIT",
-              "rollingout.com": "Rolling Out", "www.rollingout.com": "Rolling Out",
-              "eurweb.com": "EURweb", "www.eurweb.com": "EURweb",
-              "vibe.com": "Vibe", "www.vibe.com": "Vibe",
-            };
-            const publication = PUBLICATION_NAMES[hostname] ??
-              hostname.replace("www.", "").split(".")[0].charAt(0).toUpperCase() +
-              hostname.replace("www.", "").split(".")[0].slice(1);
+            const publication = getPublicationName(hostname);
 
             // Fresh articles (from today) publish immediately
-            // Older articles go to the backlog queue
-            const isToday = result.date === today;
+            const isToday = result.date?.startsWith(today) ?? false;
 
             const articleId = await ctx.runMutation(internal.articles.insertArticle, {
               urlHash,
@@ -374,46 +401,15 @@ export const backfill = internalAction({
             for (const result of data.results) {
               if (!result.title || !result.url) continue;
 
-              try {
-                const parsed = new URL(result.url);
-                const h = parsed.hostname;
-                if (h === "example.com" || h === "youtube.com" || h === "www.youtube.com") continue;
-                const bPath = parsed.pathname;
-                const bSegments = bPath.split("/").filter(Boolean);
-                if (
-                  bPath === "/" || bPath.startsWith("/category/") || bPath.startsWith("/tag/") ||
-                  bPath.startsWith("/topics/") || bPath.startsWith("/style/") ||
-                  bPath === "/latest" || bPath === "/news" || bPath === "/business" ||
-                  (bSegments.length === 1 && !bSegments[0].includes("-"))
-                ) continue;
-              } catch { continue; }
-
-              if (result.date) {
-                const d = new Date(result.date).getTime();
-                if (d < Date.now() - 7 * 24 * 60 * 60 * 1000) continue;
-              }
+              const { valid: bValid, hostname } = isValidArticleUrl(result.url);
+              if (!bValid) continue;
+              if (!isArticleFreshEnough(result.date)) continue;
 
               const urlHash = simpleHash(result.url);
               const existing = await ctx.runQuery(internal.articles.getByUrlHash, { urlHash });
               if (existing) continue;
 
-              let hostname: string;
-              try { hostname = new URL(result.url).hostname; } catch { continue; }
-
-              const PUBLICATION_NAMES: Record<string, string> = {
-                "afrotech.com": "AfroTech", "www.afrotech.com": "AfroTech",
-                "essence.com": "Essence", "www.essence.com": "Essence",
-                "blackenterprise.com": "Black Enterprise", "www.blackenterprise.com": "Black Enterprise",
-                "thegrio.com": "TheGrio", "www.thegrio.com": "TheGrio",
-                "theroot.com": "The Root", "www.theroot.com": "The Root",
-                "blavity.com": "Blavity", "www.blavity.com": "Blavity",
-                "businessinsider.com": "Business Insider", "www.businessinsider.com": "Business Insider",
-                "fastcompany.com": "Fast Company", "www.fastcompany.com": "Fast Company",
-                "wired.com": "Wired", "www.wired.com": "Wired",
-              };
-              const pubName = PUBLICATION_NAMES[hostname] ??
-                hostname.replace("www.", "").split(".")[0].charAt(0).toUpperCase() +
-                hostname.replace("www.", "").split(".")[0].slice(1);
+              const pubName = getPublicationName(hostname);
 
               const articleId = await ctx.runMutation(internal.articles.insertArticle, {
                 urlHash,
